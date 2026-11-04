@@ -2,7 +2,7 @@ const crypto = require("crypto");
 const prisma = require("../config/prisma");
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY || "";
-const EMAIL_FROM = process.env.EMAIL_FROM || "Netopsys AI <notifications@netopsys.net>";
+const EMAIL_FROM = process.env.EMAIL_FROM || "Netopsys AI <helpdesk@netopsys.net>";
 const FRONTEND_URL = (process.env.FRONTEND_URL || "http://localhost:5173").replace(/\/+$/, "");
 const BACKEND_URL = (process.env.BACKEND_URL || `http://localhost:${process.env.PORT || 5000}`).replace(/\/+$/, "");
 
@@ -34,8 +34,8 @@ async function sendRawEmail({ to, subject, html, replyTo }) {
       to: Array.isArray(to) ? to : [to],
       subject,
       html,
+      reply_to: replyTo || "helpdesk@netopsys.net",
     };
-    if (replyTo) payload.reply_to = replyTo;
 
     const response = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -255,9 +255,9 @@ function getNewBlogPostHtml({ blog, unsubscribeToken }) {
 /**
  * HTML Template: New Job Posting Published
  */
-function getNewJobPostingHtml({ job, unsubscribeToken }) {
+function getNewJobPostingHtml({ job, unsubscribeToken, subscriberType = "job" }) {
   const jobUrl = `${FRONTEND_URL}/jobdescription?id=${job.job_id || job.id}`;
-  const unsubUrl = `${BACKEND_URL}/api/subscribers/unsubscribe?type=job&token=${unsubscribeToken}`;
+  const unsubUrl = `${BACKEND_URL}/api/subscribers/unsubscribe?type=${subscriberType}&token=${unsubscribeToken}`;
   const loc = job.location || "Hyderabad / Remote";
   const emp = job.employment_type || "Full Time";
   const exp = job.experience || "1-3 years";
@@ -391,7 +391,7 @@ async function sendBlogPublishedNotification(blog) {
         return;
       }
 
-      console.log(`Found ${subscribers.length} active blog subscriber(s). Starting dispatch...`);
+      console.log(`Found ${subscribers.length} active blog subscriber(s). Starting dispatch from ${EMAIL_FROM}...`);
 
       // 2. Process in batches of 50
       const BATCH_SIZE = 50;
@@ -419,6 +419,7 @@ async function sendBlogPublishedNotification(blog) {
               to: sub.email,
               subject: `New from Netopsys: ${blog.title}`,
               html,
+              replyTo: "helpdesk@netopsys.net",
             });
 
             await recordNotificationLog({
@@ -451,7 +452,10 @@ async function sendBlogPublishedNotification(blog) {
 
 /**
  * Background Broadcast: New Job Opening Published
- * Sends to all active & verified job subscribers in batches
+ * Sends automatically to both:
+ * 1. "Notify Me" person (job subscribers)
+ * 2. "Subscribe" person (blog/newsletter subscribers)
+ * Sender: helpdesk@netopsys.net
  */
 async function sendJobPublishedNotification(job) {
   // Run asynchronously without blocking HTTP caller
@@ -459,23 +463,57 @@ async function sendJobPublishedNotification(job) {
     try {
       console.log(`📡 Triggering job notification broadcast for Job Code ${job.job_id || job.id}: "${job.title}"`);
 
-      // 1. Fetch active & verified subscribers
-      let subscribers = [];
+      // 1. Fetch active & verified subscribers from BOTH job_subscribers ("Notify Me") and blog_subscribers ("Subscribe")
+      let jobSubs = [];
+      let blogSubs = [];
       try {
-        subscribers = await prisma.$queryRawUnsafe(
-          `SELECT id, email, unsubscribe_token FROM job_subscribers WHERE is_active = true AND is_verified = true`
-        );
+        const [jobResults, blogResults] = await Promise.all([
+          prisma.$queryRawUnsafe(
+            `SELECT id, email, unsubscribe_token FROM job_subscribers WHERE is_active = true AND is_verified = true`
+          ),
+          prisma.$queryRawUnsafe(
+            `SELECT id, email, unsubscribe_token FROM blog_subscribers WHERE is_active = true AND is_verified = true`
+          ),
+        ]);
+        jobSubs = Array.isArray(jobResults) ? jobResults : [];
+        blogSubs = Array.isArray(blogResults) ? blogResults : [];
       } catch (err) {
-        console.error("Failed to query job_subscribers for broadcast:", err.message);
+        console.error("Failed to query subscribers for job broadcast:", err.message);
         return;
       }
 
-      if (!Array.isArray(subscribers) || subscribers.length === 0) {
-        console.log("No active job subscribers found to notify.");
+      // Merge and deduplicate by email (job subscribers take precedence for unsub token)
+      const subscriberMap = new Map();
+      jobSubs.forEach((sub) => {
+        if (sub.email) {
+          subscriberMap.set(sub.email.toLowerCase().trim(), {
+            ...sub,
+            sourceType: "job",
+          });
+        }
+      });
+      blogSubs.forEach((sub) => {
+        if (sub.email) {
+          const key = sub.email.toLowerCase().trim();
+          if (!subscriberMap.has(key)) {
+            subscriberMap.set(key, {
+              ...sub,
+              sourceType: "blog",
+            });
+          }
+        }
+      });
+
+      const subscribers = Array.from(subscriberMap.values());
+
+      if (subscribers.length === 0) {
+        console.log("No active subscribers found to notify for new job opening.");
         return;
       }
 
-      console.log(`Found ${subscribers.length} active job subscriber(s). Starting dispatch...`);
+      console.log(
+        `Found ${subscribers.length} total active subscriber(s) (${jobSubs.length} Notify-Me, ${blogSubs.length} Subscribe). Starting dispatch from ${EMAIL_FROM}...`
+      );
 
       // 2. Process in batches of 50
       const BATCH_SIZE = 50;
@@ -498,12 +536,14 @@ async function sendJobPublishedNotification(job) {
             const html = getNewJobPostingHtml({
               job,
               unsubscribeToken: sub.unsubscribe_token || "default",
+              subscriberType: sub.sourceType || "job",
             });
 
             const res = await sendRawEmail({
               to: sub.email,
               subject: `We're Hiring: ${job.title} at Netopsys`,
               html,
+              replyTo: "helpdesk@netopsys.net",
             });
 
             await recordNotificationLog({
