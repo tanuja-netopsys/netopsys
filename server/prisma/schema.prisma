@@ -1,0 +1,438 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                     Int       @id @default(autoincrement())
+  email                  String    @unique(map: "users_email_unique")
+  password               String
+  firstName              String    @map("first_name")
+  lastName               String    @map("last_name")
+  mobileNumber           String?   @map("mobile_number")
+  emailVerified          Boolean?  @default(false) @map("email_verified")
+  emailOtp               String?   @map("email_otp")
+  emailOtpExpiry         DateTime? @map("email_otp_expiry") @db.Timestamp(6)
+  passwordResetOtp       String?   @map("password_reset_otp")
+  passwordResetOtpExpiry DateTime? @map("password_reset_otp_expiry") @db.Timestamp(6)
+  isBlocked              Boolean?  @default(false) @map("is_blocked")
+  createdAt              DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
+
+  @@map("users")
+}
+
+model admin_notifications {
+  id             Int      @id @default(autoincrement())
+  type           String
+  title          String
+  message        String
+  application_id Int?
+  booking_id     Int?
+  is_read        Boolean  @default(false)
+  created_at     DateTime @default(now()) @db.Timestamp(6)
+}
+
+model application_answers {
+  id             Int      @id @default(autoincrement())
+  question_id    Int
+  application_id Int
+  answer_text    String
+  answered_at    DateTime @default(now()) @db.Timestamp(6)
+}
+
+model application_questions {
+  id             Int      @id @default(autoincrement())
+  application_id Int
+  question_text  String
+  question_type  String
+  options        String[]
+  created_at     DateTime @default(now()) @db.Timestamp(6)
+}
+
+model contact_submissions {
+  id              Int      @id @default(autoincrement())
+  first_name      String
+  last_name       String
+  email           String
+  company         String?
+  project_details String
+  created_at      DateTime @default(now()) @db.Timestamp(6)
+}
+
+model interview_available_dates {
+  id             Int      @id @default(autoincrement())
+  available_date String
+  is_active      Boolean  @default(true)
+  created_at     DateTime @default(now()) @db.Timestamp(6)
+  updated_at     DateTime @default(now()) @db.Timestamp(6)
+}
+
+model interview_bookings {
+  id                 Int       @id @default(autoincrement())
+  date_id            Int
+  application_id     Int
+  user_id            Int
+  booked_date        String
+  start_time         String
+  end_time           String
+  status             String    @default("pending")
+  availability_state String    @default("booked")
+  blocked_reason     String?
+  confirmation_token String?
+  confirmed_at       DateTime? @db.Timestamp(6)
+  round              Int       @default(1)
+  created_at         DateTime  @default(now()) @db.Timestamp(6)
+  updated_at         DateTime  @default(now()) @db.Timestamp(6)
+}
+
+model interview_slot_settings {
+  id        Int     @id @default(autoincrement())
+  round     Int
+  time_slot String
+  is_active Boolean @default(true)
+}
+
+model job_applications {
+  id                                  Int       @id @default(autoincrement())
+  job_id                              Int
+  user_id                             Int
+  cover_letter                        String
+  resume_path                         String
+  status                              String    @default("Pending")
+  admin_remarks                       String?
+  internal_remarks                    String?
+  created_at                          DateTime  @default(now()) @db.Timestamp(6)
+  screening_full_name                 String?
+  screening_dob                       String?
+  screening_gender                    String?
+  screening_current_location          String?
+  screening_willing_work_from_office  String?
+  screening_willing_provide_exp_docs  String?
+  screening_willing_bank_statements   String?
+  screening_years_experience          String?
+  screening_educational_qualification String?
+  screening_current_ctc               String?
+  screening_expected_ctc              String?
+  screening_willing_background_check  String?
+  screening_notice_period             String?
+  screening_willing_join_date         String?
+  screening_updated_at                DateTime? @db.Timestamp(6)
+  interview_available_from            String?
+  interview_available_to              String?
+  interview_preferred_time            String?
+  interview_updated_at                DateTime? @db.Timestamp(6)
+  scheduled_interview_date            String?
+  scheduled_interview_time            String?
+  interview_confirmation_token        String?
+  interview_confirmed                 Boolean?  @default(false)
+  interview_confirmed_at              DateTime? @db.Timestamp(6)
+  meeting_link                        String?
+  current_round                       Int?      @default(0)
+  last_rejected_at                    DateTime? @db.Timestamp(6)
+  rejection_stage                     String?
+  under_review_at                     DateTime? @db.Timestamp(6)
+  screening_reminder_count            Int?      @default(0)
+  screening_reminder_last_sent_at     DateTime? @db.Timestamp(6)
+}
+
+model job_categories {
+  id          Int     @id @default(autoincrement())
+  name        String
+  description String?
+}
+
+model job_postings {
+  id              Int      @id @default(autoincrement())
+  job_id          String   @unique(map: "job_postings_job_id_unique")
+  title           String
+  category_id     Int
+  location        String
+  employment_type String
+  experience      String
+  summary         String
+  description     String
+  requirements    String
+  is_active       Boolean  @default(true)
+  created_at      DateTime @default(now()) @db.Timestamp(6)
+}
+
+model mcq_answers {
+  id              Int      @id @default(autoincrement())
+  session_id      Int
+  question_id     Int
+  selected_answer String?
+  is_correct      Boolean?
+  submitted_at    DateTime @default(now()) @db.Timestamp(6)
+}
+
+model mcq_questions {
+  id             Int     @id @default(autoincrement())
+  session_id     Int
+  question_order Int
+  question_text  String
+  option_a       String
+  option_b       String
+  option_c       String
+  option_d       String
+  correct_answer String
+  category       String
+  difficulty     String
+  explanation    String?
+}
+
+model mcq_sessions {
+  id              Int       @id @default(autoincrement())
+  application_id  Int
+  job_id          Int
+  user_id         Int
+  status          String    @default("pending")
+  generated_at    DateTime  @default(now()) @db.Timestamp(6)
+  started_at      DateTime? @db.Timestamp(6)
+  submitted_at    DateTime? @db.Timestamp(6)
+  expires_at      DateTime? @db.Timestamp(6)
+  score           Int?
+  total_questions Int       @default(30)
+  pass_threshold  Int       @default(28)
+  passed          Boolean?
+  warning_count   Int       @default(0)
+  auto_submitted  Boolean   @default(false)
+  questions_json  Json?
+}
+
+model mcq_warning_events {
+  id              Int      @id @default(autoincrement())
+  session_id      Int
+  warning_number  Int
+  warning_type    String
+  occurred_at     DateTime @default(now()) @db.Timestamp(6)
+  webcam_snapshot String?
+}
+
+model sessions {
+  sid    String   @id @db.VarChar
+  sess   Json
+  expire DateTime @db.Timestamp(6)
+
+  @@index([expire], map: "IDX_session_expire")
+}
+
+model user_certifications {
+  id                   Int     @id @default(autoincrement())
+  user_id              Int
+  certificate_name     String
+  issuing_organization String
+  issue_date           String?
+  expiry_date          String?
+  certificate_number   String?
+  certificate_url      String?
+}
+
+model user_profiles {
+  id                Int      @id @default(autoincrement())
+  user_id           Int      @unique(map: "user_profiles_user_id_unique")
+  date_of_birth     String?
+  gender            String?
+  address           String?
+  city              String?
+  state             String?
+  country           String?
+  pincode           String?
+  highest_education String?
+  education_details String?
+  current_job_title String?
+  current_company   String?
+  total_experience  String?
+  skills            String?
+  linkedin_url      String?
+  github_url        String?
+  portfolio_url     String?
+  resume_path       String?
+  updated_at        DateTime @default(now()) @db.Timestamp(6)
+}
+
+model user_work_experience {
+  id           Int      @id @default(autoincrement())
+  user_id      Int
+  company_name String
+  job_title    String
+  location     String?
+  start_date   String
+  end_date     String?
+  is_current   Boolean? @default(false)
+  description  String?
+}
+
+model SuperAdmin {
+  id        Int       @id @default(autoincrement())
+  email     String    @unique(map: "super_admins_email_unique")
+  password  String
+  name      String    @default("Super Admin")
+  role      String    @default("SUPERADMIN")
+  isActive  Boolean   @default(true) @map("is_active")
+  lastLogin DateTime? @map("last_login") @db.Timestamp(6)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamp(6)
+
+  @@map("super_admins")
+}
+
+model Admin {
+  id          Int          @id @default(autoincrement())
+  email       String       @unique(map: "admins_email_unique")
+  password    String
+  name        String       @default("Admin User")
+  role        String       @default("ADMIN")
+  isActive    Boolean      @default(true) @map("is_active")
+  lastLogin   DateTime?    @map("last_login") @db.Timestamp(6)
+  createdAt   DateTime     @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt   DateTime     @updatedAt @map("updated_at") @db.Timestamp(6)
+  permissions Permission[]
+
+  @@map("admins")
+}
+
+model Role {
+  id              String           @id
+  name            String
+  description     String?
+  isImmutable     Boolean          @default(false) @map("is_immutable")
+  createdAt       DateTime         @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt       DateTime         @updatedAt @map("updated_at") @db.Timestamp(6)
+  rolePermissions RolePermission[]
+
+  @@map("roles")
+}
+
+model RolePermission {
+  id        Int      @id @default(autoincrement())
+  roleId    String   @map("role_id")
+  moduleId  String   @map("module_id")
+  canView   Boolean  @default(true) @map("can_view")
+  canCreate Boolean  @default(false) @map("can_create")
+  canEdit   Boolean  @default(false) @map("can_edit")
+  canDelete Boolean  @default(false) @map("can_delete")
+  enabled   Boolean  @default(true)
+  role      Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, moduleId], map: "role_permissions_role_id_module_id_key")
+  @@map("role_permissions")
+}
+
+model Permission {
+  id         Int      @id @default(autoincrement())
+  adminId    Int?     @map("admin_id")
+  adminEmail String   @map("admin_email")
+  moduleId   String   @map("module_id")
+  moduleName String?  @map("module_name")
+  canView    Boolean  @default(true) @map("can_view")
+  canCreate  Boolean  @default(false) @map("can_create")
+  canEdit    Boolean  @default(false) @map("can_edit")
+  canDelete  Boolean  @default(false) @map("can_delete")
+  enabled    Boolean  @default(true)
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamp(6)
+  admin      Admin?   @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@unique([adminEmail, moduleId], map: "permissions_admin_email_module_id_key")
+  @@map("permissions")
+}
+
+model projects {
+  id                   Int      @id @default(autoincrement())
+  title                String
+  status               String   @default("Deployed")
+  technologies         String[]
+  description          String
+  image                String
+  completion_date      String?
+  metrics              Json?
+  extended_description String?
+  is_active            Boolean  @default(true)
+  created_at           DateTime @default(now()) @db.Timestamp(6)
+  updated_at           DateTime @default(now()) @updatedAt @db.Timestamp(6)
+}
+
+model team_members {
+  id          Int      @id @default(autoincrement())
+  name        String
+  role        String
+  image       String
+  bio         String?
+  is_active   Boolean  @default(true)
+  created_at  DateTime @default(now()) @db.Timestamp(6)
+  updated_at  DateTime @default(now()) @updatedAt @db.Timestamp(6)
+}
+
+model blogs {
+  id              Int      @id @default(autoincrement())
+  slug            String   @unique
+  title           String
+  excerpt         String?
+  category        String   @default("AI Automation")
+  tag             String?  @default("AI Automation")
+  tag_bg          String?  @default("bg-[#F4EBFA]")
+  tag_color       String?  @default("text-[#693092]")
+  graphic_variant String?  @default("featured")
+  image           String?
+  date            String?
+  read_time       String?  @default("5 min read")
+  author_name     String?  @default("Netopsys Team")
+  author_initials String?  @default("NT")
+  author_role     String?  @default("AI Architecture & Engineering")
+  is_featured     Boolean  @default(false)
+  status          String   @default("Published")
+  content         String
+  key_takeaways   String[]
+  is_active       Boolean  @default(true)
+  created_at      DateTime @default(now()) @db.Timestamp(6)
+  updated_at      DateTime @default(now()) @updatedAt @db.Timestamp(6)
+}
+
+model blog_subscribers {
+  id                 Int       @id @default(autoincrement())
+  email              String    @unique(map: "blog_subscribers_email_unique")
+  is_active          Boolean   @default(true) @map("is_active")
+  is_verified        Boolean   @default(true) @map("is_verified")
+  verification_token String?   @unique(map: "blog_subscribers_verification_token_unique") @map("verification_token")
+  unsubscribe_token  String    @unique(map: "blog_subscribers_unsubscribe_token_unique") @map("unsubscribe_token")
+  created_at         DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
+  updated_at         DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamp(6)
+
+  @@map("blog_subscribers")
+}
+
+model job_subscribers {
+  id                 Int       @id @default(autoincrement())
+  email              String    @unique(map: "job_subscribers_email_unique")
+  is_active          Boolean   @default(true) @map("is_active")
+  is_verified        Boolean   @default(true) @map("is_verified")
+  verification_token String?   @unique(map: "job_subscribers_verification_token_unique") @map("verification_token")
+  unsubscribe_token  String    @unique(map: "job_subscribers_unsubscribe_token_unique") @map("unsubscribe_token")
+  created_at         DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
+  updated_at         DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamp(6)
+
+  @@map("job_subscribers")
+}
+
+model email_notification_logs {
+  id              Int      @id @default(autoincrement())
+  type            String
+  content_id      String   @map("content_id")
+  content_title   String   @map("content_title")
+  recipient_email String   @map("recipient_email")
+  status          String   @default("sent")
+  error_message   String?  @map("error_message")
+  sent_at         DateTime @default(now()) @map("sent_at") @db.Timestamp(6)
+
+  @@index([type, content_id], map: "email_logs_type_content_idx")
+  @@index([recipient_email], map: "email_logs_recipient_idx")
+  @@map("email_notification_logs")
+}
+
+
+
+

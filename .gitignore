@@ -1,0 +1,48 @@
+# Environment variables - MUST NEVER BE COMMITTED
+.env
+.env.*
+*.env
+!.env.example
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+client/.env
+client/.env.*
+!client/.env.example
+server/.env
+server/.env.*
+!server/.env.example
+
+# Dependencies
+node_modules/
+client/node_modules/
+server/node_modules/
+*/node_modules/
+
+# Production build artifacts
+dist/
+dist-ssr/
+client/dist/
+
+# Server uploads & temporary files
+server/uploads/*
+!server/uploads/.gitkeep
+scratch/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS / Editor artifacts
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.dll

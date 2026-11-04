@@ -1,0 +1,558 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Onest', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --breakpoint-xs: 480px;
+  --breakpoint-3xl: 1680px;
+}
+
+:root {
+  color-scheme: light;
+  font-family: 'Onest', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+html, body {
+  min-height: 100%;
+  margin: 0;
+  background-color: inherit;
+  color: #141010;
+  font-family: 'Onest', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  overflow-x: clip;
+  -webkit-font-smoothing: antialiased;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-float {
+  animation: float 5s ease-in-out infinite;
+}
+
+/* Upward Rising Glow Wave Keyframes */
+@keyframes riseGlow {
+  0% {
+    transform: translateY(40%);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.75;
+  }
+  50% {
+    opacity: 0.9;
+  }
+  80% {
+    opacity: 0.4;
+  }
+  100% {
+    transform: translateY(-220%);
+    opacity: 0;
+  }
+}
+
+.animate-rise-glow {
+  animation: riseGlow 7s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.animate-rise-glow-delayed {
+  animation: riseGlow 8.5s cubic-bezier(0.4, 0, 0.2, 1) infinite 3.5s;
+}
+
+/* Rising Vertical Light Beam Pulses */
+@keyframes beamRise {
+  0% {
+    transform: translateY(30%) scaleY(0.6);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 0.95;
+  }
+  80% {
+    opacity: 0.35;
+  }
+  100% {
+    transform: translateY(-240%) scaleY(1.4);
+    opacity: 0;
+  }
+}
+
+.animate-beam-rise-1 {
+  animation: beamRise 6s ease-in-out infinite;
+}
+
+.animate-beam-rise-2 {
+  animation: beamRise 5.2s ease-in-out infinite 1.8s;
+}
+
+.animate-beam-rise-3 {
+  animation: beamRise 6.8s ease-in-out infinite 3.4s;
+}
+
+/* Rising Glowing Light Particles */
+@keyframes particleRise {
+  0% {
+    transform: translateY(0) scale(0.6);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.95;
+  }
+  80% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(-100vh) scale(1.1);
+    opacity: 0;
+  }
+}
+
+.animate-particle-rise {
+  animation: particleRise linear infinite;
+}
+
+/* ============================================================================
+   PAGE LOAD / REFRESH ENTRANCE ANIMATIONS
+   ============================================================================ */
+
+/* 1. Navbar comes from top */
+@keyframes navbarEnterTop {
+  0% {
+    opacity: 0;
+    transform: translateY(-40px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-navbar-enter {
+  animation: navbarEnterTop 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* 2. Text fades in */
+@keyframes textFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-text-fade-in {
+  animation: textFadeIn 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* 3. Cube comes from right side */
+@keyframes cubeSlideFromRight {
+  0% {
+    opacity: 0;
+    transform: translateX(80px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-cube-slide-right {
+  animation: cubeSlideFromRight 0.95s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Accessibility: Support for users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+/* Infinite Horizontal Marquee Ticker */
+@keyframes marqueeScroll {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marqueeScroll 32s linear infinite;
+  will-change: transform;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+/* ==========================================================================
+   Smooth Brand Gradient Hover Transition
+   Preserves button's original color before hover.
+   On hover: Smoothly transitions to #FBAE42 -> #BE3093 -> #693092 gradient.
+   ========================================================================== */
+.hover-brand-gradient {
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+  isolation: isolate;
+  -webkit-font-smoothing: antialiased;
+  transform: translateZ(0);
+  transition: color 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.25s ease !important;
+}
+
+.hover-brand-gradient,
+.hover-brand-gradient *,
+.hover-brand-gradient svg {
+  transition: color 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+              fill 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+              stroke 0.6s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.hover-brand-gradient::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #FBAE42 0%, #BE3093 50%, #693092 100%);
+  opacity: 0;
+  z-index: -1;
+  pointer-events: none;
+  will-change: opacity;
+  transform: translateZ(0);
+  transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.hover-brand-gradient:hover {
+  color: #ffffff !important;
+  box-shadow: 0 8px 30px rgba(190, 48, 147, 0.45);
+  border-color: transparent !important;
+}
+
+.hover-brand-gradient:hover,
+.hover-brand-gradient:hover *,
+.hover-brand-gradient:hover svg {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+.hover-brand-gradient:hover::before {
+  opacity: 1;
+}
+
+.hover-brand-gradient:active {
+  transform: scale(0.97) !important;
+  transition: transform 0.15s ease !important;
+}
+
+/* ========================================================================== */
+/* FLUID RESPONSIVE SYSTEM (FOR WINDOWS DISPLAY SCALING 100%, 125%, 150%, 175%)*/
+/* Implements CSS clamp(), min(), max(), flexbox, & responsive vertical rhythm */
+/* Automatically scales across all viewport dimensions & display scaling levels */
+/* ========================================================================== */
+
+/* Prevent horizontal overflow across all components */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+img, svg, video, canvas {
+  max-width: 100%;
+  height: auto;
+}
+
+/* 1. MASTER UNIFIED DISPLAY HEADINGS (RESTORED FULL COMMANDING SCALE) */
+.hero-heading-lead {
+  font-family: 'Onest', sans-serif !important;
+  font-size: clamp(1.75rem, 1.2rem + 2vw, 4rem) !important;
+  line-height: 1.1 !important;
+}
+
+.hero-heading-title {
+  font-family: 'Onest', sans-serif !important;
+  font-size: clamp(2.35rem, 1.6rem + 3.2vw, 5.5rem) !important;
+  line-height: 1.04 !important;
+  letter-spacing: -0.03em !important;
+}
+
+.hero-heading-container {
+  margin-bottom: clamp(1rem, 1.8vh, 2rem) !important;
+}
+
+.hero-subtitle,
+.about-desc,
+.services-desc,
+.portfolio-desc,
+.contact-desc,
+.careers-desc,
+.services-page-desc,
+.blogs-page-desc {
+  font-family: 'Onest', sans-serif !important;
+  font-weight: 400 !important;
+  font-size: clamp(1rem, 0.92rem + 0.35vw, 1.25rem) !important;
+  line-height: 1.625 !important;
+  max-width: 44rem !important;
+}
+
+.hero-btn {
+  font-size: clamp(0.875rem, 0.82rem + 0.18vw, 1rem) !important;
+  padding: clamp(0.75rem, 1.2vh, 1rem) clamp(1.5rem, 1.8vw, 2.25rem) !important;
+}
+
+.hero-cube-wrap {
+  width: 100% !important;
+  max-width: min(660px, 90vw) !important;
+}
+
+/* Master Section Display Headings */
+.teams-title,
+.about-title,
+.services-title,
+.contact-title,
+.careers-title,
+.about-page-title,
+.services-page-title,
+.blogs-page-title {
+  font-family: 'Onest', sans-serif !important;
+  font-weight: 300 !important;
+  letter-spacing: -0.035em !important;
+  font-size: clamp(2.5rem, 1.5rem + 2.7vw, 4.75rem) !important;
+  line-height: 1.04 !important;
+}
+
+@media (max-height: 780px) {
+  .services-title {
+    font-size: clamp(1.75rem, 1.1rem + 1.4vw + 1.2vh, 3.25rem) !important;
+    line-height: 1.05 !important;
+  }
+}
+
+@media (max-height: 640px) {
+  .services-title {
+    font-size: clamp(1.45rem, 0.95rem + 1.1vw + 1vh, 2.35rem) !important;
+    line-height: 1.04 !important;
+  }
+}
+
+.portfolio-title {
+  font-family: 'Onest', sans-serif !important;
+  font-weight: 300 !important;
+  letter-spacing: -0.035em !important;
+  font-size: clamp(1.75rem, 1.2rem + 1.6vw, 3.15rem) !important;
+  line-height: 1.04 !important;
+}
+
+.about-block-title {
+  font-family: 'Onest', sans-serif !important;
+  font-weight: 300 !important;
+  letter-spacing: -0.035em !important;
+  font-size: clamp(2rem, 1.4rem + 1.8vw, 3.5rem) !important;
+  line-height: 1.08 !important;
+}
+
+/* 2. SECTION CONTAINER PADDING & VERTICAL RHYTHM */
+/* Fluid padding that gently adapts to available viewport height and scaling */
+.about-content-wrap,
+.portfolio-content-wrap,
+.teams-content-wrap,
+.contact-content-wrap {
+  padding-top: clamp(1.25rem, 2.8vh, 3.5rem) !important;
+  padding-bottom: clamp(1rem, 2.2vh, 2.5rem) !important;
+}
+
+.portfolio-header,
+.teams-header,
+.contact-header {
+  margin-bottom: clamp(0.85rem, 1.8vh, 1.85rem) !important;
+}
+
+/* 3. ABOUT SECTION STAT CARDS */
+.about-cards-wrap {
+  gap: clamp(0.75rem, 1.2vh, 1.25rem) !important;
+}
+
+.about-card {
+  padding: clamp(0.85rem, 1.2vh, 1.5rem) clamp(1rem, 1.3vw, 1.75rem) !important;
+  border-radius: clamp(0.875rem, 1vw, 1.35rem) !important;
+  height: auto !important;
+  min-width: 0 !important;
+  word-break: break-word !important;
+}
+
+.about-card-number {
+  font-size: clamp(2.25rem, 1.6rem + 1.4vw, 3.35rem) !important;
+  line-height: 1 !important;
+}
+
+.about-card-suffix {
+  font-size: clamp(1.75rem, 1.3rem + 1vw, 2.5rem) !important;
+}
+
+.about-card-label {
+  font-size: clamp(0.9375rem, 0.88rem + 0.25vw, 1.125rem) !important;
+  word-break: break-word !important;
+}
+
+.about-card-sub {
+  font-size: clamp(12px, 0.72rem + 0.18vw, 13.5px) !important;
+  word-break: break-word !important;
+}
+
+/* 4. PORTFOLIO SECTION CARDS */
+.portfolio-card {
+  padding: clamp(0.85rem, 1.2vh, 1.35rem) !important;
+  border-radius: clamp(0.85rem, 1vw, 1.35rem) !important;
+  height: auto !important;
+  min-height: 100% !important;
+  min-width: 0 !important;
+  word-break: break-word !important;
+}
+
+.portfolio-card-title {
+  font-size: clamp(1rem, 0.92rem + 0.28vw, 1.25rem) !important;
+  line-height: 1.3 !important;
+  margin-bottom: 0.35rem !important;
+  word-break: break-word !important;
+}
+
+.portfolio-card-desc {
+  font-size: clamp(0.8125rem, 0.76rem + 0.15vw, 0.9375rem) !important;
+  line-height: 1.45 !important;
+  margin-bottom: 0.65rem !important;
+  word-break: break-word !important;
+}
+
+/* 5. TEAMS SECTION CARDS */
+.teams-gallery {
+  gap: clamp(0.85rem, 1.2vw, 1.75rem) !important;
+  padding-bottom: clamp(0.5rem, 1vh, 1rem) !important;
+  padding-top: 0.25rem !important;
+  overflow-y: visible !important;
+}
+
+.teams-card {
+  width: clamp(210px, 16vw, 290px) !important;
+  flex-shrink: 0 !important;
+  height: auto !important;
+  min-width: 0 !important;
+  word-break: break-word !important;
+}
+
+.teams-card-img-wrap {
+  height: clamp(230px, 34vh, 390px) !important;
+}
+
+.teams-card.card-tall .teams-card-img-wrap {
+  height: clamp(250px, 37vh, 415px) !important;
+}
+
+.teams-card.card-mid .teams-card-img-wrap {
+  height: clamp(230px, 34vh, 390px) !important;
+}
+
+.teams-card.card-short .teams-card-img-wrap {
+  height: clamp(210px, 31vh, 365px) !important;
+}
+
+.teams-card-name {
+  font-size: clamp(0.9375rem, 0.88rem + 0.2vw, 1.125rem) !important;
+  word-break: break-word !important;
+}
+
+.teams-card-role {
+  font-size: clamp(12px, 0.72rem + 0.15vw, 13.5px) !important;
+  word-break: break-word !important;
+}
+
+/* 6. CONTACT SECTION */
+.contact-section-wrap {
+  min-height: 100dvh !important;
+  height: auto !important;
+  max-height: none !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  position: relative !important;
+  overflow-x: clip !important;
+  overflow-y: visible !important;
+  background-color: #F5EEF8 !important;
+}
+
+.contact-grid {
+  gap: clamp(0.85rem, 1.2vw, 1.75rem) !important;
+  margin-bottom: clamp(0.85rem, 1.5vh, 1.75rem) !important;
+}
+
+.contact-card {
+  padding: clamp(1rem, 1.5vh, 2rem) clamp(1rem, 1.3vw, 1.85rem) !important;
+  border-radius: clamp(14px, 1.1vw, 22px) !important;
+  height: auto !important;
+  min-height: 0 !important;
+  min-width: 0 !important;
+  word-break: break-word !important;
+}
+
+.contact-country {
+  font-size: clamp(1.35rem, 1.1rem + 0.7vw, 1.85rem) !important;
+  margin-bottom: 0.25rem !important;
+}
+
+.contact-office-type {
+  font-size: clamp(12.5px, 0.76rem + 0.15vw, 14px) !important;
+}
+
+.contact-address {
+  font-size: clamp(13px, 0.78rem + 0.18vw, 15px) !important;
+  line-height: 1.45 !important;
+}
+
+.contact-cta-btn {
+  padding: clamp(0.65rem, 1vh, 0.95rem) clamp(1.5rem, 2vw, 2.5rem) !important;
+  font-size: clamp(0.875rem, 0.82rem + 0.18vw, 1rem) !important;
+}
+
+/* 7. FLOATING NAVBAR RESPONSIVE FLUID SYSTEM */
+.nav-header-wrap {
+  top: clamp(0.5rem, 1vh, 1.25rem) !important;
+}
+
+.nav-pill-wrap {
+  padding: clamp(0.5rem, 0.8vh, 0.875rem) clamp(1rem, 1.3vw, 2rem) !important;
+  gap: clamp(1rem, 1.5vw, 2.5rem) !important;
+}
+
+.nav-logo-img {
+  height: clamp(1.4rem, 1.15rem + 0.38vw, 1.875rem) !important;
+}
+
+.nav-links-wrap {
+  gap: clamp(0.85rem, 1.2vw, 2rem) !important;
+}
+
+.nav-link-item {
+  font-size: clamp(0.875rem, 0.82rem + 0.18vw, 1rem) !important;
+}
+
+.nav-cta-btn {
+  font-size: clamp(0.8125rem, 0.76rem + 0.18vw, 0.9375rem) !important;
+  padding: clamp(0.45rem, 0.7vh, 0.625rem) clamp(1rem, 1.2vw, 1.5rem) !important;
+}
