@@ -1,4 +1,5 @@
 const crypto = require("crypto");
+const nodemailer = require("nodemailer");
 const prisma = require("../config/prisma");
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY || "";
@@ -6,20 +7,68 @@ const EMAIL_FROM = process.env.EMAIL_FROM || "Netopsys AI <helpdesk@netopsys.net
 const FRONTEND_URL = (process.env.FRONTEND_URL || "http://localhost:5173").replace(/\/+$/, "");
 const BACKEND_URL = (process.env.BACKEND_URL || `http://localhost:${process.env.PORT || 5000}`).replace(/\/+$/, "");
 
+// Optional direct SMTP configuration for helpdesk@netopsys.net
+const SMTP_HOST = process.env.SMTP_HOST || "";
+const SMTP_PORT = parseInt(process.env.SMTP_PORT || "587", 10);
+const SMTP_USER = process.env.SMTP_USER || "";
+const SMTP_PASS = process.env.SMTP_PASS || "";
+const SMTP_SECURE = process.env.SMTP_SECURE === "true" || SMTP_PORT === 465;
+
+let smtpTransporter = null;
+if (SMTP_HOST && SMTP_USER && SMTP_PASS) {
+  try {
+    smtpTransporter = nodemailer.createTransport({
+      host: SMTP_HOST,
+      port: SMTP_PORT,
+      secure: SMTP_SECURE,
+      auth: {
+        user: SMTP_USER,
+        pass: SMTP_PASS,
+      },
+    });
+    console.log(`📧 SMTP Transporter initialized for ${SMTP_USER} via ${SMTP_HOST}:${SMTP_PORT}`);
+  } catch (err) {
+    console.error("Failed to initialize SMTP Transporter:", err.message);
+  }
+}
+
 /**
- * Send email via Resend API using native fetch
- * If no valid API key is present, logs safely to console and records in DB.
+ * Send email via SMTP or Resend API
+ * If no valid credentials are present, logs safely to console and records in DB.
  */
 async function sendRawEmail({ to, subject, html, replyTo }) {
-  const isDemoKey = !RESEND_API_KEY || RESEND_API_KEY.includes("placeholder") || RESEND_API_KEY.includes("demo");
+  const replyToAddress = replyTo || "helpdesk@netopsys.net";
+  const recipientList = Array.isArray(to) ? to : [to];
 
-  if (isDemoKey) {
+  // 1. Prioritize direct SMTP if configured
+  if (smtpTransporter) {
+    try {
+      const info = await smtpTransporter.sendMail({
+        from: EMAIL_FROM,
+        to: recipientList.join(", "),
+        subject,
+        html,
+        replyTo: replyToAddress,
+      });
+      console.log(`✅ [LIVE SMTP EMAIL DELIVERED] to ${recipientList.join(", ")} (ID: ${info.messageId})`);
+      return { success: true, id: info.messageId };
+    } catch (err) {
+      console.error(`❌ SMTP dispatch failed to ${recipientList.join(", ")}:`, err.message);
+      return { success: false, error: err.message };
+    }
+  }
+
+  // 2. Check Resend API key
+  const hasLiveResendKey = RESEND_API_KEY && !RESEND_API_KEY.includes("placeholder") && !RESEND_API_KEY.includes("demo");
+
+  if (!hasLiveResendKey) {
     console.log("=================================================");
-    console.log(`📧 [MOCK EMAIL DISPATCH via RESEND]`);
-    console.log(`   To:      ${Array.isArray(to) ? to.join(", ") : to}`);
+    console.log(`⚠️  [MOCK EMAIL DISPATCH - NO EMAIL DELIVERED]`);
+    console.log(`   To:      ${recipientList.join(", ")}`);
     console.log(`   From:    ${EMAIL_FROM}`);
     console.log(`   Subject: ${subject}`);
-    console.log(`   (Configure RESEND_API_KEY in .env for live transmission)`);
+    console.log(`   Reason:  No live email credentials in .env.`);
+    console.log(`   👉 Set SMTP (SMTP_HOST, SMTP_USER, SMTP_PASS) OR RESEND_API_KEY in server/.env`);
     console.log("=================================================");
     return {
       success: true,
@@ -28,13 +77,14 @@ async function sendRawEmail({ to, subject, html, replyTo }) {
     };
   }
 
+  // 3. Dispatch via Resend API
   try {
     const payload = {
       from: EMAIL_FROM,
-      to: Array.isArray(to) ? to : [to],
+      to: recipientList,
       subject,
       html,
-      reply_to: replyTo || "helpdesk@netopsys.net",
+      reply_to: replyToAddress,
     };
 
     const response = await fetch("https://api.resend.com/emails", {
@@ -54,6 +104,7 @@ async function sendRawEmail({ to, subject, html, replyTo }) {
       return { success: false, error: errMsg };
     }
 
+    console.log(`✅ [LIVE RESEND EMAIL DELIVERED] to ${recipientList.join(", ")} (ID: ${data.id})`);
     return { success: true, id: data.id };
   } catch (err) {
     console.error("Error communicating with Resend API:", err.message);
