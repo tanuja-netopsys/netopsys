@@ -49,6 +49,8 @@ async function initSubscriberTables() {
     // Indexes for fast lookup
     await prisma.$executeRawUnsafe(`
       CREATE INDEX IF NOT EXISTS idx_email_logs_type_content ON email_notification_logs(type, content_id);
+    `);
+    await prisma.$executeRawUnsafe(`
       CREATE INDEX IF NOT EXISTS idx_email_logs_recipient ON email_notification_logs(recipient_email);
     `);
 
