@@ -206,8 +206,24 @@ export default function FallingToolsPhysics({ children }: FallingToolsPhysicsPro
 
     const onPointerMove = (e: PointerEvent) => {
       if (isDragging) return;
+
+      // Always prioritize navigation links, inputs, and buttons so user can click & type seamlessly
+      const target = document.elementFromPoint(e.clientX, e.clientY);
+      if (
+        target &&
+        (target.closest("a, button, input, textarea, form, label") ||
+          target.tagName === "INPUT" ||
+          target.tagName === "BUTTON" ||
+          target.tagName === "A")
+      ) {
+        canvas.style.zIndex = "10";
+        canvas.style.pointerEvents = "none";
+        canvas.style.cursor = "default";
+        return;
+      }
+
       if (isPointOverTool(e.clientX, e.clientY)) {
-        canvas.style.zIndex = "30";
+        canvas.style.zIndex = "25";
         canvas.style.pointerEvents = "auto";
         canvas.style.cursor = "grab";
       } else {
@@ -230,13 +246,26 @@ export default function FallingToolsPhysics({ children }: FallingToolsPhysicsPro
     container.addEventListener("pointerleave", onPointerLeave);
     canvas.addEventListener("pointerleave", onPointerLeave);
 
-    // Responsive touch interaction: allows dragging physics tools while preserving native page scroll elsewhere
+    // Responsive touch interaction: allows dragging physics tools while preserving native page touch & typing
     const onTouchStart = (e: TouchEvent) => {
       if (e.touches.length !== 1) return;
       const touch = e.touches[0];
+
+      // Never block touches on navigation links, inputs, or buttons
+      const target = document.elementFromPoint(touch.clientX, touch.clientY);
+      if (
+        target &&
+        (target.closest("a, button, input, textarea, form, label") ||
+          target.tagName === "INPUT" ||
+          target.tagName === "BUTTON" ||
+          target.tagName === "A")
+      ) {
+        return;
+      }
+
       if (isPointOverTool(touch.clientX, touch.clientY)) {
         isDragging = true;
-        canvas.style.zIndex = "30";
+        canvas.style.zIndex = "25";
         canvas.style.pointerEvents = "auto";
 
         const rect = canvas.getBoundingClientRect();
@@ -497,7 +526,7 @@ export default function FallingToolsPhysics({ children }: FallingToolsPhysicsPro
       className="relative w-full overflow-hidden pb-2"
     >
       {/* Footer Content: Top 5-columns navigation + Giant NETOPSYS AI text */}
-      <div className="w-full relative z-20 pointer-events-none">{children}</div>
+      <div className="w-full relative z-30 pointer-events-auto">{children}</div>
 
       {/* Foreground Canvas: Falling & Stacked 2D Physics Tools */}
       <canvas

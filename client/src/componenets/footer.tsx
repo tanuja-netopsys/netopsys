@@ -80,7 +80,7 @@ export default function Footer() {
   return (
     <footer
       ref={footerRef}
-      className="relative w-full bg-[#000000] text-white pt-12 sm:pt-16 lg:pt-20 pb-0 select-none overflow-x-clip border-t border-white/[0.06]"
+      className="relative w-full bg-[#000000] text-white pt-12 sm:pt-16 lg:pt-20 pb-0 overflow-x-clip border-t border-white/[0.06]"
     >
       {/* Subtle ambient lighting */}
       <div className="absolute top-0 left-1/3 w-[500px] h-[300px] rounded-full bg-[#693092]/10 blur-[160px] pointer-events-none" />
@@ -88,7 +88,7 @@ export default function Footer() {
       {/* 2D Physics Falling Tools spanning from the very top of the footer navigation columns all the way down to the floor */}
       <FallingToolsPhysics>
         {/* Top 5-Column Navigation Layout */}
-        <div className="relative z-20 pointer-events-auto w-full max-w-[2100px] mx-auto px-4 sm:px-6 md:px-8 lg:px-10 xl:px-14 2xl:px-18">
+        <div className="relative z-30 pointer-events-auto select-auto w-full max-w-[2100px] mx-auto px-4 sm:px-6 md:px-8 lg:px-10 xl:px-14 2xl:px-18">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 sm:gap-6 xl:gap-8 pb-12 sm:pb-16 text-left">
             {/* Column 1: Brand Info */}
             <div className="flex flex-col items-start pr-0 lg:pr-4">
@@ -96,7 +96,7 @@ export default function Footer() {
               <a
                 href="#home"
                 onClick={(e) => handleSmoothScroll(e, "home")}
-                className="flex items-center group cursor-pointer mb-4"
+                className="flex items-center group cursor-pointer mb-4 pointer-events-auto"
               >
                 <img
                   src={netopsysLogo}
@@ -111,14 +111,14 @@ export default function Footer() {
               </p>
 
               {/* Social Media Circular Buttons */}
-              <div className="flex items-center gap-2.5 sm:gap-3">
+              <div className="flex items-center gap-2.5 sm:gap-3 pointer-events-auto relative z-30">
                 {/* Facebook */}
                 <a
                   href="https://facebook.com"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Netopsys on Facebook"
-                  className="w-8 h-8 rounded-full border border-white/15 hover:border-white/40 bg-white/[0.02] hover:bg-white/[0.08] text-[#9CA3AF] hover:text-white flex items-center justify-center transition-all duration-200"
+                  className="w-8 h-8 rounded-full border border-white/15 hover:border-white/40 bg-white/[0.02] hover:bg-white/[0.08] text-[#9CA3AF] hover:text-white flex items-center justify-center transition-all duration-200 cursor-pointer pointer-events-auto"
                 >
                   <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
                     <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
@@ -131,7 +131,7 @@ export default function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Netopsys on Instagram"
-                  className="w-8 h-8 rounded-full border border-white/15 hover:border-white/40 bg-white/[0.02] hover:bg-white/[0.08] text-[#9CA3AF] hover:text-white flex items-center justify-center transition-all duration-200"
+                  className="w-8 h-8 rounded-full border border-white/15 hover:border-white/40 bg-white/[0.02] hover:bg-white/[0.08] text-[#9CA3AF] hover:text-white flex items-center justify-center transition-all duration-200 cursor-pointer pointer-events-auto"
                 >
                   <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                     <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
@@ -146,7 +146,7 @@ export default function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Netopsys on LinkedIn"
-                  className="w-8 h-8 rounded-full border border-white/15 hover:border-white/40 bg-white/[0.02] hover:bg-white/[0.08] text-[#9CA3AF] hover:text-white flex items-center justify-center transition-all duration-200"
+                  className="w-8 h-8 rounded-full border border-white/15 hover:border-white/40 bg-white/[0.02] hover:bg-white/[0.08] text-[#9CA3AF] hover:text-white flex items-center justify-center transition-all duration-200 cursor-pointer pointer-events-auto"
                 >
                   <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
                     <path d="M4.98 3.5c0 1.381-1.11 2.5-2.48 2.5s-2.48-1.119-2.48-2.5c0-1.38 1.11-2.5 2.48-2.5s2.48 1.12 2.48 2.5zm.02 4.5h-5v16h5v-16zm7.982 0h-4.968v16h4.969v-8.399c0-4.67 6.029-5.052 6.029 0v8.399h4.988v-10.131c0-7.88-8.922-7.593-11.018-3.714v-2.155z" />
@@ -157,7 +157,7 @@ export default function Footer() {
                 <a
                   href="mailto:helpdesk@netopsys.net"
                   aria-label="Email Netopsys"
-                  className="w-8 h-8 rounded-full border border-white/15 hover:border-white/40 bg-white/[0.02] hover:bg-white/[0.08] text-[#9CA3AF] hover:text-white flex items-center justify-center transition-all duration-200"
+                  className="w-8 h-8 rounded-full border border-white/15 hover:border-white/40 bg-white/[0.02] hover:bg-white/[0.08] text-[#9CA3AF] hover:text-white flex items-center justify-center transition-all duration-200 cursor-pointer pointer-events-auto"
                 >
                   <Mail className="w-3.5 h-3.5 stroke-[1.8]" />
                 </a>
@@ -174,7 +174,7 @@ export default function Footer() {
                   <a
                     href="#services"
                     onClick={(e) => handleSmoothScroll(e, "services")}
-                    className="text-[#9B94AA] hover:text-white text-xs sm:text-[13.5px] md:text-[14px] transition-colors block"
+                    className="text-[#9B94AA] hover:text-white text-xs sm:text-[13.5px] md:text-[14px] transition-colors block cursor-pointer pointer-events-auto"
                   >
                     Machine Learning
                   </a>
@@ -183,7 +183,7 @@ export default function Footer() {
                   <a
                     href="#services"
                     onClick={(e) => handleSmoothScroll(e, "services")}
-                    className="text-[#9B94AA] hover:text-white text-xs sm:text-[13.5px] md:text-[14px] transition-colors block"
+                    className="text-[#9B94AA] hover:text-white text-xs sm:text-[13.5px] md:text-[14px] transition-colors block cursor-pointer pointer-events-auto"
                   >
                     NLP Solutions
                   </a>
@@ -192,7 +192,7 @@ export default function Footer() {
                   <a
                     href="#services"
                     onClick={(e) => handleSmoothScroll(e, "services")}
-                    className="text-[#9B94AA] hover:text-white text-xs sm:text-[13.5px] md:text-[14px] transition-colors block"
+                    className="text-[#9B94AA] hover:text-white text-xs sm:text-[13.5px] md:text-[14px] transition-colors block cursor-pointer pointer-events-auto"
                   >
                     Computer Vision
                   </a>
@@ -201,7 +201,7 @@ export default function Footer() {
                   <a
                     href="#services"
                     onClick={(e) => handleSmoothScroll(e, "services")}
-                    className="text-[#9B94AA] hover:text-white text-xs sm:text-[13.5px] md:text-[14px] transition-colors block"
+                    className="text-[#9B94AA] hover:text-white text-xs sm:text-[13.5px] md:text-[14px] transition-colors block cursor-pointer pointer-events-auto"
                   >
                     AI Automation
                   </a>
@@ -219,7 +219,7 @@ export default function Footer() {
                   <a
                     href="#about"
                     onClick={(e) => handleSmoothScroll(e, "about")}
-                    className="text-[#9B94AA] hover:text-white text-xs sm:text-[13.5px] md:text-[14px] transition-colors block"
+                    className="text-[#9B94AA] hover:text-white text-xs sm:text-[13.5px] md:text-[14px] transition-colors block cursor-pointer pointer-events-auto"
                   >
                     About Us
                   </a>
@@ -228,7 +228,7 @@ export default function Footer() {
                   <a
                     href="#portfolio"
                     onClick={(e) => handleSmoothScroll(e, "portfolio")}
-                    className="text-[#9B94AA] hover:text-white text-xs sm:text-[13.5px] md:text-[14px] transition-colors block"
+                    className="text-[#9B94AA] hover:text-white text-xs sm:text-[13.5px] md:text-[14px] transition-colors block cursor-pointer pointer-events-auto"
                   >
                     Portfolio
                   </a>
@@ -237,7 +237,7 @@ export default function Footer() {
                   <a
                     href="#about"
                     onClick={(e) => handleSmoothScroll(e, "about")}
-                    className="text-[#9B94AA] hover:text-white text-xs sm:text-[13.5px] md:text-[14px] transition-colors block"
+                    className="text-[#9B94AA] hover:text-white text-xs sm:text-[13.5px] md:text-[14px] transition-colors block cursor-pointer pointer-events-auto"
                   >
                     Technologies
                   </a>
@@ -246,7 +246,7 @@ export default function Footer() {
                   <a
                     href="#careers"
                     onClick={(e) => handleSmoothScroll(e, "careers")}
-                    className="text-[#9B94AA] hover:text-white text-xs sm:text-[13.5px] md:text-[14px] transition-colors block"
+                    className="text-[#9B94AA] hover:text-white text-xs sm:text-[13.5px] md:text-[14px] transition-colors block cursor-pointer pointer-events-auto"
                   >
                     Careers
                   </a>
@@ -264,7 +264,7 @@ export default function Footer() {
                   <a
                     href="#portfolio"
                     onClick={(e) => handleSmoothScroll(e, "portfolio")}
-                    className="text-[#9B94AA] hover:text-white text-xs sm:text-[13.5px] md:text-[14px] transition-colors block"
+                    className="text-[#9B94AA] hover:text-white text-xs sm:text-[13.5px] md:text-[14px] transition-colors block cursor-pointer pointer-events-auto"
                   >
                     AI Assessment Platform
                   </a>
@@ -273,7 +273,7 @@ export default function Footer() {
                   <a
                     href="#portfolio"
                     onClick={(e) => handleSmoothScroll(e, "portfolio")}
-                    className="text-[#9B94AA] hover:text-white text-xs sm:text-[13.5px] md:text-[14px] transition-colors block"
+                    className="text-[#9B94AA] hover:text-white text-xs sm:text-[13.5px] md:text-[14px] transition-colors block cursor-pointer pointer-events-auto"
                   >
                     ERP Solutions
                   </a>
@@ -282,7 +282,7 @@ export default function Footer() {
                   <a
                     href="#portfolio"
                     onClick={(e) => handleSmoothScroll(e, "portfolio")}
-                    className="text-[#9B94AA] hover:text-white text-xs sm:text-[13.5px] md:text-[14px] transition-colors block"
+                    className="text-[#9B94AA] hover:text-white text-xs sm:text-[13.5px] md:text-[14px] transition-colors block cursor-pointer pointer-events-auto"
                   >
                     Recruitment Platform
                   </a>
@@ -291,26 +291,26 @@ export default function Footer() {
             </div>
 
             {/* Column 5: Stay Connected */}
-            <div className="sm:col-span-2 md:col-span-1 lg:col-span-1">
+            <div className="sm:col-span-2 md:col-span-1 lg:col-span-1 relative z-30 pointer-events-auto">
               <h4 className="text-white font-medium text-sm sm:text-[15px] tracking-tight mb-2 sm:mb-2.5">
                 Stay Connected
               </h4>
               <p className="text-[#9B94AA] text-xs sm:text-[13px] leading-relaxed mb-4 max-w-[280px]">
                 Get AI insights, product updates, and company news straight to your inbox.
               </p>
-              <form onSubmit={handleNewsletterSubmit} className="flex items-center gap-2 max-w-sm pointer-events-auto relative z-20">
+              <form onSubmit={handleNewsletterSubmit} className="flex items-center gap-2 max-w-sm pointer-events-auto relative z-30">
                 <input
                   type="email"
                   value={newsletterEmail}
                   onChange={(e) => setNewsletterEmail(e.target.value)}
                   placeholder="Your email address"
-                  className="w-full min-w-0 bg-[#100D16] border border-white/15 focus:border-[#BE3093] rounded-xl px-3.5 py-2.5 text-xs text-white placeholder:text-[#6C667A] outline-none transition-colors select-text cursor-text pointer-events-auto relative z-20"
+                  className="w-full min-w-0 bg-[#100D16] border border-white/15 focus:border-[#BE3093] rounded-xl px-3.5 py-2.5 text-xs text-white placeholder:text-[#6C667A] outline-none transition-colors select-text cursor-text pointer-events-auto relative z-30 focus:ring-1 focus:ring-[#BE3093]"
                 />
                 <button
                   type="submit"
                   disabled={isSubmittingNewsletter}
                   aria-label="Subscribe"
-                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#BE3093] hover:bg-[#a82981] disabled:opacity-60 disabled:cursor-not-allowed text-white flex items-center justify-center shrink-0 transition-colors cursor-pointer shadow-md pointer-events-auto relative z-20"
+                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#BE3093] hover:bg-[#a82981] disabled:opacity-60 disabled:cursor-not-allowed text-white flex items-center justify-center shrink-0 transition-colors cursor-pointer shadow-md pointer-events-auto relative z-30"
                 >
                   {isSubmittingNewsletter ? (
                     <Loader2 className="w-4 h-4 animate-spin text-white" />
