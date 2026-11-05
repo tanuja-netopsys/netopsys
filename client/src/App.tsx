@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import Navbar from "./componenets/navbar.tsx";
 import Hero from "./sections/hero.tsx";
@@ -38,6 +38,7 @@ import ProfilePage from "./pages/profile.tsx";
 import ContactPage from "./pages/contact.tsx";
 import TermsAndConditionsPage from "./pages/terms&conditions.tsx";
 import PrivacyPolicyPage from "./pages/privacypolicy.tsx";
+import NotFoundPage from "./pages/not-found.tsx";
 import ProtectedRoute from "./componenets/ProtectedRoute.tsx";
 
 
@@ -48,7 +49,8 @@ function RouteThemeSync() {
     try {
       const p = location.pathname.toLowerCase();
       const isDark = p === "/" || p === "" || p.startsWith("/services");
-      const bg = isDark ? "#08050E" : "#F5EEF8";
+      const is404 = p === "/404";
+      const bg = isDark ? "#08050E" : is404 ? "#FBF7F0" : "#F5EEF8";
       document.documentElement.style.backgroundColor = bg;
       document.body.style.backgroundColor = bg;
     } catch {}
@@ -97,6 +99,30 @@ function HomePage() {
 }
 
 export default function App() {
+  const [isOffline, setIsOffline] = useState(!navigator.onLine);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOffline(false);
+    const handleOffline = () => setIsOffline(true);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
+
+  if (isOffline) {
+    return (
+      <BrowserRouter>
+        <NotFoundPage
+          forceOffline
+          onRetry={() => setIsOffline(!navigator.onLine)}
+        />
+      </BrowserRouter>
+    );
+  }
+
   return (
     <BrowserRouter>
       <RouteThemeSync />
@@ -198,6 +224,10 @@ export default function App() {
         <Route path="/superadmin/subscriber" element={<ProtectedRoute requireSuperAdmin><SubscribersAdminPage /></ProtectedRoute>} />
         <Route path="/superadmin/permissions" element={<ProtectedRoute requireSuperAdmin><PermissionsPage /></ProtectedRoute>} />
         <Route path="/superadmin/permission" element={<ProtectedRoute requireSuperAdmin><PermissionsPage /></ProtectedRoute>} />
+
+        {/* 404 Not Found & Catch-All Routes */}
+        <Route path="/404" element={<NotFoundPage />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>
   );
