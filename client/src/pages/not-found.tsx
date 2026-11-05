@@ -474,67 +474,67 @@ export default function NotFoundPage({ forceOffline, onRetry }: NotFoundPageProp
                   >
                     {/* Bird Hand / Arm holding the handle */}
                     <path
-                      d="M 22 258 Q 50 258 74 250"
+                      d="M 22 258 Q 44 260 62 252"
                       stroke="#251815"
                       strokeWidth="11"
                       strokeLinecap="round"
                       fill="none"
                     />
 
-                    {/* Magnifying Glass Handle */}
+                    {/* Magnifying Glass Holding Handle (Increased length & elevated height) */}
                     <line
-                      x1="64"
-                      y1="250"
-                      x2="96"
-                      y2="244"
+                      x1="52"
+                      y1="254"
+                      x2="110"
+                      y2="240"
                       stroke="#221512"
-                      strokeWidth="11"
+                      strokeWidth="9"
                       strokeLinecap="round"
                     />
                     <line
-                      x1="67"
-                      y1="249"
-                      x2="94"
-                      y2="244"
+                      x1="55"
+                      y1="253"
+                      x2="108"
+                      y2="240"
                       stroke="#382622"
-                      strokeWidth="4"
+                      strokeWidth="3.4"
                       strokeLinecap="round"
                     />
 
-                    {/* Fully Transparent Glass Lens - Real background & 404 numbers show through */}
+                    {/* Fully Transparent Glass Lens - Slightly decreased to balanced size */}
                     <circle
-                      cx="124"
-                      cy="240"
-                      r="54"
+                      cx="152"
+                      cy="230"
+                      r="45"
                       fill="url(#lensGlassGradient)"
                     />
 
-                    {/* Outer Heavy Dark Lens Rim (Enlarged / Increased Height) */}
+                    {/* Outer Heavy Dark Lens Rim */}
                     <circle
-                      cx="124"
-                      cy="240"
-                      r="56.5"
+                      cx="152"
+                      cy="230"
+                      r="47.5"
                       stroke="#221512"
-                      strokeWidth="9.5"
+                      strokeWidth="8.5"
                       fill="none"
                     />
 
                     {/* Inner Glass Bezel Lip */}
                     <circle
-                      cx="124"
-                      cy="240"
-                      r="51"
+                      cx="152"
+                      cy="230"
+                      r="42.5"
                       stroke="#543C36"
-                      strokeWidth="1.8"
+                      strokeWidth="1.6"
                       fill="none"
                       opacity="0.6"
                     />
 
                     {/* Primary Specular Glint Highlight (Gloss Reflection) */}
                     <path
-                      d="M 94 216 A 42 42 0 0 1 154 210"
+                      d="M 126 208 A 35 35 0 0 1 178 204"
                       stroke="#FFFFFF"
-                      strokeWidth="3.4"
+                      strokeWidth="3.2"
                       strokeLinecap="round"
                       opacity="0.8"
                       fill="none"
@@ -542,9 +542,9 @@ export default function NotFoundPage({ forceOffline, onRetry }: NotFoundPageProp
 
                     {/* Secondary Subtle Bottom Lens Rim Glare */}
                     <path
-                      d="M 104 266 A 42 42 0 0 0 144 266"
+                      d="M 134 252 A 35 35 0 0 0 170 252"
                       stroke="#FFFFFF"
-                      strokeWidth="1.8"
+                      strokeWidth="1.6"
                       strokeLinecap="round"
                       opacity="0.4"
                       fill="none"
