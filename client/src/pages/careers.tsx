@@ -46,6 +46,7 @@ export default function CareersPage() {
   const [notifyEmail, setNotifyEmail] = useState("");
   const [isNotified, setIsNotified] = useState(false);
   const [isSubmittingNotify, setIsSubmittingNotify] = useState(false);
+  const [isPaperRocketFlying, setIsPaperRocketFlying] = useState(false);
 
   const handleJobNotifySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,7 +57,10 @@ export default function CareersPage() {
     }
 
     try {
+      // Morph button into paper rocket and launch flight
+      setIsPaperRocketFlying(true);
       setIsSubmittingNotify(true);
+
       const res = await fetch("/api/subscribers/job", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -67,7 +71,12 @@ export default function CareersPage() {
         throw new Error(data.message || "Failed to register for alerts.");
       }
 
-      setIsNotified(true);
+      // Allow paper rocket flight animation to finish soaring up and to the right
+      setTimeout(() => {
+        setIsNotified(true);
+        setIsPaperRocketFlying(false);
+      }, 1050);
+
       if (data.alreadySubscribed) {
         toast.info(data.message || "You are already registered for job alerts!", {
           title: "Already Registered",
@@ -78,6 +87,7 @@ export default function CareersPage() {
         });
       }
     } catch (err: any) {
+      setIsPaperRocketFlying(false);
       toast.error(err.message || "Failed to register. Please try again later.", {
         title: "Registration Error",
       });
@@ -439,7 +449,7 @@ export default function CareersPage() {
                     ) : (
                       <form
                         onSubmit={handleJobNotifySubmit}
-                        className="relative flex items-center bg-[#FAF8FC] border border-[#EADBFA] rounded-full p-1.5 focus-within:border-[#693092] focus-within:bg-white transition-all shadow-xs"
+                        className="relative flex items-center bg-[#FAF8FC] border border-[#EADBFA] rounded-full p-1.5 focus-within:border-[#693092] focus-within:bg-white transition-all shadow-xs overflow-visible"
                       >
                         <div className="pl-3.5 pr-2 text-[#8E869B] shrink-0">
                           <Mail className="w-4 h-4 stroke-[1.8]" />
@@ -450,16 +460,82 @@ export default function CareersPage() {
                           onChange={(e) => setNotifyEmail(e.target.value)}
                           placeholder="Enter your email"
                           required
+                          disabled={isPaperRocketFlying}
                           className="w-full min-w-0 bg-transparent text-xs sm:text-sm text-[#141010] placeholder:text-[#9A91A7] outline-none py-1 pr-2"
                         />
-                        <button
-                          type="submit"
-                          disabled={isSubmittingNotify}
-                          className="hover-brand-gradient bg-[#693092] disabled:opacity-60 text-white text-xs sm:text-sm font-semibold px-4 sm:px-5 py-2.5 rounded-full shrink-0 shadow-xs transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap"
-                        >
-                          {isSubmittingNotify && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                          <span>Notify Me</span>
-                        </button>
+                        <div className="relative shrink-0 flex items-center justify-center">
+                          <button
+                            type="submit"
+                            disabled={isSubmittingNotify || isPaperRocketFlying}
+                            className={`relative transition-all duration-300 font-semibold text-xs sm:text-sm rounded-full shrink-0 shadow-xs cursor-pointer flex items-center justify-center gap-1.5 whitespace-nowrap overflow-visible ${
+                              isPaperRocketFlying
+                                ? "w-10 h-10 p-0 bg-transparent shadow-none"
+                                : "hover-brand-gradient bg-[#693092] text-white px-4 sm:px-5 py-2.5 disabled:opacity-60"
+                            }`}
+                          >
+                            {isPaperRocketFlying ? (
+                              /* Button Morphs into Origami Paper Rocket & Soars to Top-Right */
+                              <div className="animate-paper-rocket flex items-center justify-center pointer-events-none">
+                                <div className="relative flex items-center justify-center">
+                                  {/* Crisp Brand-Themed Paper Rocket */}
+                                  <svg
+                                    width="32"
+                                    height="32"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    className="drop-shadow-[0_4px_14px_rgba(105,48,146,0.65)]"
+                                  >
+                                    {/* Main Wing in Netopsys Deep Purple */}
+                                    <path
+                                      d="M 2 12 L 22 2 L 15 22 L 11 13 Z"
+                                      fill="#693092"
+                                      stroke="#693092"
+                                      strokeWidth="0.8"
+                                      strokeLinejoin="round"
+                                    />
+                                    {/* Fold Wing in Brand Magenta */}
+                                    <path
+                                      d="M 11 13 L 22 2 L 15 22 Z"
+                                      fill="#BE3093"
+                                      stroke="#BE3093"
+                                      strokeWidth="0.6"
+                                      strokeLinejoin="round"
+                                    />
+                                    {/* Gold Center Fold Crease */}
+                                    <line
+                                      x1="2"
+                                      y1="12"
+                                      x2="22"
+                                      y2="2"
+                                      stroke="#FBAE42"
+                                      strokeWidth="1.2"
+                                    />
+                                  </svg>
+
+                                  {/* Dotted Flight Breeze Trail */}
+                                  <svg
+                                    className="absolute -bottom-3 -left-8 w-10 h-7 overflow-visible pointer-events-none opacity-85"
+                                    viewBox="0 0 32 24"
+                                    fill="none"
+                                  >
+                                    <path
+                                      d="M 0 22 Q 10 24 16 15 Q 22 6 32 2"
+                                      stroke="#693092"
+                                      strokeWidth="1.8"
+                                      strokeDasharray="2.5 3"
+                                      strokeLinecap="round"
+                                    />
+                                  </svg>
+                                </div>
+                              </div>
+                            ) : (
+                              <>
+                                {isSubmittingNotify && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                                <span>Notify Me</span>
+                              </>
+                            )}
+                          </button>
+                        </div>
                       </form>
                     )}
                   </div>
