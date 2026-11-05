@@ -34,6 +34,7 @@ export default function NotFoundPage({ forceOffline, onRetry }: NotFoundPageProp
   // Mouse Cursor Tracking (for aiming the magnifying glass and bird gaze)
   const svgRef = useRef<SVGSVGElement | null>(null);
   const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(null);
+  const mousePosRef = useRef<{ x: number; y: number } | null>(null);
 
   // Monitor network online/offline events
   useEffect(() => {
@@ -62,10 +63,13 @@ export default function NotFoundPage({ forceOffline, onRetry }: NotFoundPageProp
       if (rect.width === 0 || rect.height === 0) return;
       const svgX = ((e.clientX - rect.left) / rect.width) * 860;
       const svgY = ((e.clientY - rect.top) / rect.height) * 440;
-      setMousePos({ x: svgX, y: svgY });
+      const pos = { x: svgX, y: svgY };
+      mousePosRef.current = pos;
+      setMousePos(pos);
     };
 
     const handleMouseLeave = () => {
+      mousePosRef.current = null;
       setMousePos(null);
     };
 
@@ -94,33 +98,57 @@ export default function NotFoundPage({ forceOffline, onRetry }: NotFoundPageProp
     }, 800);
   };
 
-  // Continuous animation loop: The bird autonomously walks back and forth along the line
+  // Continuous animation loop:
+  // - When cursor is active, bird waddles along floor line following cursor X
+  // - When idle/no cursor, bird gently patrols back and forth autonomously
   useEffect(() => {
     let animId: number;
-    const minX = 200;
-    const maxX = 660;
-    const speed = 1.35; // gentle, natural walking pace
+    const minX = 160;
+    const maxX = 700;
 
     const step = () => {
-      if (pauseTimerRef.current > 0) {
-        pauseTimerRef.current -= 1;
-        setIsWalking(false);
-      } else {
-        setIsWalking(true);
-        setStepPhase((p) => p + 0.16);
+      const mouse = mousePosRef.current;
+
+      if (mouse) {
+        // Cursor-directed movement along the floor line
+        const targetX = Math.max(minX, Math.min(maxX, mouse.x));
         setBirdX((currentX) => {
-          let nextX = currentX + direction * speed;
-          if (nextX >= maxX) {
-            nextX = maxX;
-            setDirection(-1);
-            pauseTimerRef.current = 45; // brief pause at right turnaround
-          } else if (nextX <= minX) {
-            nextX = minX;
-            setDirection(1);
-            pauseTimerRef.current = 45; // brief pause at left turnaround
+          const diff = targetX - currentX;
+          const dist = Math.abs(diff);
+
+          if (dist > 8) {
+            setIsWalking(true);
+            setStepPhase((p) => p + 0.18);
+            const speed = Math.min(dist * 0.08 + 1.2, 4.0);
+            const nextX = currentX + Math.sign(diff) * speed;
+            return Math.max(minX, Math.min(maxX, nextX));
+          } else {
+            setIsWalking(false);
+            return currentX;
           }
-          return nextX;
         });
+      } else {
+        // Autonomous patrol when no mouse interaction
+        if (pauseTimerRef.current > 0) {
+          pauseTimerRef.current -= 1;
+          setIsWalking(false);
+        } else {
+          setIsWalking(true);
+          setStepPhase((p) => p + 0.16);
+          setBirdX((currentX) => {
+            let nextX = currentX + direction * 1.35;
+            if (nextX >= maxX) {
+              nextX = maxX;
+              setDirection(-1);
+              pauseTimerRef.current = 45; // brief pause at right turnaround
+            } else if (nextX <= minX) {
+              nextX = minX;
+              setDirection(1);
+              pauseTimerRef.current = 45; // brief pause at left turnaround
+            }
+            return nextX;
+          });
+        }
       }
 
       animId = requestAnimationFrame(step);
@@ -135,31 +163,48 @@ export default function NotFoundPage({ forceOffline, onRetry }: NotFoundPageProp
   const legAngle1 = isWalking ? Math.sin(stepPhase) * 20 : 0;
   const legAngle2 = isWalking ? Math.sin(stepPhase + Math.PI) * 20 : 0;
 
-  // The magnifying glass faces whichever direction the cursor is in!
+  // The character faces whichever direction the cursor is in!
   // If cursor is to the right of bird -> face right; to the left -> face left.
-  // When cursor is absent, fallback to bird's walking direction.
   const facingDirection: 1 | -1 = mousePos
     ? mousePos.x >= birdX
       ? 1
       : -1
     : direction;
 
-  // Calculate vertical tilt angle for magnifying glass aiming towards cursor
+  // Calculate wide-arc angle for magnifying glass aiming towards cursor
+  // Supports more than semi-circle sweep (> 180°):
+  // From pointing high up/overhead (-135°) through forward (0°) to pointing down (+90°)
   let glassTilt = 0;
   if (mousePos) {
-    const dx = Math.abs(mousePos.x - birdX);
-    const dy = mousePos.y - (300 + bodyBob);
-    const angleDeg = (Math.atan2(dy, Math.max(dx, 60)) * 180) / Math.PI;
-    glassTilt = Math.max(-20, Math.min(20, angleDeg));
+    const shoulderGlobalX = birdX + facingDirection * 22;
+    const shoulderGlobalY = 316 + bodyBob; // 58 (bird group translate) + 258 (shoulder) + bodyBob
+
+    const dx = mousePos.x - shoulderGlobalX;
+    const dy = mousePos.y - shoulderGlobalY;
+
+    // Convert into bird's local coordinate system (scaled by facingDirection)
+    const localDx = dx * facingDirection;
+    const localDy = dy;
+
+    // Angle in degrees: 0° forward, -90° straight up, +90° straight down
+    const rawAngle = (Math.atan2(localDy, localDx) * 180) / Math.PI;
+
+    // Sweep arc exceeds a semi-circle (total range: -135° to +90° = 225°)
+    glassTilt = Math.max(-135, Math.min(90, rawAngle));
   }
 
-  // Eye pupil offset towards cursor
-  const pupilDx = mousePos
-    ? Math.max(-3, Math.min(3, ((mousePos.x - birdX) / 250) * facingDirection * 3))
-    : 0;
-  const pupilDy = mousePos
-    ? Math.max(-3, Math.min(3, ((mousePos.y - 300) / 250) * 3))
-    : 0;
+  // Eye pupil offset dynamically tracks cursor direction
+  let pupilDx = 0;
+  let pupilDy = 0;
+  if (mousePos) {
+    const shoulderGlobalX = birdX + facingDirection * 22;
+    const shoulderGlobalY = 316 + bodyBob;
+    const dx = (mousePos.x - shoulderGlobalX) * facingDirection;
+    const dy = mousePos.y - shoulderGlobalY;
+    const dist = Math.hypot(dx, dy) || 1;
+    pupilDx = (dx / dist) * 5;
+    pupilDy = (dy / dist) * 5;
+  }
 
   return (
     <div
