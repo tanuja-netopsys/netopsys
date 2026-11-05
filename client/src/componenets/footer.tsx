@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Send, Mail, Loader2, Rocket, Check } from "lucide-react";
+import { Send, Mail, Loader2, Check } from "lucide-react";
 import netopsysLogo from "../assets/netopsys-logo.png";
 import { toast } from "./toast.tsx";
 import FallingToolsPhysics from "./FallingToolsPhysics.tsx";
@@ -333,15 +333,60 @@ export default function Footer() {
                     )}
                   </button>
 
-                  {/* Rocket Blast-off Flight Animation moving Right & Top */}
+                  {/* Paper Rocket (Paper Airplane) Flight Animation moving Right & Top */}
                   {isRocketLaunching && (
                     <div className="absolute inset-0 pointer-events-none flex items-center justify-center z-50">
-                      <div className="animate-rocket-blast flex items-center justify-center">
+                      <div className="animate-paper-rocket flex items-center justify-center">
                         <div className="relative flex items-center justify-center">
-                          <Rocket className="w-5 h-5 sm:w-6 sm:h-6 text-[#FBAE42] drop-shadow-[0_0_12px_rgba(251,174,66,0.95)] rotate-45" />
-                          {/* Rocket Flame / Exhaust Trail */}
-                          <span className="absolute -bottom-1 -left-1.5 w-3.5 h-3.5 rounded-full bg-gradient-to-tr from-[#BE3093] to-[#FBAE42] blur-[2px] opacity-90 animate-pulse" />
-                          <span className="absolute -bottom-2 -left-2 w-2 h-2 rounded-full bg-white blur-[1px] opacity-95" />
+                          {/* Crisp Origami Paper Rocket */}
+                          <svg
+                            width="28"
+                            height="28"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            className="drop-shadow-[0_2px_10px_rgba(255,255,255,0.7)]"
+                          >
+                            {/* Main Top Wing */}
+                            <path
+                              d="M 2 12 L 22 2 L 15 22 L 11 13 Z"
+                              fill="#FFFFFF"
+                              stroke="#FFFFFF"
+                              strokeWidth="0.8"
+                              strokeLinejoin="round"
+                            />
+                            {/* Folded Shaded Bottom Wing */}
+                            <path
+                              d="M 11 13 L 22 2 L 15 22 Z"
+                              fill="#EADCF5"
+                              stroke="#EADCF5"
+                              strokeWidth="0.6"
+                              strokeLinejoin="round"
+                            />
+                            {/* Center Paper Crease */}
+                            <line
+                              x1="2"
+                              y1="12"
+                              x2="22"
+                              y2="2"
+                              stroke="#C6A8E0"
+                              strokeWidth="0.8"
+                            />
+                          </svg>
+
+                          {/* Dotted Air Breeze Trail behind the paper rocket */}
+                          <svg
+                            className="absolute -bottom-3 -left-7 w-9 h-7 overflow-visible pointer-events-none opacity-85"
+                            viewBox="0 0 32 24"
+                            fill="none"
+                          >
+                            <path
+                              d="M 0 22 Q 10 24 16 15 Q 22 6 32 2"
+                              stroke="#FFFFFF"
+                              strokeWidth="1.6"
+                              strokeDasharray="2.5 3"
+                              strokeLinecap="round"
+                            />
+                          </svg>
                         </div>
                       </div>
                     </div>
