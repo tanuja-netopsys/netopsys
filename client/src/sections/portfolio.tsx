@@ -99,17 +99,14 @@ export default function Portfolio() {
         {/* Header Section with Navigation Arrows */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2.5 sm:gap-3 mb-2 sm:mb-2.5 lg:mb-2 xl:mb-2.5">
           <div className="portfolio-header max-w-3xl">
-            {/* Eyebrow Badge: Button Design */}
+            {/* Eyebrow Badge: Button Design matching remaining sections */}
             <div className="portfolio-eyebrow-wrap mb-1 sm:mb-1.5">
-              <Link
-                to="/portfolio"
-                className="portfolio-eyebrow-text hover-brand-gradient inline-flex items-center gap-2 sm:gap-2.5 px-3.5 sm:px-4 py-0.5 sm:py-1 rounded-full bg-[#141010] border border-white/20 hover:border-white/40 text-white text-xs sm:text-[13px] font-medium tracking-wide shadow-md transition-all duration-200 select-none cursor-pointer"
-              >
+              <div className="portfolio-eyebrow-text inline-flex items-center gap-2 sm:gap-2.5 px-3.5 sm:px-4 py-0.5 sm:py-1 rounded-full bg-white border border-[#693092]/20 hover:border-[#693092]/40 text-[#693092] text-xs sm:text-[13px] font-semibold tracking-wide shadow-xs hover:shadow-md transition-all duration-200 select-none cursor-default">
                 <span>Portfolio</span>
-                <div className="w-3.5 sm:w-4 h-3.5 sm:h-4 rounded-full bg-white text-[#141010] flex items-center justify-center">
-                  <ArrowRight className="w-2.5 h-2.5 stroke-[2.5]" />
+                <div className="w-3.5 sm:w-4 h-3.5 sm:h-4 rounded-full bg-[#693092] text-white flex items-center justify-center">
+                  <ArrowRight className="w-2 sm:w-2.5 h-2 sm:h-2.5 stroke-[2.5]" />
                 </div>
-              </Link>
+              </div>
             </div>
 
             {/* Large Display Title */}
