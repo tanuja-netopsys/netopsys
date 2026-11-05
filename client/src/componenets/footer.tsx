@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Send, Mail, Loader2 } from "lucide-react";
+import { Send, Mail, Loader2, Rocket, Check } from "lucide-react";
 import netopsysLogo from "../assets/netopsys-logo.png";
 import { toast } from "./toast.tsx";
 import FallingToolsPhysics from "./FallingToolsPhysics.tsx";
@@ -11,6 +11,8 @@ export default function Footer() {
   const footerRef = useRef<HTMLElement>(null);
   const [newsletterEmail, setNewsletterEmail] = useState("");
   const [isSubmittingNewsletter, setIsSubmittingNewsletter] = useState(false);
+  const [isRocketLaunching, setIsRocketLaunching] = useState(false);
+  const [isSubscribedSuccess, setIsSubscribedSuccess] = useState(false);
 
   const handleNewsletterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,7 +23,10 @@ export default function Footer() {
     }
 
     try {
+      // Trigger rocket launch animation immediately on submit
+      setIsRocketLaunching(true);
       setIsSubmittingNewsletter(true);
+
       const res = await fetch("/api/subscribers/blog", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -32,6 +37,7 @@ export default function Footer() {
         throw new Error(data.message || "Failed to subscribe.");
       }
 
+      setIsSubscribedSuccess(true);
       if (data.alreadySubscribed) {
         toast.info(data.message || "You are already subscribed to Netopsys updates!", {
           title: "Already Subscribed",
@@ -42,10 +48,15 @@ export default function Footer() {
         });
       }
       setNewsletterEmail("");
+      setTimeout(() => {
+        setIsRocketLaunching(false);
+        setIsSubscribedSuccess(false);
+      }, 2600);
     } catch (err: any) {
       toast.error(err.message || "Failed to subscribe. Please try again later.", {
         title: "Subscription Error",
       });
+      setIsRocketLaunching(false);
     } finally {
       setIsSubmittingNewsletter(false);
     }
@@ -306,18 +317,36 @@ export default function Footer() {
                   placeholder="Your email address"
                   className="w-full min-w-0 bg-[#100D16] border border-white/15 focus:border-[#BE3093] rounded-xl px-3.5 py-2.5 text-xs text-white placeholder:text-[#6C667A] outline-none transition-colors select-text cursor-text pointer-events-auto relative z-30 focus:ring-1 focus:ring-[#BE3093]"
                 />
-                <button
-                  type="submit"
-                  disabled={isSubmittingNewsletter}
-                  aria-label="Subscribe"
-                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#BE3093] hover:bg-[#a82981] disabled:opacity-60 disabled:cursor-not-allowed text-white flex items-center justify-center shrink-0 transition-colors cursor-pointer shadow-md pointer-events-auto relative z-30"
-                >
-                  {isSubmittingNewsletter ? (
-                    <Loader2 className="w-4 h-4 animate-spin text-white" />
-                  ) : (
-                    <Send className="w-4 h-4 -rotate-12" />
+                <div className="relative shrink-0">
+                  <button
+                    type="submit"
+                    disabled={isSubmittingNewsletter}
+                    aria-label="Subscribe"
+                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#BE3093] hover:bg-[#a82981] disabled:opacity-70 disabled:cursor-not-allowed text-white flex items-center justify-center shrink-0 transition-colors cursor-pointer shadow-md pointer-events-auto relative z-30 group"
+                  >
+                    {isSubscribedSuccess ? (
+                      <Check className="w-4 h-4 text-emerald-300 stroke-[2.5] animate-in zoom-in-75 duration-200" />
+                    ) : isSubmittingNewsletter ? (
+                      <Loader2 className="w-4 h-4 animate-spin text-white/90" />
+                    ) : (
+                      <Send className="w-4 h-4 -rotate-12 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                    )}
+                  </button>
+
+                  {/* Rocket Blast-off Flight Animation moving Right & Top */}
+                  {isRocketLaunching && (
+                    <div className="absolute inset-0 pointer-events-none flex items-center justify-center z-50">
+                      <div className="animate-rocket-blast flex items-center justify-center">
+                        <div className="relative flex items-center justify-center">
+                          <Rocket className="w-5 h-5 sm:w-6 sm:h-6 text-[#FBAE42] drop-shadow-[0_0_12px_rgba(251,174,66,0.95)] rotate-45" />
+                          {/* Rocket Flame / Exhaust Trail */}
+                          <span className="absolute -bottom-1 -left-1.5 w-3.5 h-3.5 rounded-full bg-gradient-to-tr from-[#BE3093] to-[#FBAE42] blur-[2px] opacity-90 animate-pulse" />
+                          <span className="absolute -bottom-2 -left-2 w-2 h-2 rounded-full bg-white blur-[1px] opacity-95" />
+                        </div>
+                      </div>
+                    </div>
                   )}
-                </button>
+                </div>
               </form>
             </div>
           </div>
