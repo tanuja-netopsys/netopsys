@@ -222,31 +222,13 @@ export default function NotFoundPage({ forceOffline, onRetry }: NotFoundPageProp
       <div className="absolute top-1/4 -right-40 w-96 h-96 rounded-full bg-[#BE3093]/10 blur-[140px] pointer-events-none" />
       <div className="absolute bottom-1/3 -left-40 w-96 h-96 rounded-full bg-[#693092]/10 blur-[140px] pointer-events-none" />
 
-      {/* Top Header / Branding */}
-      <div className="w-full max-w-6xl mx-auto px-6 pt-6 sm:pt-8 flex items-center justify-between z-20">
-        <button
-          type="button"
-          onClick={() => navigate("/")}
-          className="flex items-center gap-2 group cursor-pointer"
-        >
-          {/* Logo 3 Spheres */}
-          <svg width="38" height="20" viewBox="0 0 54 26" fill="none">
-            <circle cx="12" cy="13" r="11" fill="#FBAE42" />
-            <circle cx="25" cy="13" r="11" fill="#D13B89" />
-            <circle cx="38" cy="13" r="11" fill="#5E2282" />
-          </svg>
-          <span className="text-sm sm:text-base font-bold tracking-tight text-[#141010] group-hover:text-[#693092] transition-colors">
-            Netopsys
-          </span>
-        </button>
-
-        {isOffline && (
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100/90 border border-amber-300 text-amber-900 text-xs font-semibold animate-pulse">
-            <WifiOff className="w-3.5 h-3.5" />
-            <span>Offline Mode</span>
-          </div>
-        )}
-      </div>
+      {/* Floating Offline Mode Badge (Only shown when connection drops) */}
+      {isOffline && (
+        <div className="absolute top-6 right-6 z-30 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-amber-100/90 border border-amber-300 text-amber-900 text-xs font-semibold shadow-sm animate-pulse">
+          <WifiOff className="w-3.5 h-3.5" />
+          <span>Offline Mode</span>
+        </div>
+      )}
 
       {/* Main Center Stage: Vertically Balanced & Centered */}
       <div className="w-full flex-1 flex flex-col items-center justify-center max-w-4xl px-4 py-4 sm:py-6 relative z-10">
@@ -563,45 +545,6 @@ export default function NotFoundPage({ forceOffline, onRetry }: NotFoundPageProp
               </g>
             </g>
           </svg>
-        </div>
-      </div>
-
-      {/* Bottom Footer Credits / Links */}
-      <div className="w-full max-w-6xl mx-auto px-6 py-4 flex flex-col sm:flex-row items-center justify-between text-xs text-[#6C6377] z-20 border-t border-[#E9DFEE]">
-        <p>&copy; {new Date().getFullYear()} Netopsys Pte. Ltd. All rights reserved.</p>
-
-        <div className="flex items-center gap-4 mt-2 sm:mt-0 font-medium">
-          <button
-            type="button"
-            onClick={() => navigate("/")}
-            className="hover:text-[#693092] transition-colors cursor-pointer"
-          >
-            Home
-          </button>
-          <span className="text-[#9C94A8]">•</span>
-          <button
-            type="button"
-            onClick={() => navigate("/careers")}
-            className="hover:text-[#693092] transition-colors cursor-pointer"
-          >
-            Careers
-          </button>
-          <span className="text-[#9C94A8]">•</span>
-          <button
-            type="button"
-            onClick={() => navigate("/blogs")}
-            className="hover:text-[#693092] transition-colors cursor-pointer"
-          >
-            Blogs
-          </button>
-          <span className="text-[#9C94A8]">•</span>
-          <button
-            type="button"
-            onClick={() => navigate("/contact")}
-            className="hover:text-[#693092] transition-colors cursor-pointer"
-          >
-            Contact
-          </button>
         </div>
       </div>
     </div>
