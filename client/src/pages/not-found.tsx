@@ -24,16 +24,11 @@ export default function NotFoundPage({ forceOffline, onRetry }: NotFoundPageProp
   const [isOffline, setIsOffline] = useState(forceOffline || !navigator.onLine);
   const [isRetrying, setIsRetrying] = useState(false);
 
-  // Bird Patrol & Movement State
+  // Bird Autonomous Patrol & Movement State (Completely self-animating)
   const [birdX, setBirdX] = useState(480);
   const [direction, setDirection] = useState<1 | -1>(1); // 1 = facing right, -1 = facing left
   const [isWalking, setIsWalking] = useState(true);
   const [stepPhase, setStepPhase] = useState(0);
-
-  // Interactive mouse override
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const targetXRef = useRef<number | null>(null);
-  const isUserInteractingRef = useRef(false);
   const pauseTimerRef = useRef<number>(0);
 
   // Monitor network online/offline events
@@ -71,52 +66,33 @@ export default function NotFoundPage({ forceOffline, onRetry }: NotFoundPageProp
     }, 800);
   };
 
-  // Continuous animation loop for patrolling & walking
+  // Continuous animation loop: The bird autonomously walks back and forth along the line
   useEffect(() => {
     let animId: number;
     const minX = 220;
     const maxX = 640;
-    const speed = 1.35; // gentle detective pacing
+    const speed = 1.35; // gentle, natural walking pace
 
     const step = () => {
-      // If user is guiding with mouse
-      if (isUserInteractingRef.current && targetXRef.current !== null) {
-        setBirdX((currentX) => {
-          const target = Math.max(minX, Math.min(maxX, targetXRef.current!));
-          const diff = target - currentX;
-          if (Math.abs(diff) > 2) {
-            const nextDir = diff > 0 ? 1 : -1;
-            setDirection(nextDir);
-            setIsWalking(true);
-            setStepPhase((p) => p + 0.18);
-            return currentX + Math.sign(diff) * Math.min(speed * 1.5, Math.abs(diff));
-          } else {
-            setIsWalking(false);
-            return currentX;
-          }
-        });
+      if (pauseTimerRef.current > 0) {
+        pauseTimerRef.current -= 1;
+        setIsWalking(false);
       } else {
-        // Automated patrol back and forth across 404
-        if (pauseTimerRef.current > 0) {
-          pauseTimerRef.current -= 1;
-          setIsWalking(false);
-        } else {
-          setIsWalking(true);
-          setStepPhase((p) => p + 0.16);
-          setBirdX((currentX) => {
-            let nextX = currentX + direction * speed;
-            if (nextX >= maxX) {
-              nextX = maxX;
-              setDirection(-1);
-              pauseTimerRef.current = 45; // brief pause at right turnaround
-            } else if (nextX <= minX) {
-              nextX = minX;
-              setDirection(1);
-              pauseTimerRef.current = 45; // brief pause at left turnaround
-            }
-            return nextX;
-          });
-        }
+        setIsWalking(true);
+        setStepPhase((p) => p + 0.16);
+        setBirdX((currentX) => {
+          let nextX = currentX + direction * speed;
+          if (nextX >= maxX) {
+            nextX = maxX;
+            setDirection(-1);
+            pauseTimerRef.current = 45; // brief pause at right turnaround
+          } else if (nextX <= minX) {
+            nextX = minX;
+            setDirection(1);
+            pauseTimerRef.current = 45; // brief pause at left turnaround
+          }
+          return nextX;
+        });
       }
 
       animId = requestAnimationFrame(step);
@@ -126,36 +102,17 @@ export default function NotFoundPage({ forceOffline, onRetry }: NotFoundPageProp
     return () => cancelAnimationFrame(animId);
   }, [direction]);
 
-  // Mouse interaction handler
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!containerRef.current) return;
-    const rect = containerRef.current.getBoundingClientRect();
-    const relativeX = (e.clientX - rect.left) / rect.width;
-    // Map container width to SVG coordinate range (approx 180 to 680)
-    const svgX = 180 + relativeX * 500;
-    targetXRef.current = svgX;
-    isUserInteractingRef.current = true;
-  };
-
-  const handleMouseLeave = () => {
-    isUserInteractingRef.current = false;
-    targetXRef.current = null;
-  };
-
   // Calculate body bob and leg angles from walking stepPhase
   const bodyBob = isWalking ? Math.sin(stepPhase * 2) * 2.5 : 0;
   const legAngle1 = isWalking ? Math.sin(stepPhase) * 20 : 0;
   const legAngle2 = isWalking ? Math.sin(stepPhase + Math.PI) * 20 : 0;
 
-  // Lens coordinate for magnifying view
+  // Lens coordinate for magnifying view (sitting on the lowered ground line level)
   const lensGlobalX = birdX + (direction === 1 ? 112 : -112);
-  const lensGlobalY = 246 + bodyBob;
+  const lensGlobalY = 271 + bodyBob;
 
   return (
     <div
-      ref={containerRef}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
       className="min-h-screen w-full bg-[#FBF7F0] text-[#141010] font-['Onest',sans-serif] flex flex-col justify-between items-center select-none overflow-hidden relative"
       style={{
         backgroundImage: `radial-gradient(circle at 50% 36%, #FFFDF9 0%, #FAF5EC 60%, #F4ECE0 100%)`,
@@ -269,39 +226,39 @@ export default function NotFoundPage({ forceOffline, onRetry }: NotFoundPageProp
             </defs>
 
             {/* -----------------------------------------------------------
-                FLOOR SEAMS & GROUND LINE
+                FLOOR SEAMS & GROUND LINE (Lowered position)
             ------------------------------------------------------------ */}
             <g opacity="0.6">
-              <line x1="80" y1="310" x2="80" y2="360" stroke="#E5D9C8" strokeWidth="1.2" />
-              <line x1="220" y1="310" x2="220" y2="360" stroke="#E5D9C8" strokeWidth="1.2" />
-              <line x1="360" y1="310" x2="360" y2="360" stroke="#E5D9C8" strokeWidth="1.2" />
-              <line x1="500" y1="310" x2="500" y2="360" stroke="#E5D9C8" strokeWidth="1.2" />
-              <line x1="640" y1="310" x2="640" y2="360" stroke="#E5D9C8" strokeWidth="1.2" />
-              <line x1="780" y1="310" x2="780" y2="360" stroke="#E5D9C8" strokeWidth="1.2" />
+              <line x1="80" y1="335" x2="80" y2="385" stroke="#E5D9C8" strokeWidth="1.2" />
+              <line x1="220" y1="335" x2="220" y2="385" stroke="#E5D9C8" strokeWidth="1.2" />
+              <line x1="360" y1="335" x2="360" y2="385" stroke="#E5D9C8" strokeWidth="1.2" />
+              <line x1="500" y1="335" x2="500" y2="385" stroke="#E5D9C8" strokeWidth="1.2" />
+              <line x1="640" y1="335" x2="640" y2="385" stroke="#E5D9C8" strokeWidth="1.2" />
+              <line x1="780" y1="335" x2="780" y2="385" stroke="#E5D9C8" strokeWidth="1.2" />
             </g>
 
             {/* Main Ground Line */}
             <line
               x1="20"
-              y1="310"
+              y1="335"
               x2="840"
-              y2="310"
+              y2="335"
               stroke="#E2D4BF"
               strokeWidth="2.2"
             />
 
             {/* Walking Shadow Dots across the patrol line */}
             <g fill="#A89A88" opacity="0.4">
-              <circle cx="160" cy="312" r="3" />
-              <circle cx="260" cy="312" r="3" />
-              <circle cx="360" cy="312" r="3" />
-              <circle cx="460" cy="312" r="3" />
-              <circle cx="560" cy="312" r="3" />
-              <circle cx="660" cy="312" r="3" />
+              <circle cx="160" cy="337" r="3" />
+              <circle cx="260" cy="337" r="3" />
+              <circle cx="360" cy="337" r="3" />
+              <circle cx="460" cy="337" r="3" />
+              <circle cx="560" cy="337" r="3" />
+              <circle cx="660" cy="337" r="3" />
             </g>
 
             {/* -----------------------------------------------------------
-                MASSIVE SOFT 404 NUMBERS (Centered)
+                MASSIVE SOFT 404 NUMBERS (Centered at exact original place)
             ------------------------------------------------------------ */}
             <g
               fill="#EAD7B0"
@@ -349,9 +306,9 @@ export default function NotFoundPage({ forceOffline, onRetry }: NotFoundPageProp
               {/* Magnified Ground Line inside lens */}
               <line
                 x1={lensGlobalX - 50}
-                y1={310}
+                y1={335}
                 x2={lensGlobalX + 50}
-                y2={310}
+                y2={335}
                 stroke="#D3BEA2"
                 strokeWidth="2.5"
               />
@@ -367,17 +324,17 @@ export default function NotFoundPage({ forceOffline, onRetry }: NotFoundPageProp
                 }}
               >
                 {lensGlobalX < 310 && (
-                  <text x={lensGlobalX - 42} y={305}>
+                  <text x={lensGlobalX - 42} y={328}>
                     4
                   </text>
                 )}
                 {lensGlobalX >= 310 && lensGlobalX <= 540 && (
-                  <text x={lensGlobalX - 40} y={305}>
+                  <text x={lensGlobalX - 40} y={328}>
                     0
                   </text>
                 )}
                 {lensGlobalX > 540 && (
-                  <text x={lensGlobalX - 42} y={305}>
+                  <text x={lensGlobalX - 42} y={328}>
                     4
                   </text>
                 )}
@@ -421,7 +378,7 @@ export default function NotFoundPage({ forceOffline, onRetry }: NotFoundPageProp
                 SINGLE UNIFIED BIRD + MAGNIFYING GLASS CHARACTER UNIT
             ------------------------------------------------------------ */}
             {/* The bird and magnifying glass are locked together and patrol along the floor */}
-            <g transform={`translate(${birdX}, 0)`}>
+            <g transform={`translate(${birdX}, 25)`}>
               {/* Dynamic Ground Ellipse Shadow directly under feet */}
               <ellipse
                 cx="0"
