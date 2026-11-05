@@ -207,12 +207,21 @@ export default function NotFoundPage({ forceOffline, onRetry }: NotFoundPageProp
   }
 
   return (
-    <div
-      className="min-h-screen w-full bg-[#FBF7F0] text-[#141010] font-['Onest',sans-serif] flex flex-col justify-between items-center select-none overflow-hidden relative"
-      style={{
-        backgroundImage: `radial-gradient(circle at 50% 36%, #FFFDF9 0%, #FAF5EC 60%, #F4ECE0 100%)`,
-      }}
-    >
+    <div className="min-h-screen w-full bg-[#F5EEF8] text-[#141010] font-['Onest',sans-serif] flex flex-col justify-between items-center select-none overflow-hidden relative selection:bg-[#693092] selection:text-white">
+      {/* Subtle background tech grid matching all remaining pages */}
+      <div
+        className="absolute inset-0 opacity-[0.035] pointer-events-none"
+        style={{
+          backgroundImage:
+            "linear-gradient(#693092 1px, transparent 1px), linear-gradient(90deg, #693092 1px, transparent 1px)",
+          backgroundSize: "48px 48px",
+        }}
+      />
+
+      {/* Ambient brand background glow orbs */}
+      <div className="absolute top-1/4 -right-40 w-96 h-96 rounded-full bg-[#BE3093]/10 blur-[140px] pointer-events-none" />
+      <div className="absolute bottom-1/3 -left-40 w-96 h-96 rounded-full bg-[#693092]/10 blur-[140px] pointer-events-none" />
+
       {/* Top Header / Branding */}
       <div className="w-full max-w-6xl mx-auto px-6 pt-6 sm:pt-8 flex items-center justify-between z-20">
         <button
@@ -226,13 +235,13 @@ export default function NotFoundPage({ forceOffline, onRetry }: NotFoundPageProp
             <circle cx="25" cy="13" r="11" fill="#D13B89" />
             <circle cx="38" cy="13" r="11" fill="#5E2282" />
           </svg>
-          <span className="text-sm sm:text-base font-bold tracking-tight text-[#141010] group-hover:text-[#5E2282] transition-colors">
+          <span className="text-sm sm:text-base font-bold tracking-tight text-[#141010] group-hover:text-[#693092] transition-colors">
             Netopsys
           </span>
         </button>
 
         {isOffline && (
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100/80 border border-amber-200 text-amber-800 text-xs font-semibold animate-pulse">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100/90 border border-amber-300 text-amber-900 text-xs font-semibold animate-pulse">
             <WifiOff className="w-3.5 h-3.5" />
             <span>Offline Mode</span>
           </div>
@@ -243,17 +252,17 @@ export default function NotFoundPage({ forceOffline, onRetry }: NotFoundPageProp
       <div className="w-full flex-1 flex flex-col items-center justify-center max-w-4xl px-4 py-4 sm:py-6 relative z-10">
         {/* Headings & Action Button */}
         <div className="text-center flex flex-col items-center mb-4 sm:mb-6 animate-in fade-in slide-in-from-top-4 duration-500">
-          <h1 className="text-3xl sm:text-4xl md:text-[44px] font-extrabold text-[#231815] tracking-tight mb-2">
+          <h1 className="text-3xl sm:text-4xl md:text-[44px] font-bold text-[#141010] tracking-tight mb-2">
             {isOffline ? "No Internet Connection" : "Page Not Found"}
           </h1>
 
-          <p className="text-sm sm:text-base text-[#7C6E6A] font-medium mb-6 max-w-md px-4">
+          <p className="text-sm sm:text-base text-[#554E62] font-normal mb-6 max-w-md px-4 leading-relaxed">
             {isOffline
               ? "It looks like you're offline. Please check your network and reconnect."
               : "Nothing at this address."}
           </p>
 
-          {/* Action Buttons */}
+          {/* Action Buttons (Styled to match Netopsys signature brand buttons) */}
           <div className="flex flex-wrap items-center justify-center gap-3">
             {isOffline ? (
               <>
@@ -261,7 +270,7 @@ export default function NotFoundPage({ forceOffline, onRetry }: NotFoundPageProp
                   type="button"
                   onClick={handleRetryConnection}
                   disabled={isRetrying}
-                  className="inline-flex items-center gap-2 bg-[#B84033] hover:bg-[#A0352A] text-white px-7 py-3 rounded-full text-sm font-bold shadow-sm hover:shadow transition-all cursor-pointer active:scale-95 disabled:opacity-60"
+                  className="hover-brand-gradient inline-flex items-center gap-2 bg-[#693092] text-white px-7 py-2.5 sm:py-3 rounded-full text-sm font-semibold shadow-md hover:shadow-lg transition-all cursor-pointer active:scale-95 disabled:opacity-60"
                 >
                   <RefreshCw
                     className={`w-4 h-4 ${isRetrying ? "animate-spin" : ""}`}
@@ -272,9 +281,9 @@ export default function NotFoundPage({ forceOffline, onRetry }: NotFoundPageProp
                 <button
                   type="button"
                   onClick={() => navigate("/")}
-                  className="inline-flex items-center gap-2 bg-white/90 hover:bg-white border border-[#E4D7C5] text-[#2D1F1C] px-6 py-3 rounded-full text-sm font-bold shadow-2xs hover:shadow-xs transition-all cursor-pointer"
+                  className="inline-flex items-center gap-2 bg-white/95 hover:bg-white border border-[#E9DFEE] text-[#141010] hover:text-[#693092] px-6 py-2.5 sm:py-3 rounded-full text-sm font-semibold shadow-2xs hover:shadow-xs transition-all cursor-pointer"
                 >
-                  <Home className="w-4 h-4 text-[#5E2282]" />
+                  <Home className="w-4 h-4 text-[#693092]" />
                   <span>Back to Home</span>
                 </button>
               </>
@@ -282,7 +291,7 @@ export default function NotFoundPage({ forceOffline, onRetry }: NotFoundPageProp
               <button
                 type="button"
                 onClick={() => navigate("/")}
-                className="inline-flex items-center gap-2 bg-[#B84033] hover:bg-[#A0352A] active:bg-[#8E2F25] text-white px-7 py-2.5 sm:py-3 rounded-full text-sm sm:text-[15px] font-bold shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-95"
+                className="hover-brand-gradient inline-flex items-center gap-2 bg-[#693092] text-white px-7 py-2.5 sm:py-3 rounded-full text-sm sm:text-[15px] font-semibold shadow-md hover:shadow-lg transition-all cursor-pointer active:scale-95"
               >
                 <span>Back to Home</span>
               </button>
@@ -310,37 +319,37 @@ export default function NotFoundPage({ forceOffline, onRetry }: NotFoundPageProp
                 x2="100%"
                 y2="100%"
               >
-                <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.32" />
-                <stop offset="35%" stopColor="#FFFBF2" stopOpacity="0.06" />
-                <stop offset="70%" stopColor="#F5E8D0" stopOpacity="0.10" />
-                <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0.22" />
+                <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.38" />
+                <stop offset="35%" stopColor="#FFFFFF" stopOpacity="0.08" />
+                <stop offset="70%" stopColor="#EADBFA" stopOpacity="0.12" />
+                <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0.26" />
               </linearGradient>
             </defs>
 
             {/* -----------------------------------------------------------
-                FLOOR SEAMS & GROUND LINE (Lowered position)
+                FLOOR SEAMS & GROUND LINE (Matching Netopsys palette)
             ------------------------------------------------------------ */}
             <g opacity="0.6">
-              <line x1="80" y1="370" x2="80" y2="435" stroke="#E5D9C8" strokeWidth="1.2" />
-              <line x1="220" y1="370" x2="220" y2="435" stroke="#E5D9C8" strokeWidth="1.2" />
-              <line x1="360" y1="370" x2="360" y2="435" stroke="#E5D9C8" strokeWidth="1.2" />
-              <line x1="500" y1="370" x2="500" y2="435" stroke="#E5D9C8" strokeWidth="1.2" />
-              <line x1="640" y1="370" x2="640" y2="435" stroke="#E5D9C8" strokeWidth="1.2" />
-              <line x1="780" y1="370" x2="780" y2="435" stroke="#E5D9C8" strokeWidth="1.2" />
+              <line x1="80" y1="370" x2="80" y2="435" stroke="#E2D4EA" strokeWidth="1.2" />
+              <line x1="220" y1="370" x2="220" y2="435" stroke="#E2D4EA" strokeWidth="1.2" />
+              <line x1="360" y1="370" x2="360" y2="435" stroke="#E2D4EA" strokeWidth="1.2" />
+              <line x1="500" y1="370" x2="500" y2="435" stroke="#E2D4EA" strokeWidth="1.2" />
+              <line x1="640" y1="370" x2="640" y2="435" stroke="#E2D4EA" strokeWidth="1.2" />
+              <line x1="780" y1="370" x2="780" y2="435" stroke="#E2D4EA" strokeWidth="1.2" />
             </g>
 
-            {/* Main Ground Line (Lowered for clear vertical breathing room) */}
+            {/* Main Ground Line */}
             <line
               x1="20"
               y1="370"
               x2="840"
               y2="370"
-              stroke="#E2D4BF"
+              stroke="#D9C7E4"
               strokeWidth="2.2"
             />
 
             {/* Walking Shadow Dots across the patrol floor line */}
-            <g fill="#A89A88" opacity="0.4">
+            <g fill="#A68DB8" opacity="0.35">
               <circle cx="160" cy="372" r="3" />
               <circle cx="260" cy="372" r="3" />
               <circle cx="360" cy="372" r="3" />
@@ -351,10 +360,10 @@ export default function NotFoundPage({ forceOffline, onRetry }: NotFoundPageProp
             </g>
 
             {/* -----------------------------------------------------------
-                MASSIVE SOFT 404 NUMBERS (Maintained at exact original position)
+                MASSIVE SOFT 404 NUMBERS (Harmonious brand lavender tint)
             ------------------------------------------------------------ */}
             <g
-              fill="#EAD7B0"
+              fill="#E1D1E9"
               opacity="0.95"
               className="select-none font-black"
               style={{
@@ -392,8 +401,8 @@ export default function NotFoundPage({ forceOffline, onRetry }: NotFoundPageProp
                 cy="312"
                 rx={isWalking ? 34 : 38}
                 ry="6"
-                fill="#D8C7B0"
-                opacity="0.8"
+                fill="#CEB9DB"
+                opacity="0.75"
               />
 
               {/* Flip character orientation to face cursor direction */}
@@ -557,39 +566,39 @@ export default function NotFoundPage({ forceOffline, onRetry }: NotFoundPageProp
         </div>
       </div>
 
-      {/* Bottom Footer Credits / Home Button */}
-      <div className="w-full max-w-6xl mx-auto px-6 py-4 flex flex-col sm:flex-row items-center justify-between text-xs text-[#8F8177] z-20 border-t border-[#EDE1D1]/60">
+      {/* Bottom Footer Credits / Links */}
+      <div className="w-full max-w-6xl mx-auto px-6 py-4 flex flex-col sm:flex-row items-center justify-between text-xs text-[#6C6377] z-20 border-t border-[#E9DFEE]">
         <p>&copy; {new Date().getFullYear()} Netopsys Pte. Ltd. All rights reserved.</p>
 
-        <div className="flex items-center gap-4 mt-2 sm:mt-0">
+        <div className="flex items-center gap-4 mt-2 sm:mt-0 font-medium">
           <button
             type="button"
             onClick={() => navigate("/")}
-            className="hover:text-[#5E2282] transition-colors cursor-pointer font-medium"
+            className="hover:text-[#693092] transition-colors cursor-pointer"
           >
             Home
           </button>
-          <span>•</span>
+          <span className="text-[#9C94A8]">•</span>
           <button
             type="button"
             onClick={() => navigate("/careers")}
-            className="hover:text-[#5E2282] transition-colors cursor-pointer font-medium"
+            className="hover:text-[#693092] transition-colors cursor-pointer"
           >
             Careers
           </button>
-          <span>•</span>
+          <span className="text-[#9C94A8]">•</span>
           <button
             type="button"
             onClick={() => navigate("/blogs")}
-            className="hover:text-[#5E2282] transition-colors cursor-pointer font-medium"
+            className="hover:text-[#693092] transition-colors cursor-pointer"
           >
             Blogs
           </button>
-          <span>•</span>
+          <span className="text-[#9C94A8]">•</span>
           <button
             type="button"
             onClick={() => navigate("/contact")}
-            className="hover:text-[#5E2282] transition-colors cursor-pointer font-medium"
+            className="hover:text-[#693092] transition-colors cursor-pointer"
           >
             Contact
           </button>
