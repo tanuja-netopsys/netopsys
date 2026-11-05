@@ -474,7 +474,7 @@ export default function NotFoundPage({ forceOffline, onRetry }: NotFoundPageProp
                   >
                     {/* Bird Hand / Arm holding the handle */}
                     <path
-                      d="M 22 258 Q 50 258 72 252"
+                      d="M 22 258 Q 50 258 74 250"
                       stroke="#251815"
                       strokeWidth="11"
                       strokeLinecap="round"
@@ -483,19 +483,19 @@ export default function NotFoundPage({ forceOffline, onRetry }: NotFoundPageProp
 
                     {/* Magnifying Glass Handle */}
                     <line
-                      x1="62"
-                      y1="252"
-                      x2="88"
-                      y2="248"
+                      x1="64"
+                      y1="250"
+                      x2="96"
+                      y2="244"
                       stroke="#221512"
                       strokeWidth="11"
                       strokeLinecap="round"
                     />
                     <line
-                      x1="65"
-                      y1="251"
-                      x2="86"
-                      y2="248"
+                      x1="67"
+                      y1="249"
+                      x2="94"
+                      y2="244"
                       stroke="#382622"
                       strokeWidth="4"
                       strokeLinecap="round"
@@ -503,38 +503,38 @@ export default function NotFoundPage({ forceOffline, onRetry }: NotFoundPageProp
 
                     {/* Fully Transparent Glass Lens - Real background & 404 numbers show through */}
                     <circle
-                      cx="112"
-                      cy="246"
-                      r="44"
+                      cx="124"
+                      cy="240"
+                      r="54"
                       fill="url(#lensGlassGradient)"
                     />
 
-                    {/* Outer Heavy Dark Lens Rim */}
+                    {/* Outer Heavy Dark Lens Rim (Enlarged / Increased Height) */}
                     <circle
-                      cx="112"
-                      cy="246"
-                      r="46"
+                      cx="124"
+                      cy="240"
+                      r="56.5"
                       stroke="#221512"
-                      strokeWidth="9"
+                      strokeWidth="9.5"
                       fill="none"
                     />
 
                     {/* Inner Glass Bezel Lip */}
                     <circle
-                      cx="112"
-                      cy="246"
-                      r="41.5"
+                      cx="124"
+                      cy="240"
+                      r="51"
                       stroke="#543C36"
-                      strokeWidth="1.6"
+                      strokeWidth="1.8"
                       fill="none"
                       opacity="0.6"
                     />
 
                     {/* Primary Specular Glint Highlight (Gloss Reflection) */}
                     <path
-                      d="M 88 226 A 34 34 0 0 1 136 220"
+                      d="M 94 216 A 42 42 0 0 1 154 210"
                       stroke="#FFFFFF"
-                      strokeWidth="3.2"
+                      strokeWidth="3.4"
                       strokeLinecap="round"
                       opacity="0.8"
                       fill="none"
@@ -542,9 +542,9 @@ export default function NotFoundPage({ forceOffline, onRetry }: NotFoundPageProp
 
                     {/* Secondary Subtle Bottom Lens Rim Glare */}
                     <path
-                      d="M 96 266 A 34 34 0 0 0 128 266"
+                      d="M 104 266 A 42 42 0 0 0 144 266"
                       stroke="#FFFFFF"
-                      strokeWidth="1.6"
+                      strokeWidth="1.8"
                       strokeLinecap="round"
                       opacity="0.4"
                       fill="none"
