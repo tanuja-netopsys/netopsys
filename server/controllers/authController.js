@@ -1,6 +1,7 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const prisma = require("../config/prisma");
+const emailService = require("../services/emailService");
 
 /**
  * SuperAdmin & Admin Login Handler
@@ -404,5 +405,261 @@ exports.logout = (req, res) => {
     success: true,
     message: "Logged out successfully.",
   });
+};
+
+/**
+ * Forgot Password - Send OTP to email
+ */
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email || !String(email).trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide a valid email address.",
+      });
+    }
+
+    const normalizedEmail = String(email).trim().toLowerCase();
+
+    // 1. Look for user in `users` table
+    let user = await prisma.user.findFirst({
+      where: {
+        email: {
+          equals: normalizedEmail,
+          mode: "insensitive",
+        },
+      },
+    });
+
+    if (!user) {
+      // Also check admins/super_admins if applicable
+      const adminRows = await prisma.$queryRawUnsafe(
+        `SELECT id, email, name FROM super_admins WHERE LOWER(email) = $1 LIMIT 1`,
+        normalizedEmail
+      );
+      if (adminRows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "No account found with this email address. Please check your email or create an account.",
+        });
+      }
+      user = { id: adminRows[0].id, email: adminRows[0].email, firstName: adminRows[0].name, isSuperAdmin: true };
+    }
+
+    // 2. Generate 6-digit OTP code and 15-minute expiration
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiry = new Date(Date.now() + 15 * 60 * 1000);
+
+    // 3. Save OTP in users table
+    if (!user.isSuperAdmin) {
+      await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          passwordResetOtp: otp,
+          passwordResetOtpExpiry: expiry,
+        },
+      });
+    } else {
+      // In-memory or temporary cache for superAdmin if needed
+      global.__superAdminResetOtps = global.__superAdminResetOtps || {};
+      global.__superAdminResetOtps[normalizedEmail] = { otp, expiry };
+    }
+
+    // 4. Send email with OTP via emailService
+    await emailService.sendPasswordResetOtpEmail({
+      email: normalizedEmail,
+      name: user.firstName || "User",
+      otp,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: `A 6-digit verification code has been sent to ${normalizedEmail}.`,
+    });
+  } catch (error) {
+    console.error("Forgot Password Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to send verification code. Please try again later.",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
+  }
+};
+
+/**
+ * Verify Password Reset OTP
+ */
+exports.verifyResetOtp = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and verification code are required.",
+      });
+    }
+
+    const normalizedEmail = String(email).trim().toLowerCase();
+    const cleanOtp = String(otp).trim();
+
+    // Check super admin cache
+    if (global.__superAdminResetOtps && global.__superAdminResetOtps[normalizedEmail]) {
+      const cached = global.__superAdminResetOtps[normalizedEmail];
+      if (cached.otp === cleanOtp && new Date() < cached.expiry) {
+        return res.status(200).json({
+          success: true,
+          message: "Verification code confirmed successfully.",
+        });
+      }
+    }
+
+    const user = await prisma.user.findFirst({
+      where: {
+        email: {
+          equals: normalizedEmail,
+          mode: "insensitive",
+        },
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "No account found with this email address.",
+      });
+    }
+
+    if (!user.passwordResetOtp || user.passwordResetOtp !== cleanOtp) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid verification code. Please check your email and try again.",
+      });
+    }
+
+    if (!user.passwordResetOtpExpiry || new Date() > new Date(user.passwordResetOtpExpiry)) {
+      return res.status(400).json({
+        success: false,
+        message: "Verification code has expired. Please request a new one.",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Verification code confirmed successfully.",
+    });
+  } catch (error) {
+    console.error("Verify OTP Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to verify code. Please try again.",
+    });
+  }
+};
+
+/**
+ * Reset Password with OTP
+ */
+exports.resetPassword = async (req, res) => {
+  try {
+    const { email, otp, newPassword } = req.body;
+
+    if (!email || !otp || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Email, verification code, and new password are required.",
+      });
+    }
+
+    if (String(newPassword).length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 6 characters long.",
+      });
+    }
+
+    const normalizedEmail = String(email).trim().toLowerCase();
+    const cleanOtp = String(otp).trim();
+
+    // 1. Check SuperAdmin in-memory
+    let isSuperAdminReset = false;
+    if (global.__superAdminResetOtps && global.__superAdminResetOtps[normalizedEmail]) {
+      const cached = global.__superAdminResetOtps[normalizedEmail];
+      if (cached.otp === cleanOtp && new Date() < cached.expiry) {
+        isSuperAdminReset = true;
+        delete global.__superAdminResetOtps[normalizedEmail];
+      }
+    }
+
+    // Hash the new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    if (isSuperAdminReset) {
+      await prisma.$executeRawUnsafe(
+        `UPDATE super_admins SET password = $1, updated_at = NOW() WHERE LOWER(email) = $2`,
+        hashedPassword,
+        normalizedEmail
+      );
+      return res.status(200).json({
+        success: true,
+        message: "Password reset successfully. You can now sign in with your new password.",
+      });
+    }
+
+    const user = await prisma.user.findFirst({
+      where: {
+        email: {
+          equals: normalizedEmail,
+          mode: "insensitive",
+        },
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "No account found with this email address.",
+      });
+    }
+
+    if (!user.passwordResetOtp || user.passwordResetOtp !== cleanOtp) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid verification code. Please check your email and try again.",
+      });
+    }
+
+    if (!user.passwordResetOtpExpiry || new Date() > new Date(user.passwordResetOtpExpiry)) {
+      return res.status(400).json({
+        success: false,
+        message: "Verification code has expired. Please request a new one.",
+      });
+    }
+
+    // Update password in users table and clear reset OTP
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        password: hashedPassword,
+        passwordResetOtp: null,
+        passwordResetOtpExpiry: null,
+      },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Password reset successfully! You can now sign in with your new password.",
+    });
+  } catch (error) {
+    console.error("Reset Password Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to reset password. Please try again later.",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
+  }
 };
 

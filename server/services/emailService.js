@@ -625,12 +625,94 @@ async function sendJobPublishedNotification(job) {
   });
 }
 
+/**
+ * HTML Template: Password Reset OTP
+ */
+function getPasswordResetOtpHtml({ name, otp }) {
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #FAF7FC; margin: 0; padding: 24px; color: #141010; }
+    .container { max-width: 560px; margin: 0 auto; background: #ffffff; border: 1px solid #ECE4F2; border-radius: 24px; overflow: hidden; box-shadow: 0 4px 24px rgba(94, 34, 130, 0.06); }
+    .header { background: linear-gradient(135deg, #1C0F2B 0%, #5E2282 100%); padding: 36px 32px; text-align: center; }
+    .header h1 { margin: 0; color: #ffffff; font-size: 22px; font-weight: 700; letter-spacing: -0.01em; }
+    .header p { margin: 8px 0 0; color: #EEDBFA; font-size: 13.5px; }
+    .body { padding: 36px 32px; font-size: 15px; line-height: 1.6; color: #4A4458; }
+    .otp-box { background: #FAF5FD; border: 2px dashed #B88BD4; border-radius: 16px; padding: 24px; text-align: center; margin: 24px 0; }
+    .otp-code { font-size: 36px; font-weight: 800; letter-spacing: 0.28em; color: #5E2282; font-family: 'Courier New', monospace; margin: 0; }
+    .expiry-note { font-size: 13px; color: #7E748B; margin-top: 10px; margin-bottom: 0; }
+    .security-note { background: #FFF8E6; border-left: 4px solid #F59E0B; padding: 12px 16px; border-radius: 8px; font-size: 13px; color: #78350F; margin-top: 24px; }
+    .footer { padding: 24px 32px; background: #FAF7FC; border-top: 1px solid #ECE4F2; font-size: 12px; color: #8C849B; text-align: center; line-height: 1.5; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Password Reset Verification</h1>
+      <p>Netopsys Account Security</p>
+    </div>
+    <div class="body">
+      <p>Hello${name ? " " + name : ""},</p>
+      <p>We received a request to reset the password for your Netopsys account. Use the 6-digit verification code below to complete the reset process:</p>
+      
+      <div class="otp-box">
+        <p class="otp-code">${otp}</p>
+        <p class="expiry-note">This code is valid for <strong>15 minutes</strong>.</p>
+      </div>
+
+      <div class="security-note">
+        <strong>Security Notice:</strong> If you did not request a password reset, please ignore this email or contact <a href="mailto:helpdesk@netopsys.net" style="color: #5E2282;">helpdesk@netopsys.net</a>. Never share this code with anyone.
+      </div>
+    </div>
+    <div class="footer">
+      <p>&copy; ${new Date().getFullYear()} Netopsys. All rights reserved.</p>
+      <p>Sent from helpdesk@netopsys.net</p>
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
+/**
+ * Send Password Reset OTP Email
+ */
+async function sendPasswordResetOtpEmail({ email, name, otp }) {
+  console.log(`🔑 [PASSWORD RESET OTP] For ${email}: ${otp}`);
+  try {
+    const html = getPasswordResetOtpHtml({ name, otp });
+    const result = await sendRawEmail({
+      to: email,
+      subject: `${otp} is your Netopsys password reset verification code`,
+      html,
+      replyTo: "helpdesk@netopsys.net",
+    });
+
+    await recordNotificationLog({
+      type: "password_reset_otp",
+      contentId: "otp",
+      contentTitle: "Password Reset OTP Verification",
+      recipientEmail: email,
+      status: result.success ? "sent" : "failed",
+      errorMessage: result.error,
+    });
+
+    return result;
+  } catch (err) {
+    console.error("sendPasswordResetOtpEmail error:", err.message);
+    return { success: false, error: err.message };
+  }
+}
+
 module.exports = {
   sendRawEmail,
   sendBlogWelcomeEmail,
   sendJobWelcomeEmail,
   sendBlogPublishedNotification,
   sendJobPublishedNotification,
+  sendPasswordResetOtpEmail,
   recordNotificationLog,
   hasAlreadyReceivedNotification,
 };

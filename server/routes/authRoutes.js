@@ -13,6 +13,12 @@ router.post("/register", authController.candidateRegister);
 router.post("/candidate/login", authController.candidateLogin);
 router.post("/login", authController.candidateLogin);
 
+// Forgot Password & Reset Endpoints
+router.post("/forgot-password", authController.forgotPassword);
+router.post("/send-reset-otp", authController.forgotPassword);
+router.post("/verify-reset-otp", authController.verifyResetOtp);
+router.post("/reset-password", authController.resetPassword);
+
 // Protected SuperAdmin Routes
 router.get("/superadmin/me", authMiddleware, authController.getSuperAdminProfile);
 router.get("/me", authMiddleware, authController.getSuperAdminProfile);
