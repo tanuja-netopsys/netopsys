@@ -231,7 +231,7 @@ export default function CategoryPage() {
               ) : (
                 <button
                   onClick={handleOpenAddModal}
-                  className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 bg-[#5D2381] text-white rounded-xl text-xs font-semibold hover:bg-[#4E1C6D] transition-colors cursor-pointer"
+                  className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 bg-[#5D2381] text-white rounded-xl text-xs font-semibold hover:bg-[#4E1C6D] hover-brand-gradient transition-colors cursor-pointer"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span>Add Category</span>
@@ -302,7 +302,7 @@ export default function CategoryPage() {
               <div className="flex items-center gap-3 pt-3">
                 <button
                   type="submit"
-                  className="px-5 py-2.5 rounded-xl bg-[#5D2381] hover:bg-[#4E1C6D] text-white text-[13.5px] sm:text-[14px] font-semibold flex items-center gap-2 shadow-sm hover:shadow transition-all cursor-pointer"
+                  className="px-5 py-2.5 rounded-xl bg-[#5D2381] hover:bg-[#4E1C6D] hover-brand-gradient text-white text-[13.5px] sm:text-[14px] font-semibold flex items-center gap-2 shadow-sm hover:shadow transition-all cursor-pointer"
                 >
                   <Save className="w-4.5 h-4.5 stroke-[2]" />
                   <span>Save Category</span>
@@ -348,7 +348,7 @@ export default function CategoryPage() {
               <button
                 type="button"
                 onClick={handleConfirmDelete}
-                className="flex-1 py-2.5 rounded-xl bg-[#DC2626] hover:bg-[#B91C1C] text-white text-xs font-semibold shadow-sm transition-all cursor-pointer"
+                className="flex-1 py-2.5 rounded-xl bg-[#DC2626] hover:bg-[#B91C1C] hover-brand-gradient text-white text-xs font-semibold shadow-sm transition-all cursor-pointer"
               >
                 Delete
               </button>

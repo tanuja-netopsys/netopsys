@@ -227,7 +227,7 @@ export default function SuperAdminLoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full mt-2 bg-[#5B1E78] hover:bg-[#4D1865] text-white py-3 sm:py-3.5 px-6 rounded-xl text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed group"
+              className="w-full mt-2 hover-brand-gradient bg-[#5B1E78] hover:bg-[#4D1865] text-white py-3 sm:py-3.5 px-6 rounded-xl text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed group"
             >
               {isLoading ? (
                 <>

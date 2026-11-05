@@ -641,7 +641,7 @@ export default function ProfilePage() {
                     type="button"
                     onClick={handleSendVerification}
                     disabled={isVerifying}
-                    className="bg-[#FBAE42] hover:bg-[#efa132] text-[#141010] font-semibold text-xs sm:text-[13px] px-4.5 py-2.5 rounded-full inline-flex items-center gap-1.5 shadow-xs cursor-pointer transition-all whitespace-nowrap self-start sm:self-auto disabled:opacity-60"
+                    className="bg-[#FBAE42] hover:bg-[#efa132] hover-brand-gradient text-[#141010] font-semibold text-xs sm:text-[13px] px-4.5 py-2.5 rounded-full inline-flex items-center gap-1.5 shadow-xs cursor-pointer transition-all whitespace-nowrap self-start sm:self-auto disabled:opacity-60"
                   >
                     <Send className="w-3.5 h-3.5" />
                     <span>{isVerifying ? "Sending..." : "Send Verification Code"}</span>
@@ -785,7 +785,7 @@ export default function ProfilePage() {
                   type="button"
                   disabled={isSaving}
                   onClick={handleSavePersonalInfo}
-                  className="bg-[#652297] hover:bg-[#531b7d] text-white font-semibold text-xs sm:text-[14px] px-6 py-3 rounded-full shadow-sm hover:shadow transition-all cursor-pointer disabled:opacity-60"
+                  className="bg-[#652297] hover:bg-[#531b7d] hover-brand-gradient text-white font-semibold text-xs sm:text-[14px] px-6 py-3 rounded-full shadow-sm hover:shadow transition-all cursor-pointer disabled:opacity-60"
                 >
                   {isSaving ? "Saving..." : "Save Personal Info"}
                 </button>
@@ -793,7 +793,7 @@ export default function ProfilePage() {
                   type="button"
                   disabled={isSaving}
                   onClick={handleSaveAddress}
-                  className="bg-[#141010] hover:bg-black text-white font-semibold text-xs sm:text-[14px] px-6 py-3 rounded-full shadow-sm hover:shadow transition-all cursor-pointer disabled:opacity-60"
+                  className="bg-[#141010] hover:bg-black hover-brand-gradient text-white font-semibold text-xs sm:text-[14px] px-6 py-3 rounded-full shadow-sm hover:shadow transition-all cursor-pointer disabled:opacity-60"
                 >
                   {isSaving ? "Saving..." : "Save Address"}
                 </button>
@@ -1031,7 +1031,7 @@ export default function ProfilePage() {
                   type="button"
                   disabled={isSaving}
                   onClick={handleSaveProfessional}
-                  className="bg-[#652297] hover:bg-[#531b7d] text-white font-semibold text-xs sm:text-[14px] px-6 py-3 rounded-full shadow-sm hover:shadow transition-all cursor-pointer disabled:opacity-60"
+                  className="bg-[#652297] hover:bg-[#531b7d] hover-brand-gradient text-white font-semibold text-xs sm:text-[14px] px-6 py-3 rounded-full shadow-sm hover:shadow transition-all cursor-pointer disabled:opacity-60"
                 >
                   {isSaving ? "Saving..." : "Save Professional Info"}
                 </button>
@@ -1127,7 +1127,7 @@ export default function ProfilePage() {
                   type="button"
                   disabled={isSaving}
                   onClick={handleSaveEducation}
-                  className="bg-[#652297] hover:bg-[#531b7d] text-white font-semibold text-xs sm:text-[14px] px-6 py-3 rounded-full shadow-sm hover:shadow transition-all cursor-pointer disabled:opacity-60"
+                  className="bg-[#652297] hover:bg-[#531b7d] hover-brand-gradient text-white font-semibold text-xs sm:text-[14px] px-6 py-3 rounded-full shadow-sm hover:shadow transition-all cursor-pointer disabled:opacity-60"
                 >
                   {isSaving ? "Saving..." : "Save Education Info"}
                 </button>
@@ -1209,7 +1209,7 @@ export default function ProfilePage() {
                 <button
                   type="button"
                   onClick={handleAddCert}
-                  className="bg-[#652297] hover:bg-[#531b7d] text-white font-semibold text-xs sm:text-[13px] px-5 py-2.5 rounded-full inline-flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
+                  className="bg-[#652297] hover:bg-[#531b7d] hover-brand-gradient text-white font-semibold text-xs sm:text-[13px] px-5 py-2.5 rounded-full inline-flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Add Certification</span>
@@ -1291,7 +1291,7 @@ export default function ProfilePage() {
                 </p>
                 <Link
                   to="/careers"
-                  className="bg-[#652297] hover:bg-[#531b7d] text-white font-semibold text-xs sm:text-sm px-6 py-2.5 rounded-full inline-block shadow-sm transition-all"
+                  className="bg-[#652297] hover:bg-[#531b7d] hover-brand-gradient text-white font-semibold text-xs sm:text-sm px-6 py-2.5 rounded-full inline-block shadow-sm transition-all"
                 >
                   Explore Careers
                 </Link>

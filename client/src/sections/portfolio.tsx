@@ -103,7 +103,7 @@ export default function Portfolio() {
             <div className="portfolio-eyebrow-wrap mb-1 sm:mb-1.5">
               <Link
                 to="/portfolio"
-                className="portfolio-eyebrow-text inline-flex items-center gap-2 sm:gap-2.5 px-3.5 sm:px-4 py-0.5 sm:py-1 rounded-full bg-[#141010] border border-white/20 hover:border-white/40 text-white text-xs sm:text-[13px] font-medium tracking-wide shadow-md transition-all duration-200 select-none cursor-pointer"
+                className="portfolio-eyebrow-text hover-brand-gradient inline-flex items-center gap-2 sm:gap-2.5 px-3.5 sm:px-4 py-0.5 sm:py-1 rounded-full bg-[#141010] border border-white/20 hover:border-white/40 text-white text-xs sm:text-[13px] font-medium tracking-wide shadow-md transition-all duration-200 select-none cursor-pointer"
               >
                 <span>Portfolio</span>
                 <div className="w-3.5 sm:w-4 h-3.5 sm:h-4 rounded-full bg-white text-[#141010] flex items-center justify-center">

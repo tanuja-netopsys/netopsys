@@ -710,7 +710,7 @@ export default function TeamsAdminPage() {
               <button
                 type="button"
                 onClick={() => setViewingMember(null)}
-                className="px-5 py-2 rounded-xl text-xs font-semibold text-white bg-[#5D2381] hover:bg-[#4E1A6E] shadow-sm cursor-pointer"
+                className="px-5 py-2 rounded-xl text-xs font-semibold text-white bg-[#5D2381] hover:bg-[#4E1A6E] hover-brand-gradient shadow-sm cursor-pointer"
               >
                 Close
               </button>
@@ -741,7 +741,7 @@ export default function TeamsAdminPage() {
               <button
                 onClick={() => handleDeleteMember(memberToDelete.id)}
                 disabled={isDeleting}
-                className="px-4 py-2 rounded-xl text-xs font-semibold text-white bg-red-600 hover:bg-red-700 shadow-sm cursor-pointer inline-flex items-center gap-1.5 disabled:opacity-50"
+                className="px-4 py-2 rounded-xl text-xs font-semibold text-white bg-red-600 hover:bg-red-700 hover-brand-gradient shadow-sm cursor-pointer inline-flex items-center gap-1.5 disabled:opacity-50"
               >
                 {isDeleting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                 <span>{isDeleting ? "Deleting..." : "Delete"}</span>

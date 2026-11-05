@@ -258,7 +258,7 @@ export default function ApplyPage() {
               </p>
               <Link
                 to="/careers"
-                className="px-6 py-3 rounded-full bg-[#693092] text-white font-medium text-sm hover:opacity-95 transition"
+                className="px-6 py-3 rounded-full hover-brand-gradient bg-[#693092] text-white font-medium text-sm transition"
               >
                 View All Open Positions
               </Link>
@@ -375,7 +375,7 @@ export default function ApplyPage() {
                     <div className="flex items-center justify-center gap-3">
                       <Link
                         to="/careers"
-                        className="px-6 py-2.5 bg-[#693092] hover:bg-[#58257C] text-white rounded-xl text-xs sm:text-sm font-semibold shadow-md transition-colors"
+                        className="px-6 py-2.5 hover-brand-gradient bg-[#693092] hover:bg-[#58257C] text-white rounded-xl text-xs sm:text-sm font-semibold shadow-md transition-colors"
                       >
                         Back to Careers
                       </Link>
@@ -478,7 +478,7 @@ export default function ApplyPage() {
                       <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="w-full py-3.5 sm:py-4 px-6 rounded-2xl font-bold text-sm sm:text-base text-white bg-[#693092] hover:bg-[#58257C] active:scale-[0.99] transition-all shadow-md hover:shadow-lg cursor-pointer disabled:opacity-50"
+                        className="w-full py-3.5 sm:py-4 px-6 rounded-2xl font-bold text-sm sm:text-base text-white hover-brand-gradient bg-[#693092] hover:bg-[#58257C] active:scale-[0.99] transition-all shadow-md hover:shadow-lg cursor-pointer disabled:opacity-50"
                       >
                         {isSubmitting ? "Submitting Application..." : "Submit Application"}
                       </button>
@@ -519,7 +519,7 @@ export default function ApplyPage() {
                 <button
                   type="button"
                   onClick={() => navigate(`/jobdescription?id=${job.id}`, { state: { job } })}
-                  className="w-full py-3 px-6 rounded-2xl font-bold text-xs sm:text-sm text-[#141010] bg-[#FCAE3B] hover:bg-[#F29F25] active:scale-[0.99] transition-all shadow-md cursor-pointer text-center block"
+                  className="w-full py-3 px-6 rounded-2xl font-bold text-xs sm:text-sm text-[#141010] bg-[#FCAE3B] hover:bg-[#F29F25] hover-brand-gradient active:scale-[0.99] transition-all shadow-md cursor-pointer text-center block"
                 >
                   View Details
                 </button>

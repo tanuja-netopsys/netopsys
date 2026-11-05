@@ -289,7 +289,7 @@ export default function SubscribersAdminPage() {
                 type="button"
                 onClick={handleExportCsv}
                 disabled={isExporting || activeTab === "logs"}
-                className="flex-1 sm:flex-none justify-center bg-[#5D2381] hover:bg-[#4E1C6D] disabled:opacity-60 text-white px-4 sm:px-4.5 py-2.5 rounded-2xl text-xs sm:text-[13px] font-semibold flex items-center gap-2 transition-all cursor-pointer shadow-sm whitespace-nowrap"
+                className="flex-1 sm:flex-none justify-center bg-[#5D2381] hover:bg-[#4E1C6D] hover-brand-gradient disabled:opacity-60 text-white px-4 sm:px-4.5 py-2.5 rounded-2xl text-xs sm:text-[13px] font-semibold flex items-center gap-2 transition-all cursor-pointer shadow-sm whitespace-nowrap"
               >
                 {isExporting ? (
                   <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0" />
@@ -907,7 +907,7 @@ export default function SubscribersAdminPage() {
                 <button
                   type="submit"
                   disabled={isSendingTest}
-                  className="px-5 py-2.5 rounded-2xl bg-[#5D2381] hover:bg-[#4E1C6D] text-white font-semibold text-xs shadow-sm cursor-pointer flex items-center gap-1.5"
+                  className="px-5 py-2.5 rounded-2xl bg-[#5D2381] hover:bg-[#4E1C6D] hover-brand-gradient text-white font-semibold text-xs shadow-sm cursor-pointer flex items-center gap-1.5"
                 >
                   {isSendingTest && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                   <span>Send Test Email</span>

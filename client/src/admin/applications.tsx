@@ -854,7 +854,7 @@ export default function ApplicationsPage() {
                       className={`w-full py-2.5 px-4 rounded-xl text-[13px] font-semibold transition-all text-center ${
                         isBulkDisabled
                           ? "bg-[#B495C9] opacity-60 text-white cursor-not-allowed hover:bg-[#B495C9]"
-                          : "bg-[#5D2381] hover:bg-[#4E1C6D] text-white shadow-xs cursor-pointer"
+                          : "bg-[#5D2381] hover:bg-[#4E1C6D] hover-brand-gradient text-white shadow-xs cursor-pointer"
                       }`}
                     >
                       Review update ({selectedCount})
@@ -1235,7 +1235,7 @@ export default function ApplicationsPage() {
                                   className={`w-full py-2.5 px-4 rounded-xl text-[13px] font-semibold text-white transition-all text-center shadow-xs ${
                                     isReasonMissing
                                       ? "bg-[#B495C9] opacity-60 cursor-not-allowed hover:bg-[#B495C9]"
-                                      : "bg-[#5D2381] hover:bg-[#4E1C6D] cursor-pointer"
+                                      : "bg-[#5D2381] hover:bg-[#4E1C6D] hover-brand-gradient cursor-pointer"
                                   }`}
                                 >
                                   Submit Status Update

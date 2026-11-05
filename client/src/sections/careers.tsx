@@ -351,7 +351,7 @@ export default function Careers() {
                     <button
                       type="button"
                       onClick={handleReset}
-                      className="hover-brand-gradient inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-white/10 text-white text-xs sm:text-sm font-medium cursor-pointer"
+                      className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-white text-xs sm:text-sm font-medium cursor-pointer"
                     >
                       <Sparkles className="w-4 h-4" />
                       <span>Done</span>

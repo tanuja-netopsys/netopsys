@@ -854,7 +854,7 @@ export default function BlogsPage() {
                     type="button"
                     onClick={handlePublish}
                     disabled={isSubmitting}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#5D2381] hover:bg-[#4E1C6D] text-white text-[13px] font-semibold transition-colors cursor-pointer shadow-xs disabled:opacity-50"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#5D2381] hover:bg-[#4E1C6D] hover-brand-gradient text-white text-[13px] font-semibold transition-colors cursor-pointer shadow-xs disabled:opacity-50"
                   >
                     {isSubmitting ? (
                       <Loader2 className="w-4 h-4 animate-spin text-white" />
@@ -1776,7 +1776,7 @@ export default function BlogsPage() {
                       resetEditor();
                       setActiveAdminTab("write");
                     }}
-                    className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#5D2381] text-white text-xs font-semibold rounded-xl cursor-pointer"
+                    className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#5D2381] hover:bg-[#4E1C6D] hover-brand-gradient text-white text-xs font-semibold rounded-xl cursor-pointer"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     <span>Write Blog Now</span>
@@ -2027,7 +2027,7 @@ export default function BlogsPage() {
                     <button
                       type="button"
                       onClick={() => setViewingBlog(null)}
-                      className="px-5 py-2 rounded-xl text-xs font-semibold text-white bg-[#5D2381] hover:bg-[#4E1A6E] shadow-sm cursor-pointer"
+                      className="px-5 py-2 rounded-xl text-xs font-semibold text-white bg-[#5D2381] hover:bg-[#4E1A6E] hover-brand-gradient shadow-sm cursor-pointer"
                     >
                       Close
                     </button>
@@ -2101,7 +2101,7 @@ export default function BlogsPage() {
                 <button
                   type="button"
                   onClick={handleApplyLink}
-                  className="px-4 py-1.5 text-xs font-semibold text-white bg-[#5D2381] hover:bg-[#4E1C6D] rounded-lg cursor-pointer shadow-xs"
+                  className="px-4 py-1.5 text-xs font-semibold text-white bg-[#5D2381] hover:bg-[#4E1C6D] hover-brand-gradient rounded-lg cursor-pointer shadow-xs"
                 >
                   Apply Link
                 </button>
@@ -2164,7 +2164,7 @@ export default function BlogsPage() {
               <button
                 type="button"
                 onClick={handleInsertImageUrl}
-                className="px-4 py-1.5 text-xs font-semibold text-white bg-[#5D2381] hover:bg-[#4E1C6D] rounded-lg cursor-pointer shadow-xs"
+                className="px-4 py-1.5 text-xs font-semibold text-white bg-[#5D2381] hover:bg-[#4E1C6D] hover-brand-gradient rounded-lg cursor-pointer shadow-xs"
               >
                 Insert Image
               </button>
@@ -2217,7 +2217,7 @@ export default function BlogsPage() {
               <button
                 type="button"
                 onClick={handleInsertVideo}
-                className="px-4 py-1.5 text-xs font-semibold text-white bg-[#5D2381] hover:bg-[#4E1C6D] rounded-lg cursor-pointer shadow-xs"
+                className="px-4 py-1.5 text-xs font-semibold text-white bg-[#5D2381] hover:bg-[#4E1C6D] hover-brand-gradient rounded-lg cursor-pointer shadow-xs"
               >
                 Embed Video
               </button>
@@ -2281,7 +2281,7 @@ export default function BlogsPage() {
               <button
                 type="button"
                 onClick={handleInsertTable}
-                className="px-4 py-1.5 text-xs font-semibold text-white bg-[#5D2381] hover:bg-[#4E1C6D] rounded-lg cursor-pointer shadow-xs"
+                className="px-4 py-1.5 text-xs font-semibold text-white bg-[#5D2381] hover:bg-[#4E1C6D] hover-brand-gradient rounded-lg cursor-pointer shadow-xs"
               >
                 Insert Table
               </button>

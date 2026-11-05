@@ -322,7 +322,7 @@ export default function Footer() {
                     type="submit"
                     disabled={isSubmittingNewsletter}
                     aria-label="Subscribe"
-                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#BE3093] hover:bg-[#a82981] disabled:opacity-70 disabled:cursor-not-allowed text-white flex items-center justify-center shrink-0 transition-colors cursor-pointer shadow-md pointer-events-auto relative z-30 group"
+                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#BE3093] hover:bg-[#a82981] hover-brand-gradient disabled:opacity-70 disabled:cursor-not-allowed text-white flex items-center justify-center shrink-0 transition-colors cursor-pointer shadow-md pointer-events-auto relative z-30 group"
                   >
                     {isSubscribedSuccess ? (
                       <Check className="w-4 h-4 text-emerald-300 stroke-[2.5] animate-in zoom-in-75 duration-200" />

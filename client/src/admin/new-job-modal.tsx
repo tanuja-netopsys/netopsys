@@ -163,7 +163,7 @@ function NewJobModalDialog({
                   <button
                     type="button"
                     onClick={handleAddCategorySubmit}
-                    className="px-3 py-2 bg-[#5D2381] text-white text-xs font-semibold rounded-xl hover:bg-[#4E1A6E]"
+                    className="px-3 py-2 bg-[#5D2381] hover:bg-[#4E1A6E] hover-brand-gradient text-white text-xs font-semibold rounded-xl"
                   >
                     Add
                   </button>

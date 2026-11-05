@@ -205,7 +205,7 @@ export default function TermsAndConditionsPage() {
                         <div className="mt-4 flex items-center gap-3">
                           <Link
                             to="/contact"
-                            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#693092] hover:bg-[#5D2381] text-white text-xs sm:text-sm font-semibold transition-all shadow-sm hover:shadow-md cursor-pointer group"
+                            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#693092] hover:bg-[#5D2381] hover-brand-gradient text-white text-xs sm:text-sm font-semibold transition-all shadow-sm hover:shadow-md cursor-pointer group"
                           >
                             <span>Open Contact Form</span>
                             <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />

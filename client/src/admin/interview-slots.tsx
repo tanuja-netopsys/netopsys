@@ -542,7 +542,7 @@ export default function InterviewSlotsPage() {
               <button
                 type="button"
                 onClick={() => setIsSlotDetailsOpen((prev) => !prev)}
-                className="bg-[#5D2381] hover:bg-[#4E1C6D] text-white px-4 sm:px-5 py-2.5 rounded-2xl text-xs sm:text-[13.5px] font-semibold flex items-center gap-2 shadow-sm hover:shadow transition-all cursor-pointer whitespace-nowrap"
+                className="bg-[#5D2381] hover:bg-[#4E1C6D] hover-brand-gradient text-white px-4 sm:px-5 py-2.5 rounded-2xl text-xs sm:text-[13.5px] font-semibold flex items-center gap-2 shadow-sm hover:shadow transition-all cursor-pointer whitespace-nowrap"
               >
                 <Plus
                   className={`w-4 h-4 stroke-[2.5] transition-transform duration-200 ${
@@ -777,7 +777,7 @@ export default function InterviewSlotsPage() {
               <button
                 type="button"
                 onClick={() => handleCreateSession()}
-                className="bg-[#5D2381] hover:bg-[#4E1C6D] text-white px-5 sm:px-6 py-2.5 rounded-2xl text-xs sm:text-[13.5px] font-semibold flex items-center gap-1.5 shadow-sm hover:shadow transition-all cursor-pointer"
+                className="bg-[#5D2381] hover:bg-[#4E1C6D] hover-brand-gradient text-white px-5 sm:px-6 py-2.5 rounded-2xl text-xs sm:text-[13.5px] font-semibold flex items-center gap-1.5 shadow-sm hover:shadow transition-all cursor-pointer"
               >
                 <Plus className="w-4 h-4 stroke-[2.5]" />
                 <span>Create Session</span>
@@ -982,7 +982,7 @@ export default function InterviewSlotsPage() {
                 </button>
                 <button
                   type="submit"
-                  className="bg-[#5D2381] hover:bg-[#4E1C6D] text-white px-5 py-2.5 rounded-xl text-[13px] font-semibold flex items-center gap-1.5 shadow-sm cursor-pointer"
+                  className="bg-[#5D2381] hover:bg-[#4E1C6D] hover-brand-gradient text-white px-5 py-2.5 rounded-xl text-[13px] font-semibold flex items-center gap-1.5 shadow-sm cursor-pointer"
                 >
                   <Plus className="w-4 h-4 stroke-[2]" />
                   <span>Add Slot</span>
@@ -1023,7 +1023,7 @@ export default function InterviewSlotsPage() {
               <button
                 type="button"
                 onClick={handleConfirmDeleteSession}
-                className="bg-[#EF4444] hover:bg-[#DC2626] text-white px-5 py-2 rounded-xl text-[13px] font-semibold flex items-center gap-1.5 shadow-sm cursor-pointer"
+                className="bg-[#EF4444] hover:bg-[#DC2626] hover-brand-gradient text-white px-5 py-2 rounded-xl text-[13px] font-semibold flex items-center gap-1.5 shadow-sm cursor-pointer"
               >
                 <Trash2 className="w-4 h-4" />
                 <span>Delete</span>

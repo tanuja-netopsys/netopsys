@@ -1231,7 +1231,7 @@ export default function LoginPage({
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full mt-3 bg-[#5E2282] hover:bg-[#4D1865] text-white py-3.5 px-6 rounded-2xl font-bold text-sm sm:text-[15px] shadow-sm hover:shadow transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full mt-3 hover-brand-gradient bg-[#5E2282] hover:bg-[#4D1865] text-white py-3.5 px-6 rounded-2xl font-bold text-sm sm:text-[15px] shadow-sm hover:shadow transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isLoading ? "Signing in..." : "Sign in"}
                 </button>
@@ -1427,7 +1427,7 @@ export default function LoginPage({
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full mt-3 bg-[#5E2282] hover:bg-[#4D1865] text-white py-3.5 px-6 rounded-2xl font-bold text-sm sm:text-[15px] shadow-sm hover:shadow transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full mt-3 hover-brand-gradient bg-[#5E2282] hover:bg-[#4D1865] text-white py-3.5 px-6 rounded-2xl font-bold text-sm sm:text-[15px] shadow-sm hover:shadow transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? "Creating account..." : "Create account"}
               </button>
@@ -1494,7 +1494,7 @@ export default function LoginPage({
                     <button
                       type="submit"
                       disabled={isLoading}
-                      className="w-full mt-4 bg-[#5E2282] hover:bg-[#4D1865] text-white py-3.5 px-6 rounded-2xl font-bold text-sm sm:text-[15px] shadow-sm hover:shadow transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full mt-4 hover-brand-gradient bg-[#5E2282] hover:bg-[#4D1865] text-white py-3.5 px-6 rounded-2xl font-bold text-sm sm:text-[15px] shadow-sm hover:shadow transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {isLoading ? "Sending Verification Code..." : "Send Verification Code"}
                     </button>
@@ -1589,7 +1589,7 @@ export default function LoginPage({
                     <button
                       type="submit"
                       disabled={isLoading || otpDigits.join("").length < 6}
-                      className="w-full mt-3 bg-[#5E2282] hover:bg-[#4D1865] text-white py-3.5 px-6 rounded-2xl font-bold text-sm sm:text-[15px] shadow-sm hover:shadow transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full mt-3 hover-brand-gradient bg-[#5E2282] hover:bg-[#4D1865] text-white py-3.5 px-6 rounded-2xl font-bold text-sm sm:text-[15px] shadow-sm hover:shadow transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {isLoading ? "Verifying Code..." : "Verify & Continue"}
                     </button>
@@ -1690,7 +1690,7 @@ export default function LoginPage({
                     <button
                       type="submit"
                       disabled={isLoading}
-                      className="w-full mt-2 bg-[#5E2282] hover:bg-[#4D1865] text-white py-3.5 px-6 rounded-2xl font-bold text-sm sm:text-[15px] shadow-sm hover:shadow transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full mt-2 hover-brand-gradient bg-[#5E2282] hover:bg-[#4D1865] text-white py-3.5 px-6 rounded-2xl font-bold text-sm sm:text-[15px] shadow-sm hover:shadow transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {isLoading ? "Updating Password..." : "Reset Password"}
                     </button>
@@ -1740,7 +1740,7 @@ export default function LoginPage({
                     setSuccessMessage("Password reset successfully! Please sign in.");
                     setActiveField(null);
                   }}
-                  className="w-full bg-[#5E2282] hover:bg-[#4D1865] text-white py-3.5 px-6 rounded-2xl font-bold text-sm sm:text-[15px] shadow-sm hover:shadow transition-all cursor-pointer"
+                  className="w-full bg-[#5E2282] hover:bg-[#4D1865] hover-brand-gradient text-white py-3.5 px-6 rounded-2xl font-bold text-sm sm:text-[15px] shadow-sm hover:shadow transition-all cursor-pointer"
                 >
                   Sign In Now
                 </button>

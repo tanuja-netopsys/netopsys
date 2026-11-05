@@ -293,7 +293,7 @@ export default function JobDescriptionPage() {
               </p>
               <Link
                 to="/careers"
-                className="px-6 py-3 rounded-full bg-[#693092] text-white font-medium text-sm hover:opacity-95 transition"
+                className="px-6 py-3 rounded-full hover-brand-gradient bg-[#693092] text-white font-medium text-sm transition"
               >
                 View All Open Positions
               </Link>
@@ -444,7 +444,7 @@ export default function JobDescriptionPage() {
                     <button
                       type="button"
                       onClick={handleApplyNow}
-                      className="w-full py-3.5 sm:py-4 px-6 rounded-2xl font-bold text-sm sm:text-base text-[#141010] bg-[#FCAE3B] hover:bg-[#F29F25] active:scale-[0.99] transition-all duration-200 shadow-md hover:shadow-lg cursor-pointer"
+                      className="w-full py-3.5 sm:py-4 px-6 rounded-2xl font-bold text-sm sm:text-base text-[#141010] hover-brand-gradient bg-[#FCAE3B] hover:bg-[#F29F25] active:scale-[0.99] transition-all duration-200 shadow-md hover:shadow-lg cursor-pointer"
                     >
                       Apply Now
                     </button>
@@ -631,7 +631,7 @@ export default function JobDescriptionPage() {
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="px-6 py-2.5 bg-[#693092] hover:bg-[#58257C] text-white rounded-xl text-xs sm:text-sm font-semibold shadow-md cursor-pointer disabled:opacity-50 transition-all"
+                      className="px-6 py-2.5 bg-[#693092] hover:bg-[#58257C] hover-brand-gradient text-white rounded-xl text-xs sm:text-sm font-semibold shadow-md cursor-pointer disabled:opacity-50 transition-all"
                     >
                       {isSubmitting ? "Submitting..." : "Submit Application"}
                     </button>

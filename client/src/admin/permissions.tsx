@@ -783,7 +783,7 @@ export default function PermissionsPage() {
           </p>
           <button
             onClick={() => navigate("/admin/dashboard")}
-            className="px-5 py-2.5 rounded-xl bg-[#5D2381] hover:bg-[#4E1C6E] text-white text-xs sm:text-sm font-semibold transition-all cursor-pointer shadow-sm"
+            className="px-5 py-2.5 rounded-xl bg-[#5D2381] hover:bg-[#4E1C6E] hover-brand-gradient text-white text-xs sm:text-sm font-semibold transition-all cursor-pointer shadow-sm"
           >
             Back to Dashboard
           </button>
