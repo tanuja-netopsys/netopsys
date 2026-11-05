@@ -26,10 +26,14 @@ export default function NotFoundPage({ forceOffline, onRetry }: NotFoundPageProp
 
   // Bird Autonomous Patrol & Movement State (Completely self-animating)
   const [birdX, setBirdX] = useState(480);
-  const [direction, setDirection] = useState<1 | -1>(1); // 1 = facing right, -1 = facing left
+  const [direction, setDirection] = useState<1 | -1>(1); // 1 = walking right, -1 = walking left
   const [isWalking, setIsWalking] = useState(true);
   const [stepPhase, setStepPhase] = useState(0);
   const pauseTimerRef = useRef<number>(0);
+
+  // Mouse Cursor Tracking (for aiming the magnifying glass and bird gaze)
+  const svgRef = useRef<SVGSVGElement | null>(null);
+  const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(null);
 
   // Monitor network online/offline events
   useEffect(() => {
@@ -50,6 +54,30 @@ export default function NotFoundPage({ forceOffline, onRetry }: NotFoundPageProp
     };
   }, [forceOffline]);
 
+  // Track cursor position mapped to SVG coordinate space (0..860, 0..440)
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!svgRef.current) return;
+      const rect = svgRef.current.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) return;
+      const svgX = ((e.clientX - rect.left) / rect.width) * 860;
+      const svgY = ((e.clientY - rect.top) / rect.height) * 440;
+      setMousePos({ x: svgX, y: svgY });
+    };
+
+    const handleMouseLeave = () => {
+      setMousePos(null);
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseleave", handleMouseLeave);
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseleave", handleMouseLeave);
+    };
+  }, []);
+
   // Handle manual retry for connection
   const handleRetryConnection = () => {
     setIsRetrying(true);
@@ -69,8 +97,8 @@ export default function NotFoundPage({ forceOffline, onRetry }: NotFoundPageProp
   // Continuous animation loop: The bird autonomously walks back and forth along the line
   useEffect(() => {
     let animId: number;
-    const minX = 220;
-    const maxX = 640;
+    const minX = 200;
+    const maxX = 660;
     const speed = 1.35; // gentle, natural walking pace
 
     const step = () => {
@@ -107,9 +135,31 @@ export default function NotFoundPage({ forceOffline, onRetry }: NotFoundPageProp
   const legAngle1 = isWalking ? Math.sin(stepPhase) * 20 : 0;
   const legAngle2 = isWalking ? Math.sin(stepPhase + Math.PI) * 20 : 0;
 
-  // Lens coordinate for magnifying view (sitting on the lowered ground line level)
-  const lensGlobalX = birdX + (direction === 1 ? 112 : -112);
-  const lensGlobalY = 271 + bodyBob;
+  // The magnifying glass faces whichever direction the cursor is in!
+  // If cursor is to the right of bird -> face right; to the left -> face left.
+  // When cursor is absent, fallback to bird's walking direction.
+  const facingDirection: 1 | -1 = mousePos
+    ? mousePos.x >= birdX
+      ? 1
+      : -1
+    : direction;
+
+  // Calculate vertical tilt angle for magnifying glass aiming towards cursor
+  let glassTilt = 0;
+  if (mousePos) {
+    const dx = Math.abs(mousePos.x - birdX);
+    const dy = mousePos.y - (300 + bodyBob);
+    const angleDeg = (Math.atan2(dy, Math.max(dx, 60)) * 180) / Math.PI;
+    glassTilt = Math.max(-20, Math.min(20, angleDeg));
+  }
+
+  // Eye pupil offset towards cursor
+  const pupilDx = mousePos
+    ? Math.max(-3, Math.min(3, ((mousePos.x - birdX) / 250) * facingDirection * 3))
+    : 0;
+  const pupilDy = mousePos
+    ? Math.max(-3, Math.min(3, ((mousePos.y - 300) / 250) * 3))
+    : 0;
 
   return (
     <div
@@ -200,13 +250,14 @@ export default function NotFoundPage({ forceOffline, onRetry }: NotFoundPageProp
         =============================================================== */}
         <div className="w-full flex items-center justify-center relative overflow-visible">
           <svg
-            viewBox="0 0 860 380"
-            className="w-full max-w-[720px] md:max-w-[780px] h-auto overflow-visible select-none"
+            ref={svgRef}
+            viewBox="0 0 860 440"
+            className="w-full max-w-[740px] md:max-w-[800px] h-auto overflow-visible select-none"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
           >
             <defs>
-              {/* Glass Lens Reflection Gradient */}
+              {/* Ultra-Realistic Glass Lens Sheen Gradient (100% transparent center, subtle rim refraction) */}
               <linearGradient
                 id="lensGlassGradient"
                 x1="0%"
@@ -214,51 +265,48 @@ export default function NotFoundPage({ forceOffline, onRetry }: NotFoundPageProp
                 x2="100%"
                 y2="100%"
               >
-                <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.45" />
-                <stop offset="45%" stopColor="#FFF7E6" stopOpacity="0.12" />
-                <stop offset="100%" stopColor="#E6D3B3" stopOpacity="0.25" />
+                <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.32" />
+                <stop offset="35%" stopColor="#FFFBF2" stopOpacity="0.06" />
+                <stop offset="70%" stopColor="#F5E8D0" stopOpacity="0.10" />
+                <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0.22" />
               </linearGradient>
-
-              {/* Dynamic Lens Clip Path following bird's magnifying glass */}
-              <clipPath id="activeLensClip">
-                <circle cx={lensGlobalX} cy={lensGlobalY} r="46" />
-              </clipPath>
             </defs>
 
             {/* -----------------------------------------------------------
                 FLOOR SEAMS & GROUND LINE (Lowered position)
             ------------------------------------------------------------ */}
             <g opacity="0.6">
-              <line x1="80" y1="335" x2="80" y2="385" stroke="#E5D9C8" strokeWidth="1.2" />
-              <line x1="220" y1="335" x2="220" y2="385" stroke="#E5D9C8" strokeWidth="1.2" />
-              <line x1="360" y1="335" x2="360" y2="385" stroke="#E5D9C8" strokeWidth="1.2" />
-              <line x1="500" y1="335" x2="500" y2="385" stroke="#E5D9C8" strokeWidth="1.2" />
-              <line x1="640" y1="335" x2="640" y2="385" stroke="#E5D9C8" strokeWidth="1.2" />
-              <line x1="780" y1="335" x2="780" y2="385" stroke="#E5D9C8" strokeWidth="1.2" />
+              <line x1="80" y1="370" x2="80" y2="435" stroke="#E5D9C8" strokeWidth="1.2" />
+              <line x1="220" y1="370" x2="220" y2="435" stroke="#E5D9C8" strokeWidth="1.2" />
+              <line x1="360" y1="370" x2="360" y2="435" stroke="#E5D9C8" strokeWidth="1.2" />
+              <line x1="500" y1="370" x2="500" y2="435" stroke="#E5D9C8" strokeWidth="1.2" />
+              <line x1="640" y1="370" x2="640" y2="435" stroke="#E5D9C8" strokeWidth="1.2" />
+              <line x1="780" y1="370" x2="780" y2="435" stroke="#E5D9C8" strokeWidth="1.2" />
             </g>
 
-            {/* Main Ground Line */}
+            {/* Main Ground Line (Lowered for clear vertical breathing room) */}
             <line
               x1="20"
-              y1="335"
+              y1="370"
               x2="840"
-              y2="335"
+              y2="370"
               stroke="#E2D4BF"
               strokeWidth="2.2"
             />
 
-            {/* Walking Shadow Dots across the patrol line */}
+            {/* Walking Shadow Dots across the patrol floor line */}
             <g fill="#A89A88" opacity="0.4">
-              <circle cx="160" cy="337" r="3" />
-              <circle cx="260" cy="337" r="3" />
-              <circle cx="360" cy="337" r="3" />
-              <circle cx="460" cy="337" r="3" />
-              <circle cx="560" cy="337" r="3" />
-              <circle cx="660" cy="337" r="3" />
+              <circle cx="160" cy="372" r="3" />
+              <circle cx="260" cy="372" r="3" />
+              <circle cx="360" cy="372" r="3" />
+              <circle cx="460" cy="372" r="3" />
+              <circle cx="560" cy="372" r="3" />
+              <circle cx="660" cy="372" r="3" />
+              <circle cx="760" cy="372" r="3" />
             </g>
 
             {/* -----------------------------------------------------------
-                MASSIVE SOFT 404 NUMBERS (Centered at exact original place)
+                MASSIVE SOFT 404 NUMBERS (Maintained at exact original position)
             ------------------------------------------------------------ */}
             <g
               fill="#EAD7B0"
@@ -287,99 +335,13 @@ export default function NotFoundPage({ forceOffline, onRetry }: NotFoundPageProp
             </g>
 
             {/* -----------------------------------------------------------
-                MAGNIFYING GLASS INSPECTION CONTENT (Under the lens)
-            ------------------------------------------------------------ */}
-            <g
-              clipPath="url(#activeLensClip)"
-              className="cursor-pointer"
-              onClick={() => navigate("/")}
-            >
-              {/* Magnified Background Canvas inside lens */}
-              <rect
-                x={lensGlobalX - 60}
-                y={lensGlobalY - 60}
-                width="120"
-                height="120"
-                fill="#FFF8EC"
-              />
-
-              {/* Magnified Ground Line inside lens */}
-              <line
-                x1={lensGlobalX - 50}
-                y1={335}
-                x2={lensGlobalX + 50}
-                y2={335}
-                stroke="#D3BEA2"
-                strokeWidth="2.5"
-              />
-
-              {/* Magnified Numbers based on bird's position */}
-              <g
-                fill="#DDBB7D"
-                opacity="0.95"
-                fontWeight="900"
-                style={{
-                  fontFamily: "system-ui, -apple-system, sans-serif",
-                  fontSize: "150px",
-                }}
-              >
-                {lensGlobalX < 310 && (
-                  <text x={lensGlobalX - 42} y={328}>
-                    4
-                  </text>
-                )}
-                {lensGlobalX >= 310 && lensGlobalX <= 540 && (
-                  <text x={lensGlobalX - 40} y={328}>
-                    0
-                  </text>
-                )}
-                {lensGlobalX > 540 && (
-                  <text x={lensGlobalX - 42} y={328}>
-                    4
-                  </text>
-                )}
-              </g>
-
-              {/* Secret "HOME" (or "RETRY") stamp inside lens */}
-              <text
-                x={lensGlobalX - 25}
-                y={lensGlobalY + 5}
-                fill="#C0382B"
-                fontSize="16"
-                fontWeight="800"
-                letterSpacing="0.08em"
-                fontFamily="system-ui, sans-serif"
-                opacity="0.88"
-              >
-                {isOffline ? "RETRY" : "HOME"}
-              </text>
-
-              {/* Glass Lens Highlight Reflection */}
-              <rect
-                x={lensGlobalX - 55}
-                y={lensGlobalY - 55}
-                width="110"
-                height="110"
-                fill="url(#lensGlassGradient)"
-              />
-
-              {/* Curved Reflection Arc */}
-              <path
-                d={`M ${lensGlobalX - 30} ${lensGlobalY - 24} A 36 36 0 0 1 ${lensGlobalX + 24} ${lensGlobalY - 30}`}
-                stroke="#FFFFFF"
-                strokeWidth="3.5"
-                strokeLinecap="round"
-                opacity="0.75"
-                fill="none"
-              />
-            </g>
-
-            {/* -----------------------------------------------------------
                 SINGLE UNIFIED BIRD + MAGNIFYING GLASS CHARACTER UNIT
+                - Patrols autonomously along the floor line (y = 370)
+                - Turns and points magnifying glass in cursor direction
+                - Transparent glass reveals background numbers & floor naturally
             ------------------------------------------------------------ */}
-            {/* The bird and magnifying glass are locked together and patrol along the floor */}
-            <g transform={`translate(${birdX}, 25)`}>
-              {/* Dynamic Ground Ellipse Shadow directly under feet */}
+            <g transform={`translate(${birdX}, 58)`}>
+              {/* Dynamic Ground Ellipse Shadow directly under feet on the floor */}
               <ellipse
                 cx="0"
                 cy="312"
@@ -389,9 +351,9 @@ export default function NotFoundPage({ forceOffline, onRetry }: NotFoundPageProp
                 opacity="0.8"
               />
 
-              {/* Flip bird and magnifying glass when changing direction */}
-              <g transform={`scale(${direction}, 1)`}>
-                {/* 1. Bird Legs & Feet with Walking Rotation */}
+              {/* Flip character orientation to face cursor direction */}
+              <g transform={`scale(${facingDirection}, 1)`}>
+                {/* 1. Bird Legs & Feet with Walking Waddle Rotation */}
                 <g stroke="#261A16" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round">
                   {/* Left / Back Leg */}
                   <g transform={`translate(-8, 280) rotate(${legAngle1})`}>
@@ -450,65 +412,99 @@ export default function NotFoundPage({ forceOffline, onRetry }: NotFoundPageProp
                   {/* Large Eye White */}
                   <circle cx="34" cy="220" r="13.5" fill="#FFFFFF" />
 
-                  {/* Eye Pupil Looking forward through magnifying glass */}
-                  <circle cx="40" cy="220" r="6" fill="#141010" />
+                  {/* Dynamic Eye Pupil - naturally tracks cursor */}
+                  <circle cx={40 + pupilDx} cy={220 + pupilDy} r="6" fill="#141010" />
 
-                  {/* Catchlight in Eye */}
-                  <circle cx="42" cy="218" r="2" fill="#FFFFFF" />
+                  {/* Eye Catchlight */}
+                  <circle cx={42 + pupilDx} cy={218 + pupilDy} r="2" fill="#FFFFFF" />
 
                   {/* Cute Orange Beak */}
                   <path d="M 46 222 L 72 230 L 46 237 Z" fill="#F39C12" />
 
-                  {/* Bird Hand / Arm holding the handle */}
-                  <path
-                    d="M 22 258 Q 50 258 72 252"
-                    stroke="#251815"
-                    strokeWidth="11"
-                    strokeLinecap="round"
-                    fill="none"
-                  />
+                  {/* 3. Magnifying Glass & Arm (Aims towards cursor tilt) */}
+                  <g
+                    transform={`rotate(${glassTilt}, 22, 258)`}
+                    className="cursor-pointer"
+                    onClick={() => navigate("/")}
+                  >
+                    {/* Bird Hand / Arm holding the handle */}
+                    <path
+                      d="M 22 258 Q 50 258 72 252"
+                      stroke="#251815"
+                      strokeWidth="11"
+                      strokeLinecap="round"
+                      fill="none"
+                    />
 
-                  {/* 3. Magnifying Glass (Firmly attached to hand, moves with bird) */}
-                  {/* Handle */}
-                  <line
-                    x1="62"
-                    y1="252"
-                    x2="88"
-                    y2="248"
-                    stroke="#221512"
-                    strokeWidth="11"
-                    strokeLinecap="round"
-                  />
-                  <line
-                    x1="65"
-                    y1="251"
-                    x2="86"
-                    y2="248"
-                    stroke="#382622"
-                    strokeWidth="4"
-                    strokeLinecap="round"
-                  />
+                    {/* Magnifying Glass Handle */}
+                    <line
+                      x1="62"
+                      y1="252"
+                      x2="88"
+                      y2="248"
+                      stroke="#221512"
+                      strokeWidth="11"
+                      strokeLinecap="round"
+                    />
+                    <line
+                      x1="65"
+                      y1="251"
+                      x2="86"
+                      y2="248"
+                      stroke="#382622"
+                      strokeWidth="4"
+                      strokeLinecap="round"
+                    />
 
-                  {/* Outer Heavy Dark Lens Rim (Fixed to handle at x=112, y=246) */}
-                  <circle
-                    cx="112"
-                    cy="246"
-                    r="46"
-                    stroke="#221512"
-                    strokeWidth="9"
-                    fill="none"
-                  />
+                    {/* Fully Transparent Glass Lens - Real background & 404 numbers show through */}
+                    <circle
+                      cx="112"
+                      cy="246"
+                      r="44"
+                      fill="url(#lensGlassGradient)"
+                    />
 
-                  {/* Inner Glass Lip */}
-                  <circle
-                    cx="112"
-                    cy="246"
-                    r="41.5"
-                    stroke="#543C36"
-                    strokeWidth="1.6"
-                    fill="none"
-                    opacity="0.6"
-                  />
+                    {/* Outer Heavy Dark Lens Rim */}
+                    <circle
+                      cx="112"
+                      cy="246"
+                      r="46"
+                      stroke="#221512"
+                      strokeWidth="9"
+                      fill="none"
+                    />
+
+                    {/* Inner Glass Bezel Lip */}
+                    <circle
+                      cx="112"
+                      cy="246"
+                      r="41.5"
+                      stroke="#543C36"
+                      strokeWidth="1.6"
+                      fill="none"
+                      opacity="0.6"
+                    />
+
+                    {/* Primary Specular Glint Highlight (Gloss Reflection) */}
+                    <path
+                      d="M 88 226 A 34 34 0 0 1 136 220"
+                      stroke="#FFFFFF"
+                      strokeWidth="3.2"
+                      strokeLinecap="round"
+                      opacity="0.8"
+                      fill="none"
+                    />
+
+                    {/* Secondary Subtle Bottom Lens Rim Glare */}
+                    <path
+                      d="M 96 266 A 34 34 0 0 0 128 266"
+                      stroke="#FFFFFF"
+                      strokeWidth="1.6"
+                      strokeLinecap="round"
+                      opacity="0.4"
+                      fill="none"
+                    />
+                  </g>
                 </g>
               </g>
             </g>
