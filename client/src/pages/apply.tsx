@@ -10,6 +10,10 @@ import {
   FileCheck,
   Check,
   Loader2,
+  AlertCircle,
+  CheckCircle2,
+  Send,
+  X,
 } from "lucide-react";
 import Navbar from "../componenets/navbar.tsx";
 import Footer from "../componenets/footer.tsx";
@@ -40,6 +44,101 @@ export default function ApplyPage() {
   const [notFound, setNotFound] = useState(false);
   const [currentUser, setCurrentUser] = useState<CareerUser | null>(null);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+
+  // Email Verification OTP States
+  const [isVerificationModalOpen, setIsVerificationModalOpen] = useState(false);
+  const [otpInput, setOtpInput] = useState("");
+  const [otpCountdown, setOtpCountdown] = useState(0);
+  const [otpError, setOtpError] = useState("");
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
+  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
+
+  useEffect(() => {
+    if (otpCountdown <= 0) return;
+    const timer = setInterval(() => {
+      setOtpCountdown((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [otpCountdown]);
+
+  const handleSendVerificationOtp = async () => {
+    if (!currentUser?.email) {
+      toast.error("Please log in to verify your email.");
+      return;
+    }
+    setIsSendingOtp(true);
+    setOtpError("");
+    try {
+      const res = await fetch("/api/auth/send-verification-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: currentUser.email }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setIsVerificationModalOpen(true);
+        setOtpCountdown(60);
+        toast.info(data.message || `Verification code sent to ${currentUser.email}`);
+      } else if (data.alreadyVerified) {
+        const updated = { ...currentUser, verificationStatus: "verified", isEmailVerified: true };
+        setCurrentUser(updated);
+        localStorage.setItem("career_user", JSON.stringify(updated));
+        window.dispatchEvent(new Event("career_user_change"));
+        setIsVerificationModalOpen(false);
+        toast.success("Your email is already verified!");
+      } else {
+        setOtpError(data.message || "Failed to send verification code.");
+      }
+    } catch {
+      setOtpError("Network error. Please check your connection.");
+    } finally {
+      setIsSendingOtp(false);
+    }
+  };
+
+  const handleVerifyEmailOtp = async () => {
+    if (!currentUser?.email) return;
+    const cleanOtp = otpInput.trim();
+    if (!cleanOtp || cleanOtp.length < 6) {
+      setOtpError("Please enter the complete 6-digit verification code.");
+      return;
+    }
+    setIsVerifyingOtp(true);
+    setOtpError("");
+    try {
+      const res = await fetch("/api/auth/verify-email-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: currentUser.email, otp: cleanOtp }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        const updated = { ...currentUser, verificationStatus: "verified", isEmailVerified: true };
+        setCurrentUser(updated);
+        localStorage.setItem("career_user", JSON.stringify(updated));
+        window.dispatchEvent(new Event("career_user_change"));
+        try {
+          const prof = localStorage.getItem("career_profile_details");
+          if (prof) {
+            const p = JSON.parse(prof);
+            p.isEmailVerified = true;
+            localStorage.setItem("career_profile_details", JSON.stringify(p));
+          }
+        } catch {}
+
+        setIsVerificationModalOpen(false);
+        setOtpInput("");
+        setErrorMessage("");
+        toast.success("Email verified successfully! You can now submit your application.");
+      } else {
+        setOtpError(data.message || "Invalid verification code.");
+      }
+    } catch {
+      setOtpError("Failed to verify code. Please try again.");
+    } finally {
+      setIsVerifyingOtp(false);
+    }
+  };
 
   // Form State
   const [coverLetter, setCoverLetter] = useState("");
@@ -168,6 +267,17 @@ export default function ApplyPage() {
       return;
     }
 
+    const isEmailVerified = currentUser.verificationStatus === "verified" || (currentUser as any).isEmailVerified === true;
+    if (!isEmailVerified) {
+      setErrorMessage("Email verification required: Please verify your email before submitting your application.");
+      toast.warning("Please verify your email address to submit your application.", {
+        title: "Email Verification Required",
+      });
+      setIsVerificationModalOpen(true);
+      handleSendVerificationOtp();
+      return;
+    }
+
     if (!coverLetter.trim()) {
       setErrorMessage("Please enter a cover letter.");
       toast.warning("Please enter your cover letter.", { title: "Cover Letter Required" });
@@ -236,7 +346,7 @@ export default function ApplyPage() {
       <Navbar activeTab="Careers" />
 
       {/* Main Content Area */}
-      <main className="relative w-full z-10 flex-1 pt-24 sm:pt-28 md:pt-30 pb-14 sm:pb-20">
+      <main className="relative w-full z-10 flex-1 pt-24 sm:pt-28 md:pt-30 pb-14 sm:pb-20 apply-page-main">
         {/* Ambient background glows */}
         <div className="absolute top-1/6 -right-40 w-80 h-80 rounded-full bg-[#BE3093]/10 blur-[130px] pointer-events-none" />
         <div className="absolute top-1/2 -left-40 w-80 h-80 rounded-full bg-[#693092]/10 blur-[130px] pointer-events-none" />
@@ -266,7 +376,7 @@ export default function ApplyPage() {
           ) : (
             <>
               {/* Breadcrumb Navigation: Home > Careers > Job Title > Apply */}
-              <nav aria-label="Breadcrumb" className="mb-4 sm:mb-6">
+              <nav aria-label="Breadcrumb" className="mb-4 sm:mb-6 apply-page-breadcrumb">
             <ol className="inline-flex items-center gap-1.5 sm:gap-2 text-xs sm:text-[13.5px] font-medium">
               <li>
                 <Link
@@ -311,9 +421,9 @@ export default function ApplyPage() {
           </nav>
 
           {/* Top Job Card Banner matching screenshot */}
-          <div className="bg-white rounded-[26px] sm:rounded-[32px] p-6 sm:p-8 md:p-9 border border-[#EADBFA]/80 shadow-[0_8px_30px_rgba(93,35,129,0.04)] mb-8 sm:mb-10">
+          <div className="bg-white rounded-[26px] sm:rounded-[32px] p-6 sm:p-8 md:p-9 border border-[#EADBFA]/80 shadow-[0_8px_30px_rgba(93,35,129,0.04)] mb-8 sm:mb-10 apply-page-banner">
             {/* Top Badges Row */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 sm:mb-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 sm:mb-5 apply-page-banner-badges">
               {/* Left Badges Group: Code & Category */}
               <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
                 <span className="px-3.5 py-1.5 rounded-full border border-[#EADBFA] text-xs sm:text-[13px] font-medium text-[#544862] bg-[#FAF8FC]">
@@ -348,21 +458,21 @@ export default function ApplyPage() {
             </div>
 
             {/* Title matching signature heading font-light and tracking */}
-            <h1 className="font-light tracking-[-0.035em] text-[#141010] text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] xl:text-[3.5rem] leading-[1.08] mb-3 sm:mb-4">
+            <h1 className="font-light tracking-[-0.035em] text-[#141010] text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] xl:text-[3.5rem] leading-[1.08] mb-3 sm:mb-4 apply-page-banner-title">
               {job.title}
             </h1>
 
             {/* Summary matching other pages subtitle typography */}
-            <p className="text-[#554E62] leading-relaxed font-normal text-sm sm:text-base md:text-[16px] lg:text-[17px] max-w-4xl">
+            <p className="text-[#554E62] leading-relaxed font-normal text-sm sm:text-base md:text-[16px] lg:text-[17px] max-w-4xl apply-page-banner-desc">
               {job.summary}
             </p>
           </div>
 
           {/* Main 2-Column Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start apply-page-grid">
             {/* Left Column: Application Form */}
             <div className="lg:col-span-8">
-              <div className="bg-white rounded-[26px] sm:rounded-[32px] p-7 sm:p-9 md:p-10 border border-[#EADBFA]/80 shadow-[0_8px_30px_rgba(93,35,129,0.04)]">
+              <div className="bg-white rounded-[26px] sm:rounded-[32px] p-7 sm:p-9 md:p-10 border border-[#EADBFA]/80 shadow-[0_8px_30px_rgba(93,35,129,0.04)] apply-page-form-card">
                 {isSubmitted ? (
                   <div className="py-16 text-center">
                     <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto mb-4">
@@ -383,11 +493,39 @@ export default function ApplyPage() {
                   </div>
                 ) : (
                   <>
-                    <h2 className="text-2xl sm:text-3xl font-bold text-[#141010] tracking-tight pb-5 mb-6 border-b border-[#F0E6F5]">
+                    <h2 className="text-2xl sm:text-3xl font-bold text-[#141010] tracking-tight pb-5 mb-6 border-b border-[#F0E6F5] apply-page-form-title">
                       Application Form
                     </h2>
 
-                    <form onSubmit={handleSubmit} className="space-y-6">
+                    {/* Email Verification Required Banner */}
+                    {currentUser && !(currentUser.verificationStatus === "verified" || (currentUser as any).isEmailVerified) && (
+                      <div className="mb-6 bg-[#FFF8EE] border border-[#FFE7BA] rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-left">
+                        <div className="flex items-start sm:items-center gap-3">
+                          <AlertCircle className="w-5 h-5 text-[#D48806] shrink-0 mt-0.5 sm:mt-0 stroke-[2.2]" />
+                          <div>
+                            <h4 className="text-xs sm:text-sm font-bold text-[#7D4A00]">
+                              Email Verification Required
+                            </h4>
+                            <p className="text-xs text-[#7D4A00]/90 font-medium">
+                              Your email ({currentUser.email}) must be verified before submitting this job application.
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsVerificationModalOpen(true);
+                            handleSendVerificationOtp();
+                          }}
+                          className="bg-[#FBAE42] hover:bg-[#efa132] hover-brand-gradient text-[#141010] font-semibold text-xs px-4 py-2.5 rounded-full inline-flex items-center gap-1.5 shadow-xs cursor-pointer whitespace-nowrap self-start sm:self-auto"
+                        >
+                          <Send className="w-3.5 h-3.5" />
+                          <span>Verify with OTP</span>
+                        </button>
+                      </div>
+                    )}
+
+                    <form onSubmit={handleSubmit} className="space-y-6 apply-page-form">
                       {/* Cover Letter */}
                       <div>
                         <label className="block text-xs sm:text-sm font-semibold text-[#141010] mb-1.5">
@@ -405,7 +543,7 @@ export default function ApplyPage() {
                             setErrorMessage("");
                           }}
                           placeholder={`Dear Hiring Manager,\n\nI am writing to express my interest in the position...\n\nPlease include:\n- Your relevant experience and achievements\n- Why you're interested in this role\n- What unique value you bring to the team\n- Your career goals and how this position aligns with them`}
-                          className="w-full bg-[#FAF8FC] border border-[#E2DBEA] focus:border-[#693092] rounded-2xl p-4 sm:p-5 text-xs sm:text-sm text-[#141010] outline-none leading-relaxed placeholder:text-[#9C94A8] resize-y"
+                          className="w-full bg-[#FAF8FC] border border-[#E2DBEA] focus:border-[#693092] rounded-2xl p-4 sm:p-5 text-xs sm:text-sm text-[#141010] outline-none leading-relaxed placeholder:text-[#9C94A8] resize-y apply-page-textarea"
                         />
                       </div>
 
@@ -444,7 +582,7 @@ export default function ApplyPage() {
                         ) : (
                           <div
                             onClick={() => fileInputRef.current?.click()}
-                            className="border-2 border-dashed border-[#BE95D4] hover:border-[#693092] bg-[#FAF8FC] hover:bg-[#F9F5FB] rounded-2xl p-7 sm:p-9 text-center cursor-pointer transition-colors group"
+                            className="border-2 border-dashed border-[#BE95D4] hover:border-[#693092] bg-[#FAF8FC] hover:bg-[#F9F5FB] rounded-2xl p-7 sm:p-9 text-center cursor-pointer transition-colors group apply-page-dropzone"
                           >
                             <div className="w-11 h-11 rounded-full bg-[#F6EEFA] text-[#693092] flex items-center justify-center mx-auto mb-2.5 group-hover:scale-110 transition-transform">
                               <Upload className="w-5 h-5 stroke-[2.2]" />
@@ -489,9 +627,9 @@ export default function ApplyPage() {
             </div>
 
             {/* Right Column */}
-            <div className="lg:col-span-4 flex flex-col gap-5 lg:sticky lg:top-32">
+            <div className="lg:col-span-4 flex flex-col gap-5 lg:sticky lg:top-32 apply-page-sidebar">
               {/* Applying As Card */}
-              <div className="bg-white rounded-2xl p-5 sm:p-6 border border-[#EADBFA]/80 shadow-[0_4px_20px_rgba(93,35,129,0.03)] flex items-center gap-3.5">
+              <div className="bg-white rounded-2xl p-5 sm:p-6 border border-[#EADBFA]/80 shadow-[0_4px_20px_rgba(93,35,129,0.03)] flex items-center gap-3.5 apply-page-user-card">
                 <div className="w-11 h-11 rounded-full bg-[#F6EEFA] text-[#693092] flex items-center justify-center shrink-0">
                   <Mail className="w-5 h-5" />
                 </div>
@@ -511,7 +649,7 @@ export default function ApplyPage() {
               </div>
 
               {/* Review The Role Card */}
-              <div className="bg-[#210D35] text-white rounded-[26px] p-6 sm:p-7 shadow-xl border border-white/10 text-left">
+              <div className="bg-[#210D35] text-white rounded-[26px] p-6 sm:p-7 shadow-xl border border-white/10 text-left apply-page-review-card">
                 <h3 className="text-xl sm:text-2xl font-bold text-white mb-1.5 tracking-tight">Review the role</h3>
                 <p className="text-xs sm:text-sm text-white/75 font-normal leading-relaxed mb-5">
                   See the full job details first.
@@ -534,6 +672,93 @@ export default function ApplyPage() {
       {/* Global Footer */}
       <Footer />
       <BackToHeroButton />
+
+      {/* Email Verification OTP Modal */}
+      {isVerificationModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="relative w-full max-w-md bg-white rounded-3xl p-6 sm:p-7 shadow-2xl border border-[#ECE4F2] text-left">
+            <button
+              type="button"
+              onClick={() => {
+                setIsVerificationModalOpen(false);
+                setOtpError("");
+              }}
+              className="absolute top-5 right-5 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 hover:text-gray-700 transition cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            <div className="w-12 h-12 rounded-2xl bg-[#F6EFF9] border border-[#EADBFA] flex items-center justify-center text-[#693092] mb-4">
+              <Mail className="w-6 h-6" />
+            </div>
+
+            <h3 className="text-xl font-bold text-[#141010] mb-1 tracking-tight">
+              Verify Your Email
+            </h3>
+            <p className="text-xs sm:text-sm text-[#554E62] leading-relaxed mb-5">
+              We sent a 6-digit verification code to{" "}
+              <strong className="text-[#141010]">{currentUser?.email}</strong>. Please enter the code below to verify your email and submit your application.
+            </p>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-[#141010] mb-1.5">
+                  6-Digit Verification Code
+                </label>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={6}
+                  value={otpInput}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, "");
+                    setOtpInput(val);
+                    if (otpError) setOtpError("");
+                  }}
+                  placeholder="e.g. 582914"
+                  className="w-full bg-[#FAF8FC] border border-[#E2DBEA] focus:border-[#693092] focus:bg-white rounded-2xl px-4 py-3 text-base tracking-widest font-mono text-center text-[#141010] placeholder:tracking-normal placeholder:font-sans placeholder:text-[#9F96AC] outline-none transition"
+                />
+                {otpError && (
+                  <p className="text-xs text-rose-600 font-medium mt-1.5">{otpError}</p>
+                )}
+              </div>
+
+              <div className="flex items-center justify-between text-xs pt-1">
+                <span className="text-[#716A7E]">
+                  {otpCountdown > 0 ? `Resend code in ${otpCountdown}s` : "Didn't get the code?"}
+                </span>
+                <button
+                  type="button"
+                  onClick={handleSendVerificationOtp}
+                  disabled={isSendingOtp || otpCountdown > 0}
+                  className="font-semibold text-[#693092] hover:underline disabled:opacity-40 disabled:no-underline cursor-pointer"
+                >
+                  {isSendingOtp ? "Sending..." : "Resend Code"}
+                </button>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleVerifyEmailOtp}
+                disabled={isVerifyingOtp || otpInput.trim().length !== 6}
+                className="w-full py-3 px-5 bg-[#693092] hover:bg-[#58257C] hover-brand-gradient text-white rounded-2xl text-xs sm:text-sm font-semibold shadow-md inline-flex items-center justify-center gap-2 transition cursor-pointer disabled:opacity-50"
+              >
+                {isVerifyingOtp ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Verifying Code...</span>
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>Verify & Continue</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Login & Create Account Modal */}
       {isLoginModalOpen && (

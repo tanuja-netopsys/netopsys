@@ -230,8 +230,8 @@ export default function About() {
             </div>
           </div>
 
-          {/* Right Column: Stat Cards (1 col mobile, 2x2 grid tablet, 1 col stacked desktop) */}
-          <div className="about-cards-wrap lg:col-span-5 xl:col-span-5 2xl:col-span-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-3 sm:gap-3.5 lg:gap-3.5 xl:gap-4.5 w-full">
+          {/* Right Column: Stat Cards (Strictly vertical one after another across all screen scales) */}
+          <div className="about-cards-wrap lg:col-span-5 xl:col-span-5 2xl:col-span-5 grid grid-cols-1 gap-2.5 sm:gap-3 lg:gap-3 xl:gap-3.5 w-full">
             {STATS.map((stat, idx) => (
               <div
                 key={idx}

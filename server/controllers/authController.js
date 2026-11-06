@@ -294,7 +294,7 @@ exports.candidateRegister = async (req, res) => {
 
     return res.status(201).json({
       success: true,
-      message: "Account created successfully!",
+      message: "Account created successfully! Please verify your email before applying for jobs.",
       token,
       user: {
         id: newUser.id,
@@ -303,7 +303,8 @@ exports.candidateRegister = async (req, res) => {
         phone: newUser.mobileNumber,
         role: "Candidate",
         registeredDate: new Date().toLocaleDateString("en-GB"),
-        verificationStatus: "verified",
+        verificationStatus: "Unverified",
+        isEmailVerified: false,
         accountStatus: "Active",
       },
     });
@@ -417,13 +418,14 @@ exports.forgotPassword = async (req, res) => {
     if (!email || !String(email).trim()) {
       return res.status(400).json({
         success: false,
-        message: "Please provide a valid email address.",
+        isRegistered: false,
+        message: "Please enter your email address.",
       });
     }
 
     const normalizedEmail = String(email).trim().toLowerCase();
 
-    // 1. Look for user in `users` table
+    // 1. Check if email exists in `users` table
     let user = await prisma.user.findFirst({
       where: {
         email: {
@@ -433,27 +435,56 @@ exports.forgotPassword = async (req, res) => {
       },
     });
 
+    let accountType = "user";
+
+    // 2. Also check `admins` table if applicable
     if (!user) {
-      // Also check admins/super_admins if applicable
-      const adminRows = await prisma.$queryRawUnsafe(
-        `SELECT id, email, name FROM super_admins WHERE LOWER(email) = $1 LIMIT 1`,
-        normalizedEmail
-      );
-      if (adminRows.length === 0) {
-        return res.status(404).json({
-          success: false,
-          message: "No account found with this email address. Please check your email or create an account.",
-        });
+      const admin = await prisma.admin.findFirst({
+        where: {
+          email: {
+            equals: normalizedEmail,
+            mode: "insensitive",
+          },
+        },
+      });
+      if (admin) {
+        user = { id: admin.id, email: admin.email, firstName: admin.name };
+        accountType = "admin";
       }
-      user = { id: adminRows[0].id, email: adminRows[0].email, firstName: adminRows[0].name, isSuperAdmin: true };
     }
 
-    // 2. Generate 6-digit OTP code and 15-minute expiration
+    // 3. Also check `super_admins` table if applicable
+    if (!user) {
+      const superAdmin = await prisma.superAdmin.findFirst({
+        where: {
+          email: {
+            equals: normalizedEmail,
+            mode: "insensitive",
+          },
+        },
+      });
+      if (superAdmin) {
+        user = { id: superAdmin.id, email: superAdmin.email, firstName: superAdmin.name };
+        accountType = "superadmin";
+      }
+    }
+
+    // 4. CRITICAL CHECK: If the email is NOT registered in any account table,
+    // immediately halt, DO NOT send any OTP email, and inform the user to register first.
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        isRegistered: false,
+        message: "This email is not registered. Please register first.",
+      });
+    }
+
+    // 5. Email IS registered -> Generate 6-digit OTP code with 15-minute expiration
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const expiry = new Date(Date.now() + 15 * 60 * 1000);
 
-    // 3. Save OTP in users table
-    if (!user.isSuperAdmin) {
+    // Save OTP to database or session cache
+    if (accountType === "user") {
       await prisma.user.update({
         where: { id: user.id },
         data: {
@@ -462,12 +493,16 @@ exports.forgotPassword = async (req, res) => {
         },
       });
     } else {
-      // In-memory or temporary cache for superAdmin if needed
       global.__superAdminResetOtps = global.__superAdminResetOtps || {};
-      global.__superAdminResetOtps[normalizedEmail] = { otp, expiry };
+      global.__superAdminResetOtps[normalizedEmail] = {
+        otp,
+        expiry,
+        accountType,
+        id: user.id,
+      };
     }
 
-    // 4. Send email with OTP via emailService
+    // 6. Send OTP email via emailService only for registered users
     await emailService.sendPasswordResetOtpEmail({
       email: normalizedEmail,
       name: user.firstName || "User",
@@ -476,6 +511,7 @@ exports.forgotPassword = async (req, res) => {
 
     return res.status(200).json({
       success: true,
+      isRegistered: true,
       message: `A 6-digit verification code has been sent to ${normalizedEmail}.`,
     });
   } catch (error) {
@@ -658,6 +694,162 @@ exports.resetPassword = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Failed to reset password. Please try again later.",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
+  }
+};
+
+/**
+ * Send Email Verification OTP to Candidate
+ */
+exports.sendVerificationOtp = async (req, res) => {
+  try {
+    const email = req.body?.email || req.user?.email;
+
+    if (!email || !String(email).trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide a valid email address.",
+      });
+    }
+
+    const normalizedEmail = String(email).trim().toLowerCase();
+
+    const user = await prisma.user.findFirst({
+      where: {
+        email: {
+          equals: normalizedEmail,
+          mode: "insensitive",
+        },
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "Account not found for this email address.",
+      });
+    }
+
+    if (user.emailVerified) {
+      return res.status(400).json({
+        success: false,
+        alreadyVerified: true,
+        message: "Your email is already verified.",
+      });
+    }
+
+    // Generate 6-digit OTP code with 15-minute expiration
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiry = new Date(Date.now() + 15 * 60 * 1000);
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        emailOtp: otp,
+        emailOtpExpiry: expiry,
+      },
+    });
+
+    // Send email with OTP via emailService
+    await emailService.sendEmailVerificationOtpEmail({
+      email: normalizedEmail,
+      name: user.firstName || "Candidate",
+      otp,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: `A 6-digit verification code has been sent to ${normalizedEmail}.`,
+    });
+  } catch (error) {
+    console.error("Send Verification OTP Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to send verification code. Please try again later.",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
+  }
+};
+
+/**
+ * Verify Candidate Email with OTP
+ */
+exports.verifyEmailOtp = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and verification code are required.",
+      });
+    }
+
+    const normalizedEmail = String(email).trim().toLowerCase();
+    const cleanOtp = String(otp).trim();
+
+    const user = await prisma.user.findFirst({
+      where: {
+        email: {
+          equals: normalizedEmail,
+          mode: "insensitive",
+        },
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "No account found with this email address.",
+      });
+    }
+
+    if (user.emailVerified) {
+      return res.status(200).json({
+        success: true,
+        alreadyVerified: true,
+        isEmailVerified: true,
+        verificationStatus: "verified",
+        message: "Your email is already verified.",
+      });
+    }
+
+    if (!user.emailOtp || user.emailOtp !== cleanOtp) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid verification code. Please check your email and try again.",
+      });
+    }
+
+    if (!user.emailOtpExpiry || new Date() > new Date(user.emailOtpExpiry)) {
+      return res.status(400).json({
+        success: false,
+        message: "Verification code has expired. Please request a new one.",
+      });
+    }
+
+    // Successfully verify user in database
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        emailVerified: true,
+        emailOtp: null,
+        emailOtpExpiry: null,
+      },
+    });
+
+    return res.status(200).json({
+      success: true,
+      isEmailVerified: true,
+      verificationStatus: "verified",
+      message: "Email successfully verified! You can now apply for open positions.",
+    });
+  } catch (error) {
+    console.error("Verify Email OTP Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to verify email. Please try again.",
       error: process.env.NODE_ENV === "development" ? error.message : undefined,
     });
   }

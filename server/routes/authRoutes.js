@@ -13,6 +13,10 @@ router.post("/register", authController.candidateRegister);
 router.post("/candidate/login", authController.candidateLogin);
 router.post("/login", authController.candidateLogin);
 
+// Email Verification OTP Endpoints
+router.post("/send-verification-otp", authController.sendVerificationOtp);
+router.post("/verify-email-otp", authController.verifyEmailOtp);
+
 // Forgot Password & Reset Endpoints
 router.post("/forgot-password", authController.forgotPassword);
 router.post("/send-reset-otp", authController.forgotPassword);

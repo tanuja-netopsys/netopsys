@@ -254,7 +254,7 @@ export default function CareersPage() {
       <Navbar activeTab="Careers" />
 
       {/* Main Page Content */}
-      <main className="relative w-full z-10 flex-1 pt-24 sm:pt-28 md:pt-30 pb-12 sm:pb-16 select-none">
+      <main className="careers-page-main relative w-full z-10 flex-1 pt-24 sm:pt-28 md:pt-30 pb-12 sm:pb-16 select-none">
         {/* Subtle background tech grid */}
         <div
           className="absolute inset-0 opacity-[0.03] pointer-events-none"
@@ -272,7 +272,7 @@ export default function CareersPage() {
         {/* Main Full-Width Container matching all remaining pages (max-w-[2100px]) */}
         <div className="relative w-full max-w-[2100px] mx-auto px-4 sm:px-6 md:px-8 lg:px-10 xl:px-14 2xl:px-18">
           {/* Breadcrumb Navigation: Home > Careers (Matching remaining pages) */}
-          <nav aria-label="Breadcrumb" className="mb-4 sm:mb-5 text-left">
+          <nav aria-label="Breadcrumb" className="careers-page-breadcrumb mb-4 sm:mb-5 text-left">
             <ol className="inline-flex items-center gap-1.5 sm:gap-2 text-xs sm:text-[13.5px] font-medium">
               <li>
                 <Link
@@ -297,13 +297,13 @@ export default function CareersPage() {
               - "Build the Future With Us"
               - Subtitle (Matches font styles, tracking, and sizes from remaining pages)
           ========================================================================= */}
-          <div className="w-full mb-10 sm:mb-14 lg:mb-16 text-left">
-            <h1 className="careers-title text-4xl sm:text-5xl md:text-6xl lg:text-[4.75rem] font-light tracking-[-0.035em] leading-[1.04] text-[#141010] mb-4 sm:mb-5 lg:mb-6">
+          <div className="careers-page-header w-full mb-10 sm:mb-14 lg:mb-16 text-left">
+            <h1 className="careers-page-title careers-title text-4xl sm:text-5xl md:text-6xl lg:text-[4.75rem] font-light tracking-[-0.035em] leading-[1.04] text-[#141010] mb-4 sm:mb-5 lg:mb-6">
               <span className="block">Build the Future</span>
               <span className="block text-[#693092]">With Us</span>
             </h1>
 
-            <p className="careers-desc text-[#554E62] text-sm sm:text-base md:text-[16px] lg:text-[17px] leading-relaxed font-normal max-w-2xl">
+            <p className="careers-page-desc careers-desc text-[#554E62] text-sm sm:text-base md:text-[16px] lg:text-[17px] leading-relaxed font-normal max-w-2xl">
               Join Netopsys and be part of a team that&apos;s transforming businesses through AI-powered solutions and cutting-edge technology.
             </p>
           </div>
@@ -311,9 +311,9 @@ export default function CareersPage() {
           {/* =========================================================================
               OPEN POSITIONS SECTION (Vertical Stack Cards matching remaining pages)
           ========================================================================= */}
-          <section className="mb-16 sm:mb-24">
+          <section className="careers-page-positions mb-16 sm:mb-24">
             {/* Section Header */}
-            <h2 className="about-block-title font-light tracking-[-0.035em] text-[#141010] text-3xl sm:text-4xl md:text-[2.65rem] lg:text-[3.25rem] leading-[1.06] mb-6 sm:mb-8 text-left">
+            <h2 className="careers-open-title about-block-title font-light tracking-[-0.035em] text-[#141010] text-3xl sm:text-4xl md:text-[2.65rem] lg:text-[3.25rem] leading-[1.06] mb-6 sm:mb-8 text-left">
               Open Positions
             </h2>
 
@@ -379,49 +379,49 @@ export default function CareersPage() {
                 </div>
               </div>
             ) : (
-              <div className="flex flex-col gap-4 sm:gap-5">
+              <div className="careers-roles-list flex flex-col gap-4 sm:gap-5">
                 {roles.map((role) => (
                   <div
                     key={role.id}
-                    className="bg-white rounded-[24px] sm:rounded-[28px] border border-[#F0E6F4] shadow-[0_4px_24px_rgba(0,0,0,0.02)] p-6 sm:p-7 md:px-8 md:py-6 flex flex-col lg:flex-row lg:items-center justify-between gap-5 transition-all duration-300 hover:shadow-[0_8px_30px_rgba(105,48,146,0.06)] text-left h-auto min-w-0 break-words"
+                    className="careers-role-card bg-white rounded-[24px] sm:rounded-[28px] border border-[#F0E6F4] shadow-[0_4px_24px_rgba(0,0,0,0.02)] p-6 sm:p-7 md:px-8 md:py-6 flex flex-col lg:flex-row lg:items-center justify-between gap-5 transition-all duration-300 hover:shadow-[0_8px_30px_rgba(105,48,146,0.06)] text-left h-auto min-w-0 break-words"
                   >
                     {/* Left Column: Department & Job Title */}
                     <div className="min-w-0 flex-1 break-words">
-                      <div className="text-[#693092] text-xs sm:text-[13px] font-semibold mb-1">
+                      <div className="careers-role-dept text-[#693092] text-xs sm:text-[13px] font-semibold mb-1">
                         {role.department}
                       </div>
-                      <h3 className="text-xl sm:text-2xl md:text-[26px] font-bold text-[#141010] tracking-tight break-words">
+                      <h3 className="careers-role-title text-xl sm:text-2xl md:text-[26px] font-bold text-[#141010] tracking-tight break-words">
                         {role.title}
                       </h3>
                     </div>
 
                     {/* Middle Column: 3 Pill Badges */}
-                    <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
-                      <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#FAF8FC] border border-[#EADBFA] text-[#693092] text-xs sm:text-[13px] font-medium">
+                    <div className="careers-role-pills flex flex-wrap items-center gap-2.5 sm:gap-3">
+                      <span className="careers-role-pill inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#FAF8FC] border border-[#EADBFA] text-[#693092] text-xs sm:text-[13px] font-medium">
                         <FileText className="w-3.5 h-3.5 stroke-[2] text-[#693092]" />
                         <span>{role.location || "Onsite"}</span>
                       </span>
-                      <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#FAF5FC] border border-[#EADBFA] text-[#693092] text-xs sm:text-[13px] font-medium">
+                      <span className="careers-role-pill inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#FAF5FC] border border-[#EADBFA] text-[#693092] text-xs sm:text-[13px] font-medium">
                         <Clock className="w-3.5 h-3.5 stroke-[2] text-[#693092]" />
                         <span>{role.employmentType || "Full Time"}</span>
                       </span>
-                      <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#FAF5FC] border border-[#EADBFA] text-[#693092] text-xs sm:text-[13px] font-medium">
+                      <span className="careers-role-pill inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#FAF5FC] border border-[#EADBFA] text-[#693092] text-xs sm:text-[13px] font-medium">
                         <TrendingUp className="w-3.5 h-3.5 stroke-[2] text-[#693092]" />
                         <span>{role.experience || "Entry Level"}</span>
                       </span>
                     </div>
 
                     {/* Right Column: Action Buttons */}
-                    <div className="flex items-center gap-3 sm:gap-3.5 shrink-0">
+                    <div className="careers-role-actions flex items-center gap-3 sm:gap-3.5 shrink-0">
                       <button
                         onClick={() => navigate(`/jobdescription?id=${role.id}`, { state: { job: role } })}
-                        className="bg-white border border-[#DDD6E5] hover:border-[#693092] text-[#141010] hover:text-[#693092] font-semibold text-xs sm:text-sm rounded-full px-6 py-2.5 transition-all cursor-pointer whitespace-nowrap shadow-xs"
+                        className="careers-role-btn-outline bg-white border border-[#DDD6E5] hover:border-[#693092] text-[#141010] hover:text-[#693092] font-semibold text-xs sm:text-sm rounded-full px-6 py-2.5 transition-all cursor-pointer whitespace-nowrap shadow-xs"
                       >
                         View Details
                       </button>
                       <button
                         onClick={() => handleApplyClick(role)}
-                        className="hover-brand-gradient bg-[#693092] hover:bg-[#58247c] text-white font-semibold text-xs sm:text-sm rounded-full px-6 py-2.5 flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap shadow-sm"
+                        className="careers-role-btn-primary hover-brand-gradient bg-[#693092] hover:bg-[#58247c] text-white font-semibold text-xs sm:text-sm rounded-full px-6 py-2.5 flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap shadow-sm"
                       >
                         <span>Apply Now</span>
                         <ArrowUpRight className="w-4 h-4 stroke-[2.2]" />
@@ -431,12 +431,12 @@ export default function CareersPage() {
                 ))}
 
                 {/* Stay Connected for New Roles Banner */}
-                <div className="mt-6 bg-white rounded-[24px] sm:rounded-[28px] border border-[#F0E6F4] p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-[0_4px_24px_rgba(0,0,0,0.02)] text-left">
-                  <div className="max-w-md">
-                    <h4 className="text-lg sm:text-xl font-bold text-[#141010] tracking-tight">
+                <div className="mt-6 bg-white rounded-[24px] sm:rounded-[28px] border border-[#F0E6F4] px-6 sm:px-8 md:px-10 py-10 sm:py-12 md:py-14 min-h-[140px] sm:min-h-[160px] md:min-h-[175px] flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-[0_4px_24px_rgba(0,0,0,0.02)] text-left careers-alert-banner">
+                  <div className="max-w-md lg:max-w-lg">
+                    <h4 className="careers-alert-title text-xl sm:text-2xl md:text-[26px] font-bold text-[#141010] tracking-tight">
                       Don&apos;t see the right role?
                     </h4>
-                    <p className="text-xs sm:text-[13px] text-[#716A7E] mt-1">
+                    <p className="careers-alert-desc text-sm sm:text-base md:text-[16px] text-[#554E62] leading-relaxed font-normal mt-1.5">
                       Subscribe to job alerts and be the first to know when new positions open.
                     </p>
                   </div>

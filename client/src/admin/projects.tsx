@@ -383,7 +383,7 @@ export default function ProjectsAdminPage() {
 
           {/* Projects Grid */}
           {!isLoading && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-8 items-stretch">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 mb-8 items-stretch">
               {filteredProjects.map((project) => (
                 <div
                   key={project.id}
@@ -502,7 +502,7 @@ export default function ProjectsAdminPage() {
             </div>
 
             {/* Modal Form */}
-            <form onSubmit={handleFormSubmit} className="p-6 space-y-4 overflow-y-auto max-h-[75vh]">
+            <form onSubmit={handleFormSubmit} className="p-6 space-y-4 overflow-y-auto max-h-[82dvh]">
               {/* Project Title */}
               <div>
                 <label className="block text-xs font-semibold text-[#4A4458] mb-1.5">

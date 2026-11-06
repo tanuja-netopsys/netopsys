@@ -871,8 +871,8 @@ export default function PermissionsPage() {
             </div>
 
             {/* Users Table */}
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
+            <div className="overflow-x-auto table-responsive-container">
+              <table className="w-full text-left border-collapse min-w-[640px]">
                 <thead>
                   <tr className="bg-gray-50/75 border-b border-gray-100 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
                     <th className="py-3.5 px-6">Administrator</th>

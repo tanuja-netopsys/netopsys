@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ChevronRight, Loader2 } from "lucide-react";
 import Navbar from "../componenets/navbar.tsx";
@@ -9,17 +9,15 @@ import BackToHeroButton from "../componenets/back-to-hero.tsx";
 // TYPES & DATA
 // ============================================================================
 
-export type BlogCategory = string;
-
 export interface BlogPost {
   id: string | number;
   slug: string;
   title: string;
   excerpt: string;
-  category: string;
-  tag: string;
-  tagBg: string;
-  tagColor: string;
+  category?: string;
+  tag?: string;
+  tagBg?: string;
+  tagColor?: string;
   graphicVariant: "featured" | "ml" | "nlp" | "erp";
   image?: string | null;
   date: string;
@@ -77,7 +75,7 @@ function BlogGraphic({
 
   return (
     <div
-      className={`relative w-full h-full min-h-[170px] sm:min-h-[190px] rounded-[20px] ${bg} flex items-center justify-center overflow-hidden select-none ${className}`}
+      className={`blogs-graphic-wrap relative w-full h-full min-h-[170px] sm:min-h-[190px] rounded-[20px] ${bg} flex items-center justify-center overflow-hidden select-none ${className}`}
     >
       <svg
         viewBox="0 0 400 230"
@@ -154,7 +152,6 @@ export default function BlogsPage() {
   const navigate = useNavigate();
   const [blogs, setBlogs] = useState<BlogPost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [activeCategory, setActiveCategory] = useState<string>("All");
 
   // Fetch blogs dynamically from backend API
   useEffect(() => {
@@ -180,20 +177,6 @@ export default function BlogsPage() {
     };
   }, []);
 
-  // Compute categories dynamically from database blogs only
-  const categories = useMemo(() => {
-    const dynamicCats = Array.from(
-      new Set(blogs.map((b) => b.category).filter(Boolean))
-    );
-    return ["All", ...dynamicCats];
-  }, [blogs]);
-
-  // Filter posts based on category
-  const filteredPosts = useMemo(() => {
-    if (activeCategory === "All") return blogs;
-    return blogs.filter((p) => p.category.toLowerCase() === activeCategory.toLowerCase());
-  }, [blogs, activeCategory]);
-
   return (
     <div
       className="min-h-screen w-full bg-[#F5EEF8] text-[#141010] flex flex-col overflow-x-clip selection:bg-[#693092] selection:text-white"
@@ -203,7 +186,7 @@ export default function BlogsPage() {
       <Navbar activeTab="Blogs" />
 
       {/* Main Interactive Blogs Section matching style and width of remaining pages */}
-      <main className="relative flex-1 w-full pt-24 sm:pt-28 md:pt-30 pb-16 sm:pb-20 lg:pb-24 select-none overflow-hidden">
+      <main className="blogs-page-main relative flex-1 w-full pt-24 sm:pt-28 md:pt-30 pb-16 sm:pb-20 lg:pb-24 select-none overflow-hidden">
         {/* Subtle background tech grid */}
         <div
           className="absolute inset-0 opacity-[0.035] pointer-events-none"
@@ -223,9 +206,9 @@ export default function BlogsPage() {
           {/* ===================================================================
               HEADER: Breadcrumb, Eyebrow, Main Title, Subtitle, View All Button
           =================================================================== */}
-          <div className="w-full mb-8 sm:mb-10">
+          <div className="blogs-page-header w-full mb-8 sm:mb-10">
             {/* Breadcrumb Navigation: Home > Blogs */}
-            <nav aria-label="Breadcrumb" className="mb-4 sm:mb-5">
+            <nav aria-label="Breadcrumb" className="blogs-page-breadcrumb mb-4 sm:mb-5">
               <ol className="inline-flex items-center gap-1.5 sm:gap-2 text-xs sm:text-[13.5px] font-medium">
                 <li>
                   <Link
@@ -261,28 +244,6 @@ export default function BlogsPage() {
             </div>
           </div>
 
-        {/* ===================================================================
-            CATEGORY FILTER TABS (Horizontal Pill Badges)
-        =================================================================== */}
-        <div className="flex items-center gap-2.5 overflow-x-auto pb-2 mb-8 no-scrollbar scroll-smooth">
-          {categories.map((cat) => {
-            const isActive = activeCategory === cat;
-            return (
-              <button
-                key={cat}
-                onClick={() => setActiveCategory(cat)}
-                className={`px-4.5 py-2 rounded-full text-[13px] font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0 border ${
-                  isActive
-                    ? "bg-[#5D2381] text-white border-[#5D2381] shadow-xs"
-                    : "bg-white text-[#4A4458] border-[#E2DBEA] hover:bg-[#FAF7FC]"
-                }`}
-              >
-                {cat}
-              </button>
-            );
-          })}
-        </div>
-
         {/* Loading Indicator */}
         {isLoading && (
           <div className="py-24 flex flex-col items-center justify-center gap-3 bg-white/60 backdrop-blur-xs rounded-[26px] border border-[#ECE4F2] mb-12">
@@ -292,27 +253,27 @@ export default function BlogsPage() {
         )}
 
         {/* Empty State */}
-        {!isLoading && filteredPosts.length === 0 && (
+        {!isLoading && blogs.length === 0 && (
           <div className="py-20 text-center bg-white/70 rounded-[26px] border border-[#ECE4F2] mb-12">
             <p className="text-base font-semibold text-[#141010] mb-1">No blog articles found</p>
-            <p className="text-xs text-[#716A7E]">Try selecting a different category or check back later.</p>
+            <p className="text-xs text-[#716A7E]">Check back soon for new articles.</p>
           </div>
         )}
 
         {/* ===================================================================
             3-COLUMN ARTICLES GRID
         =================================================================== */}
-        {!isLoading && filteredPosts.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12 items-stretch">
-            {filteredPosts.map((post) => (
+        {!isLoading && blogs.length > 0 && (
+          <div className="blogs-page-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12 items-stretch">
+            {blogs.map((post) => (
               <div
                 key={post.id}
                 onClick={() => navigate(`/blogs-detail?id=${post.id}`)}
-                className="group bg-white rounded-[24px] p-5 sm:p-5.5 border border-[#ECE4F2] shadow-[0_4px_20px_rgba(0,0,0,0.02)] hover:shadow-[0_8px_28px_rgba(93,35,129,0.07)] hover:-translate-y-1 transition-all flex flex-col justify-between cursor-pointer h-auto min-w-0 break-words"
+                className="blogs-page-card group bg-white rounded-[24px] p-5 sm:p-5.5 border border-[#ECE4F2] shadow-[0_4px_20px_rgba(0,0,0,0.02)] hover:shadow-[0_8px_28px_rgba(93,35,129,0.07)] hover:-translate-y-1 transition-all flex flex-col justify-between cursor-pointer h-auto min-w-0 break-words"
               >
                 <div>
                   {/* Visual Graphic Box or Custom Cover Image */}
-                  <div className="mb-4">
+                  <div className="blogs-page-card-media mb-4">
                     {post.image ? (
                       <div className="aspect-[16/10] rounded-[20px] overflow-hidden bg-gray-100 border border-black/5">
                         <img
@@ -326,26 +287,19 @@ export default function BlogsPage() {
                     )}
                   </div>
 
-                  {/* Category Pill Tag */}
-                  <span
-                    className={`inline-block px-2.5 py-0.5 rounded-full text-[11px] font-medium ${post.tagBg || "bg-[#F4EBFA]"} ${post.tagColor || "text-[#693092]"} mb-2.5`}
-                  >
-                    {post.tag || post.category}
-                  </span>
-
                   {/* Article Title */}
-                  <h3 className="text-lg sm:text-xl md:text-[21px] font-light tracking-[-0.025em] text-[#141010] leading-snug mb-2 group-hover:text-[#693092] transition-colors">
+                  <h3 className="blogs-page-card-title text-lg sm:text-xl md:text-[21px] font-light tracking-[-0.025em] text-[#141010] leading-snug mb-2 group-hover:text-[#693092] transition-colors">
                     {post.title}
                   </h3>
 
                   {/* Excerpt - Matches description sizes and text color */}
-                  <p className="text-[#554E62] text-xs sm:text-sm md:text-[14px] leading-relaxed font-normal mb-5">
+                  <p className="blogs-page-card-excerpt text-[#554E62] text-xs sm:text-sm md:text-[14px] leading-relaxed font-normal mb-5">
                     {post.excerpt}
                   </p>
                 </div>
 
                 {/* Card Footer: Date & Read more */}
-                <div className="flex items-center justify-between pt-3 border-t border-[#F5EEF8] text-xs mt-auto">
+                <div className="blogs-page-card-footer flex items-center justify-between pt-3 border-t border-[#F5EEF8] text-xs mt-auto">
                   <span className="text-[#8E869B]">
                     {post.date} · {post.readTime}
                   </span>

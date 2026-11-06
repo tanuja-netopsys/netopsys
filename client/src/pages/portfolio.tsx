@@ -70,28 +70,28 @@ const getInitialProjects = (): Project[] => {
 // Card Animation Variants: Current card moves UP and next card comes from DOWN when scrolling down
 const cardVariants: Variants = {
   enter: (dir: number) => ({
-    y: dir >= 0 ? 110 : -110,
+    y: dir >= 0 ? 60 : -60,
     opacity: 0,
-    scale: 0.97,
+    scale: 0.98,
   }),
   center: {
     y: 0,
     opacity: 1,
     scale: 1,
     transition: {
-      y: { type: "spring" as const, stiffness: 280, damping: 26 },
-      opacity: { duration: 0.35, ease: "easeOut" },
-      scale: { duration: 0.35, ease: "easeOut" },
+      y: { type: "spring" as const, stiffness: 300, damping: 28 },
+      opacity: { duration: 0.3, ease: "easeOut" },
+      scale: { duration: 0.3, ease: "easeOut" },
     },
   },
   exit: (dir: number) => ({
-    y: dir >= 0 ? -110 : 110,
+    y: dir >= 0 ? -60 : 60,
     opacity: 0,
-    scale: 0.97,
+    scale: 0.98,
     transition: {
-      y: { type: "spring" as const, stiffness: 280, damping: 26 },
-      opacity: { duration: 0.25, ease: "easeIn" },
-      scale: { duration: 0.25, ease: "easeIn" },
+      y: { type: "spring" as const, stiffness: 300, damping: 28 },
+      opacity: { duration: 0.22, ease: "easeIn" },
+      scale: { duration: 0.22, ease: "easeIn" },
     },
   }),
 };
@@ -167,15 +167,27 @@ export default function PortfolioPage() {
     if (!el) return;
 
     const onWheel = (e: WheelEvent) => {
-      if (Math.abs(e.deltaY) < 20) return;
-
-      if (isTransitioningRef.current) {
-        if (
-          (e.deltaY > 0 && activeIndexRef.current < projectsLengthRef.current - 1) ||
-          (e.deltaY < 0 && activeIndexRef.current > 0)
-        ) {
+      // If the window is scrolled down towards the footer:
+      if (window.scrollY > 20) {
+        if (e.deltaY < 0) {
+          // User is scrolling UP to get back to the portfolio:
+          // Smooth scroll to top without changing project cards so layout never overlaps header!
+          window.scrollTo({ top: 0, behavior: "smooth" });
           e.preventDefault();
         }
+        // Allow native scroll down towards footer
+        return;
+      }
+
+      // When at the top of the page (window.scrollY <= 20):
+      // Prevent accidental micro-scrolls from scrolling window
+      if (Math.abs(e.deltaY) < 18) {
+        e.preventDefault();
+        return;
+      }
+
+      if (isTransitioningRef.current) {
+        e.preventDefault();
         return;
       }
 
@@ -183,23 +195,27 @@ export default function PortfolioPage() {
         // Scrolling DOWN
         if (activeIndexRef.current < projectsLengthRef.current - 1) {
           e.preventDefault();
+          window.scrollTo({ top: 0, behavior: "instant" });
           isTransitioningRef.current = true;
           setDirection(1);
           setActiveIndex((prev) => prev + 1);
           setTimeout(() => {
             isTransitioningRef.current = false;
-          }, 600);
+          }, 550);
+        } else {
+          // On last project, allow scrolling down to footer
         }
       } else if (e.deltaY < 0) {
         // Scrolling UP
         if (activeIndexRef.current > 0) {
           e.preventDefault();
+          window.scrollTo({ top: 0, behavior: "instant" });
           isTransitioningRef.current = true;
           setDirection(-1);
           setActiveIndex((prev) => prev - 1);
           setTimeout(() => {
             isTransitioningRef.current = false;
-          }, 600);
+          }, 550);
         }
       }
     };
@@ -215,25 +231,34 @@ export default function PortfolioPage() {
       if (Math.abs(diffY) < 45) return;
       if (isTransitioningRef.current) return;
 
+      if (window.scrollY > 20) {
+        if (diffY < 0) {
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+        return;
+      }
+
       if (diffY > 0) {
         // Swiped UP -> Show next project
         if (activeIndexRef.current < projectsLengthRef.current - 1) {
+          window.scrollTo({ top: 0, behavior: "instant" });
           isTransitioningRef.current = true;
           setDirection(1);
           setActiveIndex((prev) => prev + 1);
           setTimeout(() => {
             isTransitioningRef.current = false;
-          }, 600);
+          }, 550);
         }
       } else {
         // Swiped DOWN -> Show previous project
         if (activeIndexRef.current > 0) {
+          window.scrollTo({ top: 0, behavior: "instant" });
           isTransitioningRef.current = true;
           setDirection(-1);
           setActiveIndex((prev) => prev - 1);
           setTimeout(() => {
             isTransitioningRef.current = false;
-          }, 600);
+          }, 550);
         }
       }
     };
@@ -272,7 +297,7 @@ export default function PortfolioPage() {
       {/* Main Interactive Portfolio Section with Scroll Interactivity */}
       <main
         ref={sectionRef}
-        className="relative flex-1 w-full pt-24 sm:pt-28 md:pt-30 pb-14 sm:pb-18 select-none overflow-hidden"
+        className="portfolio-page-main relative flex-1 w-full pt-24 sm:pt-28 md:pt-30 pb-14 sm:pb-18 select-none overflow-hidden"
       >
         {/* Subtle background tech grid */}
         <div
@@ -291,7 +316,7 @@ export default function PortfolioPage() {
         {/* Main Full-Width Container matching other pages */}
         <div className="relative w-full max-w-[2100px] mx-auto px-4 sm:px-6 md:px-8 lg:px-10 xl:px-14 2xl:px-18">
           {/* Breadcrumb Navigation: Home > Portfolio */}
-          <nav aria-label="Breadcrumb" className="mb-4 sm:mb-6">
+          <nav aria-label="Breadcrumb" className="portfolio-page-breadcrumb mb-4 sm:mb-6">
             <ol className="inline-flex items-center gap-1.5 sm:gap-2 text-xs sm:text-[13.5px] font-medium">
               <li>
                 <Link
@@ -320,36 +345,36 @@ export default function PortfolioPage() {
 
           {/* 2-Column Interactive Showcase Layout */}
           {!isLoading && (
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 xl:gap-16 items-start">
+            <div className="portfolio-page-grid grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 xl:gap-16 items-start">
               {/* Left Column: Heading, Subtitle & Interactive Project Stepper */}
-              <div className="lg:col-span-5 flex flex-col justify-start text-left pt-2">
+              <div className="portfolio-page-left-col lg:col-span-5 flex flex-col justify-start text-left pt-2">
 
                 {/* Main Heading */}
-                <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[3.85rem] xl:text-[4.25rem] font-light tracking-[-0.035em] leading-[1.04] text-[#141010] mb-4 sm:mb-5">
+                <h1 className="portfolio-page-title text-4xl sm:text-5xl md:text-6xl lg:text-[3.85rem] xl:text-[4.25rem] font-light tracking-[-0.035em] leading-[1.04] text-[#141010] mb-4 sm:mb-5">
                   AI Solutions <br />
                   <span className="text-[#693092]">in Action</span>
                 </h1>
 
                 {/* Subtitle */}
-                <p className="text-[#554E62] leading-relaxed font-normal text-sm sm:text-base md:text-[16px] lg:text-[17px] max-w-lg mb-8 sm:mb-12">
+                <p className="portfolio-page-desc text-[#554E62] leading-relaxed font-normal text-sm sm:text-base md:text-[16px] lg:text-[17px] max-w-lg mb-8 sm:mb-12">
                   Explore our transformative AI projects that have revolutionized business operations and delivered measurable results.
                 </p>
 
                 {/* Stepper List of Projects */}
-                <div className="flex flex-col w-full max-w-lg">
+                <div className="portfolio-page-stepper flex flex-col w-full max-w-lg">
                   {projects.map((project, index) => {
                     const isSelected = index === activeIndex;
                     const itemNumber = String(index + 1).padStart(2, "0");
                     const isLast = index === projects.length - 1;
 
                     return (
-                      <div key={project.id} className="flex items-start gap-4 sm:gap-5 relative">
+                      <div key={project.id} className="portfolio-page-step flex items-start gap-4 sm:gap-5 relative">
                         {/* Column 1: Number Circle & Connecting Vertical Line */}
                         <div className="flex flex-col items-center shrink-0 pt-0.5">
                           <button
                             type="button"
                             onClick={() => handleSelectProject(index)}
-                            className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-xs font-semibold transition-all duration-300 cursor-pointer ${
+                            className={`portfolio-page-step-btn w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-xs font-semibold transition-all duration-300 cursor-pointer ${
                               isSelected
                                 ? "bg-[#693092] text-white shadow-md ring-4 ring-[#693092]/15 scale-105"
                                 : "border border-[#D6C5E5] bg-white/70 text-[#716A7E] hover:border-[#693092] hover:text-[#693092]"
@@ -360,18 +385,18 @@ export default function PortfolioPage() {
 
                           {/* Connecting Line to next step */}
                           {!isLast && (
-                            <div className="w-[1.5px] bg-[#E2D5EE] min-h-[44px] sm:min-h-[50px] my-1.5" />
+                            <div className="portfolio-page-step-line w-[1.5px] bg-[#E2D5EE] min-h-[44px] sm:min-h-[50px] my-1.5" />
                           )}
                         </div>
 
                         {/* Column 2: Title, Underline & Arrow */}
                         <div
                           onClick={() => handleSelectProject(index)}
-                          className="flex-1 pb-7 sm:pb-9 cursor-pointer group"
+                          className="portfolio-page-step-content flex-1 pb-7 sm:pb-9 cursor-pointer group"
                         >
                           <div className="flex items-center justify-between gap-3">
                             <h3
-                              className={`text-base sm:text-lg md:text-[19px] leading-snug transition-colors duration-200 ${
+                              className={`portfolio-page-step-title text-base sm:text-lg md:text-[19px] leading-snug transition-colors duration-200 ${
                                 isSelected
                                   ? "font-semibold text-[#141010]"
                                   : "font-medium text-[#554E62] group-hover:text-[#141010]"
@@ -402,7 +427,7 @@ export default function PortfolioPage() {
               </div>
 
               {/* Right Column: Featured Dark Showcase Card with Up/Down Slide Transition */}
-              <div className="lg:col-span-7 w-full flex flex-col relative overflow-hidden rounded-[30px] sm:rounded-[36px] lg:rounded-[40px] mt-8 sm:mt-12 lg:mt-20 xl:mt-28">
+              <div className="portfolio-page-card-wrap lg:col-span-7 w-full flex flex-col relative overflow-hidden rounded-[30px] sm:rounded-[36px] lg:rounded-[40px] mt-8 sm:mt-12 lg:mt-20 xl:mt-28">
                 <AnimatePresence initial={false} mode="wait" custom={direction}>
                   <motion.div
                     key={activeIndex}
@@ -411,7 +436,7 @@ export default function PortfolioPage() {
                     initial={false}
                     animate="center"
                     exit="exit"
-                    className="relative w-full rounded-[30px] sm:rounded-[36px] lg:rounded-[40px] bg-gradient-to-br from-[#090514] via-[#0E071F] to-[#180A2E] text-white border border-[#3E255B]/60 shadow-[0_25px_60px_rgba(15,7,30,0.35)] overflow-hidden p-7 sm:p-9 md:p-11 lg:p-13 h-auto min-h-[480px] lg:min-h-[540px] flex flex-col justify-between min-w-0 break-words"
+                    className="portfolio-page-card relative w-full rounded-[30px] sm:rounded-[36px] lg:rounded-[40px] bg-gradient-to-br from-[#090514] via-[#0E071F] to-[#180A2E] text-white border border-[#3E255B]/60 shadow-[0_25px_60px_rgba(15,7,30,0.35)] overflow-hidden p-7 sm:p-9 md:p-11 lg:p-13 h-auto min-h-[480px] lg:min-h-[540px] flex flex-col justify-between min-w-0 break-words"
                   >
                     {/* Background Photography with enhanced visibility */}
                     {activeProject.image && (
@@ -429,32 +454,32 @@ export default function PortfolioPage() {
                     <div className="absolute -bottom-16 -left-16 w-80 h-80 rounded-full bg-[#693092]/25 blur-[100px] pointer-events-none" />
 
                     {/* Top Group: Icon Box & Status Pill */}
-                    <div className="relative z-10 flex flex-col items-start mb-6 sm:mb-8">
+                    <div className="portfolio-page-card-top relative z-10 flex flex-col items-start mb-6 sm:mb-8">
                       {/* Cyan Lightning Bolt in Glass Square */}
-                      <div className="w-12 h-12 rounded-2xl bg-white/[0.07] border border-white/10 backdrop-blur-md flex items-center justify-center text-cyan-400 mb-4 sm:mb-5 shadow-inner">
+                      <div className="portfolio-page-card-icon w-12 h-12 rounded-2xl bg-white/[0.07] border border-white/10 backdrop-blur-md flex items-center justify-center text-cyan-400 mb-4 sm:mb-5 shadow-inner">
                         <Zap className="w-5 h-5 fill-cyan-400/20 text-cyan-400 stroke-[2.2]" />
                       </div>
 
                       {/* Deployed Status Pill */}
-                      <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#032318]/70 border border-emerald-500/40 text-[#34D399] text-xs sm:text-[13px] font-medium backdrop-blur-md">
+                      <span className="portfolio-page-card-pill inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#032318]/70 border border-emerald-500/40 text-[#34D399] text-xs sm:text-[13px] font-medium backdrop-blur-md">
                         <span className="w-2 h-2 rounded-full bg-[#34D399]" />
                         <span>{activeProject.status || "Deployed"}</span>
                       </span>
                     </div>
 
                     {/* Middle Group: Title, Description & Tags */}
-                    <div className="relative z-10 mb-8 sm:mb-10 text-left">
-                      <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-[2.65rem] font-bold text-white tracking-tight leading-tight mb-4 sm:mb-5">
+                    <div className="portfolio-page-card-mid relative z-10 mb-8 sm:mb-10 text-left">
+                      <h2 className="portfolio-page-card-title text-2xl sm:text-3xl lg:text-4xl xl:text-[2.65rem] font-bold text-white tracking-tight leading-tight mb-4 sm:mb-5">
                         {activeProject.title}
                       </h2>
 
-                      <p className="text-white/75 text-sm sm:text-base lg:text-[16px] leading-relaxed font-normal max-w-xl mb-6 sm:mb-8">
+                      <p className="portfolio-page-card-desc text-white/75 text-sm sm:text-base lg:text-[16px] leading-relaxed font-normal max-w-xl mb-6 sm:mb-8">
                         {activeProject.description}
                       </p>
                     </div>
 
                     {/* Bottom Action: Learn more with Arrow */}
-                    <div className="relative z-10 pt-4 text-left">
+                    <div className="portfolio-page-card-cta relative z-10 pt-4 text-left">
                       <button
                         type="button"
                         onClick={() =>

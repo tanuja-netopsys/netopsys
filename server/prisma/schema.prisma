@@ -372,7 +372,6 @@ model blogs {
   slug            String   @unique
   title           String
   excerpt         String?
-  category        String   @default("AI Automation")
   tag             String?  @default("AI Automation")
   tag_bg          String?  @default("bg-[#F4EBFA]")
   tag_color       String?  @default("text-[#693092]")

@@ -10,7 +10,7 @@ export interface BlogPostDetail {
   slug: string;
   title: string;
   excerpt: string;
-  category: string;
+  category?: string;
   tag?: string;
   tagBg?: string;
   tagColor?: string;
@@ -35,7 +35,7 @@ export interface BlogSection {
 }
 
 export interface ParsedBlogData {
-  category: string;
+  category?: string;
   tagBg: string;
   tagColor: string;
   variant: "featured" | "ml" | "nlp" | "erp";
@@ -69,14 +69,14 @@ function HeroGraphicCard({
 }) {
   if (image) {
     return (
-      <div className="w-full h-[220px] sm:h-[260px] md:h-[280px] rounded-[20px] overflow-hidden border border-[#ECE4F2] shadow-xs bg-[#EAE0F5]">
+      <div className="w-full h-[220px] sm:h-[260px] md:h-[280px] rounded-[20px] overflow-hidden border border-[#ECE4F2] shadow-xs bg-[#EAE0F5] blogdetail-graphic-wrap">
         <img src={image} alt="Article visual" className="w-full h-full object-cover" />
       </div>
     );
   }
 
   return (
-    <div className="relative w-full h-[220px] sm:h-[260px] md:h-[280px] rounded-[20px] bg-[#EAE0F5] flex items-center justify-center overflow-hidden select-none border border-[#E2D5EF]/70 shadow-xs">
+    <div className="relative w-full h-[220px] sm:h-[260px] md:h-[280px] rounded-[20px] bg-[#EAE0F5] flex items-center justify-center overflow-hidden select-none border border-[#E2D5EF]/70 shadow-xs blogdetail-graphic-wrap">
       <svg
         viewBox="0 0 460 270"
         className="w-full h-full object-contain p-4"
@@ -574,7 +574,7 @@ export default function BlogsDetailPage() {
       <Navbar activeTab="Blogs" />
 
       {/* Main Container */}
-      <main className="relative flex-1 w-full pt-24 sm:pt-28 md:pt-30 pb-16 sm:pb-20 lg:pb-24 overflow-hidden">
+      <main className="relative flex-1 w-full pt-24 sm:pt-28 md:pt-30 pb-16 sm:pb-20 lg:pb-24 overflow-hidden blogdetail-page-main">
         {/* Subtle background tech grid */}
         <div
           className="absolute inset-0 opacity-[0.035] pointer-events-none"
@@ -591,7 +591,7 @@ export default function BlogsDetailPage() {
 
         <div className="relative w-full max-w-[2100px] mx-auto px-4 sm:px-6 md:px-8 lg:px-10 xl:px-14 2xl:px-18">
           {/* Back to blogs link button */}
-          <div className="mb-5 sm:mb-6">
+          <div className="mb-5 sm:mb-6 blogdetail-back-wrap">
             <button
               type="button"
               onClick={() => navigate("/blogs")}
@@ -634,12 +634,12 @@ export default function BlogsDetailPage() {
                   CARD 1: TOP HERO CARD (Single white card with title + graphic)
                   Matches Image 1 exactly
               =================================================================== */}
-              <header className="bg-white rounded-[24px] sm:rounded-[28px] p-6 sm:p-8 md:p-10 border border-[#ECE4F2] shadow-[0_4px_24px_rgba(0,0,0,0.03)]">
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+              <header className="bg-white rounded-[24px] sm:rounded-[28px] p-6 sm:p-8 md:p-10 border border-[#ECE4F2] shadow-[0_4px_24px_rgba(0,0,0,0.03)] blogdetail-hero-card">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center blogdetail-hero-grid">
                   {/* Left Column: Breadcrumb, Pill, Display Title, Excerpt, Author */}
                   <div className="lg:col-span-7 flex flex-col justify-start">
-                    {/* Breadcrumb Navigation: Home / Blog  AI Automation */}
-                    <nav aria-label="Breadcrumb" className="mb-3.5">
+                    {/* Breadcrumb Navigation */}
+                    <nav aria-label="Breadcrumb" className="mb-3.5 blogdetail-breadcrumb">
                       <ol className="inline-flex items-center gap-1.5 sm:gap-2 text-xs sm:text-[13px] font-medium text-[#716A7E]">
                         <li>
                           <Link
@@ -663,21 +663,14 @@ export default function BlogsDetailPage() {
                         </li>
                         <li className="truncate max-w-[200px] sm:max-w-xs">
                           <span className="text-[#693092] font-semibold">
-                            {parsed.category}
+                            {parsed.fullTitle}
                           </span>
                         </li>
                       </ol>
                     </nav>
 
-                    {/* Category Pill Tag */}
-                    <div className="inline-block mb-3.5">
-                      <span className="px-3.5 py-1 rounded-full text-xs font-semibold bg-[#F6EEFA] text-[#693092]">
-                        {parsed.category}
-                      </span>
-                    </div>
-
                     {/* Main Article Title: Standard Netopsys heading size and font-light style */}
-                    <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] font-light tracking-[-0.035em] text-[#141010] leading-[1.08] mb-4 sm:mb-5">
+                    <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] font-light tracking-[-0.035em] text-[#141010] leading-[1.08] mb-4 sm:mb-5 blogdetail-hero-title">
                       {parsed.titleMain}{" "}
                       {parsed.titleHighlight && (
                         <span className="text-[#693092]">{parsed.titleHighlight}</span>
@@ -685,12 +678,12 @@ export default function BlogsDetailPage() {
                     </h1>
 
                     {/* Excerpt subtitle: Standard Netopsys description style and size */}
-                    <p className="text-[#554E62] text-sm sm:text-base md:text-[16.5px] leading-relaxed font-normal mb-6 max-w-3xl">
+                    <p className="text-[#554E62] text-sm sm:text-base md:text-[16.5px] leading-relaxed font-normal mb-6 max-w-3xl blogdetail-hero-desc">
                       {parsed.excerpt}
                     </p>
 
                     {/* Author Meta Row: Avatar, Name, Date, Read Time */}
-                    <div className="flex items-center gap-3 pt-2">
+                    <div className="flex items-center gap-3 pt-2 blogdetail-hero-author">
                       <div className="w-9 h-9 rounded-full bg-[#EADBFA] text-[#693092] font-bold text-xs flex items-center justify-center shrink-0 select-none">
                         {parsed.authorInitials}
                       </div>
@@ -717,22 +710,22 @@ export default function BlogsDetailPage() {
                   Left: Content Card + Magenta Quote Card
                   Right: 4 Sidebar Widgets (On this page, Key takeaways, Explore, Share)
               =================================================================== */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-7 items-start">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-7 items-start blogdetail-body-grid">
                 {/* ---------------------------------------------------------------
                     LEFT COLUMN: Content Card + Magenta Quote Callout
                 ---------------------------------------------------------------- */}
                 <div className="lg:col-span-8 space-y-6">
                   {/* Card A: Numbered Article Content Canvas */}
-                  <div className="bg-white rounded-[24px] sm:rounded-[28px] p-6 sm:p-8 md:p-10 border border-[#ECE4F2] shadow-[0_4px_24px_rgba(0,0,0,0.03)]">
+                  <div className="bg-white rounded-[24px] sm:rounded-[28px] p-6 sm:p-8 md:p-10 border border-[#ECE4F2] shadow-[0_4px_24px_rgba(0,0,0,0.03)] blogdetail-content-card">
                     {/* Lead Paragraph with Amber/Gold Left Accent Border - Standard description size */}
-                    <div className="border-l-2 border-[#FBAE42] pl-4 sm:pl-5 py-1 mb-8 sm:mb-9">
+                    <div className="border-l-2 border-[#FBAE42] pl-4 sm:pl-5 py-1 mb-8 sm:mb-9 blogdetail-lead">
                       <p className="text-[#554E62] text-sm sm:text-base md:text-[16.5px] leading-relaxed font-normal">
                         {parsed.leadParagraph}
                       </p>
                     </div>
 
                     {/* Numbered Sections (01, 02, 03, ...) */}
-                    <div className="space-y-8 sm:space-y-9">
+                    <div className="space-y-8 sm:space-y-9 blogdetail-sections-wrap">
                       {parsed.sections.map((section, idx) => (
                         <section
                           key={section.id || idx}
@@ -744,13 +737,13 @@ export default function BlogsDetailPage() {
                             <span className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs sm:text-[13px] font-bold bg-[#F6EEFA] text-[#693092] select-none shrink-0">
                               {String(idx + 1).padStart(2, "0")}
                             </span>
-                            <h2 className="text-xl sm:text-2xl lg:text-[1.65rem] font-bold tracking-tight leading-snug text-[#141010]">
+                            <h2 className="text-xl sm:text-2xl lg:text-[1.65rem] font-bold tracking-tight leading-snug text-[#141010] blogdetail-section-title">
                               {section.title}
                             </h2>
                           </div>
 
                           {/* Body text: Unified description size matching remaining pages */}
-                          <p className="text-[#554E62] text-sm sm:text-base md:text-[16.5px] leading-relaxed font-normal pl-0 sm:pl-0.5">
+                          <p className="text-[#554E62] text-sm sm:text-base md:text-[16.5px] leading-relaxed font-normal pl-0 sm:pl-0.5 blogdetail-section-body">
                             {section.content}
                           </p>
                         </section>
@@ -759,7 +752,7 @@ export default function BlogsDetailPage() {
                   </div>
 
                   {/* Card B: Quote Callout Card (Vibrant Magenta #A12F91 matching screenshot) */}
-                  <div className="bg-[#A12F91] text-white rounded-[24px] sm:rounded-[28px] p-7 sm:p-9 relative overflow-hidden shadow-sm">
+                  <div className="bg-[#A12F91] text-white rounded-[24px] sm:rounded-[28px] p-7 sm:p-9 relative overflow-hidden shadow-sm blogdetail-quote-card">
                     {/* Ambient subtle circles in bottom right */}
                     <div className="absolute -right-8 -bottom-8 w-36 h-36 rounded-full bg-white/10 pointer-events-none" />
                     <div className="absolute right-12 bottom-3 w-14 h-14 rounded-full bg-[#FBAE42]/40 pointer-events-none" />
@@ -778,9 +771,9 @@ export default function BlogsDetailPage() {
                 {/* ---------------------------------------------------------------
                     RIGHT COLUMN: 4 Sidebar Cards
                 ---------------------------------------------------------------- */}
-                <div className="lg:col-span-4 space-y-6">
+                <div className="lg:col-span-4 space-y-6 blogdetail-sidebar">
                   {/* Widget 1: On this page (TOC with active indicator) */}
-                  <div className="bg-white rounded-[20px] p-6 sm:p-7 border border-[#ECE4F2] shadow-sm">
+                  <div className="bg-white rounded-[20px] p-6 sm:p-7 border border-[#ECE4F2] shadow-sm blogdetail-sidebar-card">
                     <h3 className="text-sm sm:text-[15px] font-bold tracking-wider uppercase text-[#141010] mb-4 select-none">
                       On this page
                     </h3>
@@ -811,7 +804,7 @@ export default function BlogsDetailPage() {
                   </div>
 
                   {/* Widget 2: Key takeaways (Dark Navy #2A124E matching screenshot) */}
-                  <div className="bg-[#2A124E] text-white rounded-[22px] p-6 sm:p-7 relative overflow-hidden shadow-md">
+                  <div className="bg-[#2A124E] text-white rounded-[22px] p-6 sm:p-7 relative overflow-hidden shadow-md blogdetail-sidebar-card">
                     {/* Decorative corner aura */}
                     <div className="absolute top-2 right-2 w-16 h-16 rounded-full bg-white/5 pointer-events-none" />
                     <h3 className="text-lg sm:text-xl font-bold text-white mb-4 select-none">
@@ -828,7 +821,7 @@ export default function BlogsDetailPage() {
                   </div>
 
                   {/* Widget 3: Share this article */}
-                  <div className="bg-white rounded-[20px] p-6 sm:p-7 border border-[#ECE4F2] shadow-sm">
+                  <div className="bg-white rounded-[20px] p-6 sm:p-7 border border-[#ECE4F2] shadow-sm blogdetail-sidebar-card">
                     <h3 className="text-sm sm:text-[15px] font-bold tracking-wider uppercase text-[#141010] mb-4 select-none">
                       Share this article
                     </h3>
@@ -884,18 +877,18 @@ export default function BlogsDetailPage() {
                   CARD 5: BOTTOM CTA BANNER
               =================================================================== */}
               <div className="mt-8 sm:mt-12 w-full">
-                <div className="w-full bg-[#2A1450] rounded-2xl sm:rounded-3xl px-6 sm:px-10 lg:px-14 py-10 sm:py-14 shadow-xl shadow-[#2A1450]/20 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                <div className="w-full bg-[#2A1450] rounded-2xl sm:rounded-3xl px-6 sm:px-10 lg:px-14 py-10 sm:py-14 shadow-xl shadow-[#2A1450]/20 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 cta-banner-card">
                   <div>
-                    <h3 className="text-2xl sm:text-3xl md:text-4xl font-light tracking-[-0.035em] leading-[1.1] text-white mb-2">
+                    <h3 className="text-2xl sm:text-3xl md:text-4xl font-light tracking-[-0.035em] leading-[1.1] text-white mb-2 cta-banner-title">
                       Ready to transform your enterprise workflows?
                     </h3>
-                    <p className="text-white/80 text-sm sm:text-base md:text-[16.5px] leading-relaxed font-normal">
+                    <p className="text-white/80 text-sm sm:text-base md:text-[16.5px] leading-relaxed font-normal cta-banner-subtitle">
                       Let&apos;s build intelligent solutions together
                     </p>
                   </div>
                   <Link
                     to="/contact"
-                    className="hover-brand-gradient inline-flex items-center justify-center bg-[#FBAE42] text-black hover:text-white font-medium text-xs sm:text-sm px-7 py-3 rounded-full shadow-md whitespace-nowrap cursor-pointer transition-colors"
+                    className="hover-brand-gradient inline-flex items-center justify-center bg-[#FBAE42] text-black hover:text-white font-medium text-xs sm:text-sm px-7 py-3 rounded-full shadow-md whitespace-nowrap cursor-pointer transition-colors cta-banner-btn"
                   >
                     Let&apos;s Connect
                   </Link>

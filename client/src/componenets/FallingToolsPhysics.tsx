@@ -72,7 +72,46 @@ export default function FallingToolsPhysics({ children }: FallingToolsPhysicsPro
     let height = container.clientHeight || 700;
     const isMobile = width < 640;
     const isTablet = width < 1024;
-    const baseRadius = isMobile ? 16 : isTablet ? 22 : 26;
+
+    // Dynamic radius calculation: strictly adapts for 150% scale while preserving 100%, 125%, 4K, tablet, and mobile
+    const getBaseRadius = () => {
+      const currentWidth = container.clientWidth || window.innerWidth || width;
+      const currentHeight = window.innerHeight || height;
+      const currentDpr = window.devicePixelRatio || 1;
+
+      // 1. Mobile phone devices (< 640px)
+      if (currentWidth < 640) return 15;
+
+      // 2. Strict check for 100% desktop scale (1080p @ 100%: dpr ~ 1.0, width >= 1500, height >= 800)
+      const is100Scale =
+        (Math.abs(currentDpr - 1.0) < 0.12 && currentWidth >= 1500) ||
+        (currentWidth >= 1700 && currentHeight >= 820);
+
+      // 3. Strict check for 125% desktop scale (1080p @ 125%: dpr ~ 1.25, width ~1536, height ~760)
+      const is125Scale =
+        Math.abs(currentDpr - 1.25) < 0.08 ||
+        (currentWidth >= 1400 && currentWidth < 1700 && currentHeight >= 740);
+
+      if (is100Scale || is125Scale) {
+        return 26; // Default desktop size strictly preserved for 100% and 125% screens
+      }
+
+      // 4. Strict check for 150% scale:
+      // - devicePixelRatio is ~1.5 (1.35 to 1.65)
+      // - OR compact viewport height on 1080p displays at 150% Windows scaling (height <= 720px)
+      const is150Scale =
+        (currentDpr >= 1.35 && currentDpr <= 1.65) ||
+        (currentHeight > 0 && currentHeight <= 720);
+
+      if (is150Scale) {
+        return 12; // Noticeably smaller tool size for 150% scale (diameter ~24px vs 52px)
+      }
+
+      // Tablet fallback (< 1024px at standard DPI)
+      if (currentWidth < 1024) return 20;
+
+      return 26; // Default desktop size
+    };
 
     // High DPI setup for crystal crisp logos on Retina/4K
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -380,7 +419,8 @@ export default function FallingToolsPhysics({ children }: FallingToolsPhysicsPro
         }
 
         const img = loadedImages[spawnIndex % loadedImages.length];
-        const r = baseRadius * (0.92 + Math.random() * 0.16);
+        const currentRadius = getBaseRadius();
+        const r = currentRadius * (0.92 + Math.random() * 0.16);
         const padding = r + 20;
         const targetX =
           padding + slots[spawnIndex] * Math.max(1, width - padding * 2) + (Math.random() - 0.5) * r;
@@ -424,10 +464,10 @@ export default function FallingToolsPhysics({ children }: FallingToolsPhysicsPro
           ctx.translate(x, y);
           ctx.rotate(angle);
 
-          // Soft drop shadow
+          // Soft drop shadow scaled to tool radius
           ctx.shadowColor = "rgba(0, 0, 0, 0.55)";
-          ctx.shadowBlur = 10;
-          ctx.shadowOffsetY = 4;
+          ctx.shadowBlur = r < 18 ? 6 : 10;
+          ctx.shadowOffsetY = r < 18 ? 2.5 : 4;
 
           // Draw tool icon
           if (item.img && item.img.complete && item.img.naturalWidth > 0) {
@@ -451,7 +491,7 @@ export default function FallingToolsPhysics({ children }: FallingToolsPhysicsPro
     // Intersection observer triggers tool rain EVERY TIME footer scrolls into view
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && entry.intersectionRatio >= 0.2) {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.05) {
           if (!hasSpawned) {
             spawnTools();
           }
@@ -461,11 +501,11 @@ export default function FallingToolsPhysics({ children }: FallingToolsPhysicsPro
           hasSpawned = false;
         }
       },
-      { threshold: [0, 0.2] }
+      { threshold: [0, 0.05, 0.2] }
     );
     observer.observe(container);
 
-    // Responsive window resize
+    // Responsive window resize & dynamic scale adaptation
     let resizeTimer: number | null = null;
     const handleResize = () => {
       if (resizeTimer) window.clearTimeout(resizeTimer);
@@ -494,6 +534,14 @@ export default function FallingToolsPhysics({ children }: FallingToolsPhysicsPro
           x: width + wallThickness / 2,
           y: height / 2,
         });
+
+        // Automatically respawn tools if window scale or target tool size changes
+        const currentTargetRadius = getBaseRadius();
+        if (activeBodies.length > 0 && Math.abs(activeBodies[0].radius - currentTargetRadius) > 3) {
+          clearTools();
+          hasSpawned = false;
+          spawnTools();
+        }
       }, 150);
     };
 

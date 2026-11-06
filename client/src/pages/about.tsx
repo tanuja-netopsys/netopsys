@@ -62,7 +62,7 @@ export default function AboutPage() {
           {/* 1. HERO SECTION: Exactly matching Image 2                         */}
           {/*    Pioneering Digital Excellence + Semicircular Arch Infographic  */}
           {/* ================================================================ */}
-          <section className="w-full mb-10 sm:mb-14 lg:mb-16">
+          <section className="about-page-hero-section w-full mb-10 sm:mb-14 lg:mb-16">
             {/* Screen reader semantic header for accessibility and SEO */}
             <div className="sr-only">
               <h1>Pioneering Digital Excellence</h1>
@@ -81,7 +81,7 @@ export default function AboutPage() {
               initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.55 }}
-              className="w-full flex justify-start items-center select-none"
+              className="about-page-hero-svg-wrap w-full flex justify-start items-center select-none"
             >
               {/* 
                 Unified SVG matching Image 2 (media_1793605533565_baa831b8.jpg)
@@ -89,7 +89,7 @@ export default function AboutPage() {
               */}
               <svg
                 viewBox="0 0 900 435"
-                className="w-full h-auto overflow-visible select-none"
+                className="about-page-hero-svg w-full h-auto overflow-visible select-none"
                 aria-label="Pioneering Digital Excellence - Key Metrics and Capabilities Infographic"
               >
                 <defs>
@@ -550,18 +550,18 @@ export default function AboutPage() {
           {/* ================================================================ */}
           {/* 3. TIMELINE SECTIONS: MISSION & GLOBAL PRESENCE                  */}
           {/* ================================================================ */}
-          <section className="relative mb-14 sm:mb-20 lg:mb-24">
+          <section className="about-page-timeline-section relative mb-14 sm:mb-20 lg:mb-24">
             {/* Left Vertical Timeline Line with Golden Indicator Nodes */}
-            <div className="hidden lg:block absolute left-0 top-6 bottom-12 w-[1px]">
+            <div className="about-page-timeline-line hidden lg:block absolute left-0 top-6 bottom-12 w-[1px]">
               <div className="w-full h-full bg-gradient-to-b from-[#FBAE42] via-[#BE3093]/40 to-[#FBAE42]" />
               <div className="absolute top-0 -left-[7px] w-[15px] h-[15px] rounded-full border-2 border-[#FBAE42] bg-[#F5EEF8] shadow-sm" />
               <div className="absolute top-[52%] -left-[7px] w-[15px] h-[15px] rounded-full border-2 border-[#FBAE42] bg-[#F5EEF8] shadow-sm" />
             </div>
 
             {/* Content Container */}
-            <div className="space-y-12 sm:space-y-16 lg:space-y-20 lg:pl-8 xl:pl-12">
+            <div className="about-page-timeline-container space-y-12 sm:space-y-16 lg:space-y-20 lg:pl-8 xl:pl-12">
               {/* BLOCK 1: MISSION */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-10 lg:gap-12 xl:gap-14 items-center">
+              <div className="about-page-timeline-grid grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-10 lg:gap-12 xl:gap-14 items-center">
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
                   whileInView={{ opacity: 1, x: 0 }}
@@ -569,7 +569,7 @@ export default function AboutPage() {
                   transition={{ duration: 0.55 }}
                   className="lg:col-span-6 w-full"
                 >
-                  <div className="relative w-full aspect-[4/3] max-h-[380px] rounded-2xl sm:rounded-3xl overflow-hidden border border-[#693092]/15 shadow-md group bg-[#EBDFF1]">
+                  <div className="about-page-timeline-img-wrap relative w-full aspect-[4/3] max-h-[380px] rounded-2xl sm:rounded-3xl overflow-hidden border border-[#693092]/15 shadow-md group bg-[#EBDFF1]">
                     <img
                       src="/about/about-mission.jpg"
                       alt="Netopsys Technology Strategy and Architecture Workshop"
@@ -610,7 +610,7 @@ export default function AboutPage() {
               </div>
 
               {/* BLOCK 2: GLOBAL PRESENCE */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-10 lg:gap-12 xl:gap-14 items-center">
+              <div className="about-page-timeline-grid grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-10 lg:gap-12 xl:gap-14 items-center">
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
                   whileInView={{ opacity: 1, x: 0 }}
@@ -643,11 +643,11 @@ export default function AboutPage() {
                     solutions for diverse markets.
                   </p>
 
-                  <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 select-none">
+                  <div className="about-page-loc-pills flex flex-wrap items-center gap-2.5 sm:gap-3 select-none">
                     {LOCATIONS.map((loc, lIdx) => (
                       <span
                         key={lIdx}
-                        className="rounded-full bg-white border border-black/[0.08] text-[#554E62] font-medium hover:border-[#693092]/40 transition-colors px-3.5 py-1 text-xs sm:text-sm"
+                        className="about-page-loc-pill rounded-full bg-white border border-black/[0.08] text-[#554E62] font-medium hover:border-[#693092]/40 transition-colors px-3.5 py-1 text-xs sm:text-sm"
                       >
                         {loc}
                       </span>
@@ -662,7 +662,7 @@ export default function AboutPage() {
                   transition={{ duration: 0.55 }}
                   className="lg:col-span-6 w-full order-1 lg:order-2"
                 >
-                  <div className="relative w-full aspect-[4/3] max-h-[380px] rounded-2xl sm:rounded-3xl overflow-hidden border border-[#693092]/15 shadow-md group bg-[#EBDFF1]">
+                  <div className="about-page-timeline-img-wrap relative w-full aspect-[4/3] max-h-[380px] rounded-2xl sm:rounded-3xl overflow-hidden border border-[#693092]/15 shadow-md group bg-[#EBDFF1]">
                     <img
                       src="/about/about-global.jpg"
                       alt="Netopsys Global International Headquarters at Twilight"
@@ -678,8 +678,8 @@ export default function AboutPage() {
           {/* ================================================================ */}
           {/* 3.1 WHY CHOOSE US SECTION                                        */}
           {/* ================================================================ */}
-          <section className="w-full mt-12 sm:mt-16 lg:mt-20 mb-12 sm:mb-16">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 xl:gap-16 items-center">
+          <section className="about-page-why-section w-full mt-12 sm:mt-16 lg:mt-20 mb-12 sm:mb-16">
+            <div className="about-page-why-grid grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 xl:gap-16 items-center">
               {/* Left Column: Title & Description */}
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
@@ -707,23 +707,23 @@ export default function AboutPage() {
               </motion.div>
 
               {/* Right Column: 3 Staggered Stacked Cards matching image */}
-              <div className="lg:col-span-7 flex flex-col gap-4 sm:gap-5 w-full">
+              <div className="about-page-why-cards lg:col-span-7 flex flex-col gap-4 sm:gap-5 w-full">
                 {/* Card 1: Understand & Think (White, aligned left) */}
                 <motion.div
                   initial={{ opacity: 0, y: 15 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: "-100px" }}
                   transition={{ duration: 0.45, delay: 0.1 }}
-                  className="w-full lg:w-[90%] lg:mr-auto bg-white rounded-2xl sm:rounded-[26px] px-6 sm:px-8 py-5 sm:py-6 border border-black/[0.06] shadow-sm flex items-center gap-5 hover:shadow-md transition-shadow h-auto min-w-0 break-words"
+                  className="about-page-why-card w-full lg:w-[90%] lg:mr-auto bg-white rounded-2xl sm:rounded-[26px] px-6 sm:px-8 py-5 sm:py-6 border border-black/[0.06] shadow-sm flex items-center gap-5 hover:shadow-md transition-shadow h-auto min-w-0 break-words"
                 >
-                  <div className="w-12 h-12 sm:w-13 sm:h-13 rounded-full bg-[#F3ECF8] flex items-center justify-center shrink-0">
+                  <div className="about-page-why-icon w-12 h-12 sm:w-13 sm:h-13 rounded-full bg-[#F3ECF8] flex items-center justify-center shrink-0">
                     <Search className="w-5 h-5 text-[#5D2381] stroke-[2.2]" />
                   </div>
                   <div className="min-w-0 flex-1 break-words">
-                    <h3 className="text-base sm:text-lg font-bold text-[#141010] mb-1 tracking-tight break-words">
+                    <h3 className="about-page-why-card-title text-base sm:text-lg font-bold text-[#141010] mb-1 tracking-tight break-words">
                       Understand &amp; Think
                     </h3>
-                    <p className="text-xs sm:text-[13px] text-[#554E62] leading-relaxed break-words">
+                    <p className="about-page-why-card-desc text-xs sm:text-[13px] text-[#554E62] leading-relaxed break-words">
                       We understand the challenge, explore different perspectives and focus on finding practical thoughtful solutions.
                     </p>
                   </div>
@@ -735,9 +735,9 @@ export default function AboutPage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: "-100px" }}
                   transition={{ duration: 0.45, delay: 0.2 }}
-                  className="w-full lg:w-[90%] lg:ml-auto bg-[#693092] rounded-2xl sm:rounded-[26px] px-6 sm:px-8 py-5 sm:py-6 shadow-lg shadow-[#693092]/20 flex items-center gap-5 hover:bg-[#5f2b84] transition-colors h-auto min-w-0 break-words"
+                  className="about-page-why-card w-full lg:w-[90%] lg:ml-auto bg-[#693092] rounded-2xl sm:rounded-[26px] px-6 sm:px-8 py-5 sm:py-6 shadow-lg shadow-[#693092]/20 flex items-center gap-5 hover:bg-[#5f2b84] transition-colors h-auto min-w-0 break-words"
                 >
-                  <div className="w-12 h-12 sm:w-13 sm:h-13 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+                  <div className="about-page-why-icon w-12 h-12 sm:w-13 sm:h-13 rounded-full bg-white/20 flex items-center justify-center shrink-0">
                     <svg
                       className="w-6 h-6 text-white stroke-[2.2]"
                       viewBox="0 0 24 24"
@@ -751,10 +751,10 @@ export default function AboutPage() {
                     </svg>
                   </div>
                   <div className="min-w-0 flex-1 break-words">
-                    <h3 className="text-base sm:text-lg font-bold text-white mb-1 tracking-tight break-words">
+                    <h3 className="about-page-why-card-title text-base sm:text-lg font-bold text-white mb-1 tracking-tight break-words">
                       Collaborate &amp; Build
                     </h3>
-                    <p className="text-xs sm:text-[13px] text-white/90 leading-relaxed break-words">
+                    <p className="about-page-why-card-desc text-xs sm:text-[13px] text-white/90 leading-relaxed break-words">
                       We deliver solutions on time without compromising on quality or attention to detail.
                     </p>
                   </div>
@@ -766,16 +766,16 @@ export default function AboutPage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: "-100px" }}
                   transition={{ duration: 0.45, delay: 0.3 }}
-                  className="w-full lg:w-[90%] lg:mr-auto bg-white rounded-2xl sm:rounded-[26px] px-6 sm:px-8 py-5 sm:py-6 border border-black/[0.06] shadow-sm flex items-center gap-5 hover:shadow-md transition-shadow h-auto min-w-0 break-words"
+                  className="about-page-why-card w-full lg:w-[90%] lg:mr-auto bg-white rounded-2xl sm:rounded-[26px] px-6 sm:px-8 py-5 sm:py-6 border border-black/[0.06] shadow-sm flex items-center gap-5 hover:shadow-md transition-shadow h-auto min-w-0 break-words"
                 >
-                  <div className="w-12 h-12 sm:w-13 sm:h-13 rounded-full bg-[#F3ECF8] flex items-center justify-center shrink-0">
+                  <div className="about-page-why-icon w-12 h-12 sm:w-13 sm:h-13 rounded-full bg-[#F3ECF8] flex items-center justify-center shrink-0">
                     <TrendingUp className="w-5 h-5 text-[#5D2381] stroke-[2.2]" />
                   </div>
                   <div className="min-w-0 flex-1 break-words">
-                    <h3 className="text-base sm:text-lg font-bold text-[#141010] mb-1 tracking-tight break-words">
+                    <h3 className="about-page-why-card-title text-base sm:text-lg font-bold text-[#141010] mb-1 tracking-tight break-words">
                       Learn &amp; Improve
                     </h3>
-                    <p className="text-xs sm:text-[13px] text-[#554E62] leading-relaxed break-words">
+                    <p className="about-page-why-card-desc text-xs sm:text-[13px] text-[#554E62] leading-relaxed break-words">
                       Every solution undergoes rigorous testing and quality assurance processes.
                     </p>
                   </div>

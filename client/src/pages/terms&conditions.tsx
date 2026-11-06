@@ -106,7 +106,7 @@ export default function TermsAndConditionsPage() {
       <Navbar activeTab="" />
 
       {/* Main Page Content */}
-      <main className="relative flex-1 w-full select-none pt-24 sm:pt-28 md:pt-30 pb-14 sm:pb-20">
+      <main className="relative flex-1 w-full select-none pt-24 sm:pt-28 md:pt-30 pb-14 sm:pb-20 legal-page-main">
         {/* Subtle background tech grid */}
         <div
           className="absolute inset-0 opacity-[0.035] pointer-events-none"
@@ -121,9 +121,9 @@ export default function TermsAndConditionsPage() {
         <div className="absolute top-1/6 -right-48 w-96 h-96 rounded-full bg-[#BE3093]/10 blur-[140px] pointer-events-none" />
         <div className="absolute top-1/2 -left-48 w-96 h-96 rounded-full bg-[#693092]/10 blur-[140px] pointer-events-none" />
 
-        <div className="relative w-full max-w-[1280px] mx-auto px-4 sm:px-6 md:px-8 lg:px-10">
+        <div className="relative w-full max-w-[1280px] mx-auto px-4 sm:px-6 md:px-8 lg:px-10 legal-page-container">
           {/* Breadcrumb Navigation: Home > Terms & Conditions */}
-          <nav aria-label="Breadcrumb" className="mb-6 sm:mb-8">
+          <nav aria-label="Breadcrumb" className="mb-6 sm:mb-8 legal-page-breadcrumb">
             <ol className="inline-flex items-center gap-1.5 sm:gap-2 text-xs sm:text-[13.5px] font-medium">
               <li>
                 <Link
@@ -143,60 +143,60 @@ export default function TermsAndConditionsPage() {
           </nav>
 
           {/* Header Section */}
-          <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-[#EADBFA] text-[#693092] text-xs sm:text-[13px] font-semibold shadow-xs mb-4">
+          <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16 legal-page-header">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-[#EADBFA] text-[#693092] text-xs sm:text-[13px] font-semibold shadow-xs mb-4 legal-page-badge">
               <FileText className="w-4 h-4 text-[#BE3093]" />
               <span>Legal Agreement &amp; Compliance</span>
             </div>
 
-            <h1 className="font-light tracking-[-0.035em] text-[#141010] text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] leading-[1.1] mb-4 sm:mb-5">
+            <h1 className="font-light tracking-[-0.035em] text-[#141010] text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] leading-[1.1] mb-4 sm:mb-5 legal-page-title">
               Terms and <span className="text-[#693092] font-normal">Conditions</span>
             </h1>
 
-            <p className="text-[#554E62] leading-relaxed font-normal text-sm sm:text-base md:text-[16.5px]">
+            <p className="text-[#554E62] leading-relaxed font-normal text-sm sm:text-base md:text-[16.5px] legal-page-desc">
               Welcome to Netopsys. By accessing and using our website and services, you agree
               to be bound by the following terms and conditions.
             </p>
           </div>
 
           {/* Main Card with Structured Sections */}
-          <div className="bg-white rounded-[28px] sm:rounded-[34px] border border-[#E9DFEE] shadow-[0_20px_60px_-15px_rgba(93,35,129,0.06)] overflow-hidden p-6 sm:p-10 md:p-12 lg:p-14">
-            <div className="space-y-8 sm:space-y-10">
+          <div className="bg-white rounded-[28px] sm:rounded-[34px] border border-[#E9DFEE] shadow-[0_20px_60px_-15px_rgba(93,35,129,0.06)] overflow-hidden p-6 sm:p-10 md:p-12 lg:p-14 legal-page-card">
+            <div className="space-y-8 sm:space-y-10 legal-page-sections">
               {TERMS_SECTIONS.map((sec, index) => {
                 const IconComponent = sec.icon;
                 return (
                   <div
                     key={sec.number}
-                    className={`relative flex flex-col md:flex-row items-start gap-4 sm:gap-6 ${
+                    className={`relative flex flex-col md:flex-row items-start gap-4 sm:gap-6 legal-page-section-item ${
                       index !== TERMS_SECTIONS.length - 1
                         ? "pb-8 sm:pb-10 border-b border-[#F0E6F4]"
                         : ""
                     }`}
                   >
                     {/* Number Badge & Icon */}
-                    <div className="flex items-center gap-3 md:flex-col md:items-center shrink-0">
-                      <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-[#F6EEFA] border border-[#EADBFA] flex items-center justify-center text-[#5D2381] shadow-xs">
+                    <div className="flex items-center gap-3 md:flex-col md:items-center shrink-0 legal-page-icon-col">
+                      <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-[#F6EEFA] border border-[#EADBFA] flex items-center justify-center text-[#5D2381] shadow-xs legal-page-icon">
                         <IconComponent className="w-6 h-6 stroke-[2]" />
                       </div>
-                      <span className="hidden md:inline-block text-xs font-bold text-[#8E869B] tracking-wider uppercase">
+                      <span className="hidden md:inline-block text-xs font-bold text-[#8E869B] tracking-wider uppercase legal-page-sec-num">
                         Section {sec.number}
                       </span>
                     </div>
 
                     {/* Content Details */}
-                    <div className="flex-1">
+                    <div className="flex-1 legal-page-section-body">
                       <div className="flex flex-wrap items-center gap-2.5 mb-2 sm:mb-2.5">
-                        <h2 className="text-lg sm:text-xl md:text-[21px] font-bold tracking-tight text-[#141010]">
+                        <h2 className="text-lg sm:text-xl md:text-[21px] font-bold tracking-tight text-[#141010] legal-page-section-title">
                           {sec.number}. {sec.title}
                         </h2>
                         {sec.highlight && (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-[#FAF5FC] border border-[#E6D8EE] text-[#693092] text-[11px] sm:text-xs font-semibold">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-[#FAF5FC] border border-[#E6D8EE] text-[#693092] text-[11px] sm:text-xs font-semibold legal-page-highlight">
                             {sec.highlight}
                           </span>
                         )}
                       </div>
 
-                      <p className="text-sm sm:text-[15px] md:text-[15.5px] text-[#554E62] leading-relaxed font-normal">
+                      <p className="text-sm sm:text-[15px] md:text-[15.5px] text-[#554E62] leading-relaxed font-normal legal-page-section-content">
                         {sec.content}
                       </p>
 
@@ -219,7 +219,7 @@ export default function TermsAndConditionsPage() {
             </div>
 
             {/* Bottom Metadata & Privacy Policy Link */}
-            <div className="mt-10 sm:mt-12 pt-6 sm:pt-8 border-t border-[#F0E6F4] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs sm:text-sm text-[#7E7A8D]">
+            <div className="mt-10 sm:mt-12 pt-6 sm:pt-8 border-t border-[#F0E6F4] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs sm:text-sm text-[#7E7A8D] legal-page-footer-meta">
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-emerald-500" />
                 <span className="font-medium">Last updated: January 2026</span>

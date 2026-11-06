@@ -149,11 +149,16 @@ export default function App() {
         <Route path="/jobdescription/:id" element={<JobDescriptionPage />} />
         <Route path="/job-description" element={<JobDescriptionPage />} />
         <Route path="/job-description/:id" element={<JobDescriptionPage />} />
+        <Route path="/job/:id" element={<JobDescriptionPage />} />
+        <Route path="/jobs/:id" element={<JobDescriptionPage />} />
         <Route path="/careers/jobdescription" element={<JobDescriptionPage />} />
         <Route path="/careers/jobdescription/:id" element={<JobDescriptionPage />} />
         <Route path="/careers/job-description" element={<JobDescriptionPage />} />
         <Route path="/careers/job-description/:id" element={<JobDescriptionPage />} />
+        <Route path="/careers/job/:id" element={<JobDescriptionPage />} />
+        <Route path="/careers/jobs/:id" element={<JobDescriptionPage />} />
         <Route path="/blogs" element={<PublicBlogsPage />} />
+        <Route path="/blogs/:idOrSlug" element={<BlogsDetailPage />} />
         <Route path="/blog" element={<PublicBlogsPage />} />
         <Route path="/blogs-detail" element={<BlogsDetailPage />} />
         <Route path="/blogs-detail/:idOrSlug" element={<BlogsDetailPage />} />

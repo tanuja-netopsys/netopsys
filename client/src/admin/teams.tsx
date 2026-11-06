@@ -330,8 +330,8 @@ export default function TeamsAdminPage() {
 
           {/* Team Members Table Container */}
           <div className="bg-white rounded-3xl border border-[#ECE4F2] shadow-xs overflow-hidden mb-8">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
+            <div className="overflow-x-auto table-responsive-container">
+              <table className="w-full min-w-[580px] text-left border-collapse">
                 <thead>
                   <tr className="bg-gray-50/75 border-b border-[#ECE4F2] text-[11px] font-bold text-gray-500 uppercase tracking-wider">
                     <th className="py-4 px-6">S.No</th>

@@ -729,20 +729,45 @@ export default function Hero() {
   const heroRef = useRef<HTMLElement>(null);
   const [heroTitleIndex, setHeroTitleIndex] = useState(0);
   const [isDesktop, setIsDesktop] = useState(false);
+  const [viewportHeight, setViewportHeight] = useState(
+    typeof window !== "undefined" ? window.innerHeight : 900
+  );
+  const [devicePixelRatio, setDevicePixelRatio] = useState(
+    typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1
+  );
 
-  // Track window resize for desktop-only scroll parallax
+  // Track window resize for desktop-only scroll parallax and height-aware display scaling
   useEffect(() => {
     const handleResize = () => {
-      setIsDesktop(window.innerWidth >= 1024);
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      setIsDesktop(w >= 1024);
+      setViewportHeight(h);
+      setDevicePixelRatio(window.devicePixelRatio || 1);
     };
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Responsive fluid cube scale across all desktop & mobile display scaling levels
+  // Dedicated check for 100% display scale (devicePixelRatio <= 1.14 on desktop)
+  const is100Scale = isDesktop && devicePixelRatio <= 1.14;
+
+  // Responsive fluid cube scale:
+  // For 100% scale ONLY: tuned slightly for ideal balanced proportion on desktop viewports.
+  // For all other scales (125%, 150%, 175%, 200%, mobile): preserved exactly as before without change.
   const cubeScaleClass = isDesktop
-    ? "scale-[0.88] xl:scale-[0.96] 2xl:scale-[1.02]"
+    ? is100Scale
+      ? viewportHeight < 620
+        ? "scale-[0.88] xl:scale-[0.96] 2xl:scale-[1.05]"
+        : viewportHeight < 740
+        ? "scale-[1.02] xl:scale-[1.10] 2xl:scale-[1.18]"
+        : "scale-[1.12] xl:scale-[1.22] 2xl:scale-[1.28] min-[1680px]:scale-[1.34]"
+      : viewportHeight < 620
+      ? "scale-[0.76] xl:scale-[0.80] 2xl:scale-[0.85]"
+      : viewportHeight < 740
+      ? "scale-[0.80] xl:scale-[0.85] 2xl:scale-[0.90]"
+      : "scale-[0.88] xl:scale-[0.96] 2xl:scale-[1.02]"
     : "scale-[0.68] xs:scale-[0.76] sm:scale-[0.85] md:scale-[0.90]";
 
   // Rotating title cycle: smoothly transitions every 3.6s without layout shifts or height collapse
@@ -764,7 +789,7 @@ export default function Hero() {
     <section
       ref={heroRef}
       id="home"
-      className="relative lg:sticky lg:top-0 w-full min-h-[100dvh] lg:h-screen lg:min-h-0 flex items-center bg-[#FBAE42] px-4 sm:px-6 md:px-8 lg:px-8 xl:px-10 2xl:px-14 min-[1680px]:px-20 pt-24 sm:pt-28 md:pt-32 lg:pt-0 pb-14 sm:pb-16 lg:pb-0 overflow-x-clip lg:overflow-hidden select-none z-0"
+      className="hero-section-wrap relative lg:sticky lg:top-0 w-full min-h-[100dvh] lg:min-h-[100dvh] flex items-center bg-[#FBAE42] px-4 sm:px-6 md:px-8 lg:px-8 xl:px-10 2xl:px-14 min-[1680px]:px-20 pt-24 sm:pt-28 md:pt-32 lg:pt-14 xl:pt-10 pb-12 sm:pb-16 lg:pb-10 overflow-x-clip select-none z-0"
     >
       {/* 2-Column Responsive Layout - Fluid Scaling Across All Breakpoints */}
       <div className="w-full max-w-[2100px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-6 xl:gap-8 2xl:gap-10 min-[1680px]:gap-16 items-center justify-between">

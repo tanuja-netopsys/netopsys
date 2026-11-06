@@ -569,7 +569,7 @@ export default function AdminSidebar({
         </div>
 
         {/* Bottom Section: Admin User Card & Log out */}
-        <div className="p-4.5 pt-3 border-t border-[#ECE4F2] shrink-0 mt-auto bg-white">
+        <div className="p-3 sm:p-4 border-t border-[#ECE4F2] shrink-0 mt-auto bg-white">
           {/* Admin User Card */}
           <div className="bg-[#F7F0FA] border border-[#EFE5F5] rounded-2xl p-3 flex items-center gap-3 mb-3">
             <div className="relative w-9 h-9 rounded-full bg-[#E6D4EF] text-[#5D2381] font-bold text-xs flex items-center justify-center flex-shrink-0">

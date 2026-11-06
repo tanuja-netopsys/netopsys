@@ -11,7 +11,6 @@ const DEFAULT_BLOGS = [
     title: "How AI Automation Is Reshaping Enterprise Workflows",
     excerpt:
       "From intelligent document processing to self-healing pipelines, here's how organisations are cutting manual effort and moving faster with practical AI automation.",
-    category: "AI Automation",
     tag: "AI Automation",
     tag_bg: "bg-[#F4EBFA]",
     tag_color: "text-[#693092]",
@@ -38,7 +37,6 @@ const DEFAULT_BLOGS = [
     title: "Building Reliable ML Pipelines for Production",
     excerpt:
       "Lessons from deploying models at scale and the monitoring practices that keep them accurate.",
-    category: "Machine Learning",
     tag: "Machine Learning",
     tag_bg: "bg-[#FDF2F8]",
     tag_color: "text-[#BE185D]",
@@ -65,7 +63,6 @@ const DEFAULT_BLOGS = [
     title: "Making Sense of Text: NLP for Business Insights",
     excerpt:
       "A practical guide to turning emails, tickets and reviews into confident business decisions.",
-    category: "NLP Solutions",
     tag: "NLP Solutions",
     tag_bg: "bg-[#FEF3C7]",
     tag_color: "text-[#B45309]",
@@ -92,7 +89,6 @@ const DEFAULT_BLOGS = [
     title: "Why Intelligent ERP Starts with Better Navigation",
     excerpt:
       "How assistants and smarter workflows help teams find what they need faster.",
-    category: "ERP Solutions",
     tag: "ERP Solutions",
     tag_bg: "bg-[#EFF6FF]",
     tag_color: "text-[#2563EB]",
@@ -176,17 +172,15 @@ function getCategoryColor(category) {
 
 function formatBlog(b) {
   if (!b) return null;
-  const colors = getCategoryColor(b.category);
   return {
     id: b.id,
     slug: b.slug,
     title: b.title,
     excerpt: b.excerpt || stripHtml(b.content).slice(0, 160) + "...",
-    category: b.category || "",
-    tag: b.tag || b.category || "",
-    tagBg: b.tag_bg || colors.tagBg,
-    tagColor: b.tag_color || colors.tagColor,
-    graphicVariant: b.graphic_variant || colors.graphicVariant,
+    tag: b.tag || "",
+    tagBg: b.tag_bg || "bg-[#F4EBFA]",
+    tagColor: b.tag_color || "text-[#693092]",
+    graphicVariant: b.graphic_variant || "featured",
     image: b.image || null,
     date:
       b.date ||
@@ -226,7 +220,7 @@ function formatBlog(b) {
  */
 exports.getAllBlogs = async (req, res) => {
   try {
-    const { all, category, search } = req.query;
+    const { all, search } = req.query;
 
     const where = {};
     if (all !== "true") {
@@ -234,15 +228,10 @@ exports.getAllBlogs = async (req, res) => {
       where.status = "Published";
     }
 
-    if (category && category !== "All") {
-      where.category = { equals: category, mode: "insensitive" };
-    }
-
     if (search && search.trim()) {
       where.OR = [
         { title: { contains: search.trim(), mode: "insensitive" } },
         { excerpt: { contains: search.trim(), mode: "insensitive" } },
-        { category: { contains: search.trim(), mode: "insensitive" } },
       ];
     }
 
@@ -309,18 +298,11 @@ exports.getBlogByIdOrSlug = async (req, res) => {
 function extractMetadataAndCleanContent(rawContent, body = {}) {
   let content = rawContent || "";
 
-  let extractedCategory = body.category?.trim() || "";
   let extractedAuthor = body.authorName?.trim() || "";
   let extractedDate = body.date?.trim() || "";
   let extractedExcerpt = body.excerpt?.trim() || "";
   let extractedFeatured = body.isFeatured !== undefined ? Boolean(body.isFeatured) : undefined;
   let extractedStatus = body.status || undefined;
-
-  // Extract from content text/html
-  const catMatch = content.match(/(?:<strong>|<b>)?\s*Category\s*:\s*(?:<\/strong>|<\/b>)?\s*([^<\n\r]+)/i);
-  if (catMatch && catMatch[1]?.trim()) {
-    extractedCategory = catMatch[1].trim();
-  }
 
   const authorMatch = content.match(/(?:<strong>|<b>)?\s*Author\s*:\s*(?:<\/strong>|<\/b>)?\s*([^<\n\r]+)/i);
   if (authorMatch && authorMatch[1]?.trim()) {
@@ -359,7 +341,6 @@ function extractMetadataAndCleanContent(rawContent, body = {}) {
 
   return {
     cleanContent: cleanContent || content,
-    category: extractedCategory || "Artificial Intelligence",
     authorName: extractedAuthor || "Netopsys Team",
     date: extractedDate,
     excerpt: extractedExcerpt,
@@ -376,7 +357,6 @@ exports.createBlog = async (req, res) => {
     const {
       title,
       content,
-      category,
       tag,
       excerpt,
       graphicVariant,
@@ -406,7 +386,6 @@ exports.createBlog = async (req, res) => {
 
     // Auto-extract metadata lines embedded in content and clean the body
     const parsed = extractMetadataAndCleanContent(content, {
-      category,
       authorName,
       date,
       excerpt,
@@ -425,8 +404,8 @@ exports.createBlog = async (req, res) => {
       uniqueSlug = `${baseSlug}-${counter++}`;
     }
 
-    const cleanCategory = parsed.category || (category && category.trim()) || "Artificial Intelligence";
-    const colors = getCategoryColor(cleanCategory);
+    const cleanTag = (tag && tag.trim()) || "AI Automation";
+    const colors = getCategoryColor(cleanTag);
     const plainExcerpt =
       parsed.excerpt ||
       (excerpt && excerpt.trim()) ||
@@ -506,8 +485,7 @@ exports.createBlog = async (req, res) => {
         slug: uniqueSlug,
         title: title.trim(),
         content: bodyContent.trim(),
-        category: cleanCategory,
-        tag: (tag && tag.trim()) || cleanCategory,
+        tag: cleanTag,
         tag_bg: colors.tagBg,
         tag_color: colors.tagColor,
         excerpt: plainExcerpt,
@@ -574,7 +552,6 @@ exports.updateBlog = async (req, res) => {
     const {
       title,
       content,
-      category,
       tag,
       excerpt,
       graphicVariant,
@@ -593,7 +570,6 @@ exports.updateBlog = async (req, res) => {
     if (title !== undefined) dataToUpdate.title = title.trim();
     if (content !== undefined) {
       const parsed = extractMetadataAndCleanContent(content, {
-        category,
         authorName,
         date,
         excerpt,
@@ -604,25 +580,18 @@ exports.updateBlog = async (req, res) => {
       dataToUpdate.content = parsed.cleanContent.trim();
       dataToUpdate.read_time = calculateReadTime(parsed.cleanContent);
 
-      if (parsed.category && category === undefined) {
-        dataToUpdate.category = parsed.category;
-        const colors = getCategoryColor(parsed.category);
-        dataToUpdate.tag_bg = colors.tagBg;
-        dataToUpdate.tag_color = colors.tagColor;
-      }
       if (parsed.excerpt && excerpt === undefined) dataToUpdate.excerpt = parsed.excerpt;
       if (parsed.authorName && authorName === undefined) dataToUpdate.author_name = parsed.authorName;
       if (parsed.date && date === undefined) dataToUpdate.date = parsed.date;
       if (parsed.isFeatured !== undefined && isFeatured === undefined) dataToUpdate.is_featured = parsed.isFeatured;
       if (parsed.status !== undefined && status === undefined) dataToUpdate.status = parsed.status;
     }
-    if (category !== undefined) {
-      dataToUpdate.category = category.trim();
-      const colors = getCategoryColor(category);
+    if (tag !== undefined) {
+      dataToUpdate.tag = tag.trim();
+      const colors = getCategoryColor(tag);
       dataToUpdate.tag_bg = colors.tagBg;
       dataToUpdate.tag_color = colors.tagColor;
     }
-    if (tag !== undefined) dataToUpdate.tag = tag.trim();
     if (excerpt !== undefined) dataToUpdate.excerpt = excerpt.trim();
     if (graphicVariant !== undefined) dataToUpdate.graphic_variant = graphicVariant;
     if (image !== undefined) dataToUpdate.image = image ? saveBase64Image(image.trim(), "blog") : null;

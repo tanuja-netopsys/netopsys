@@ -162,7 +162,6 @@ export default function BlogsPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Metadata state
-  const [category, setCategory] = useState("");
   const [customTag, setCustomTag] = useState("");
   const [excerpt, setExcerpt] = useState("");
   const [authorName, setAuthorName] = useState("");
@@ -214,7 +213,6 @@ export default function BlogsPage() {
   const resetEditor = () => {
     setEditingBlogId(null);
     setTitle("");
-    setCategory("");
     setCustomTag("");
     setExcerpt("");
     setAuthorName("");
@@ -256,8 +254,7 @@ export default function BlogsPage() {
       const payload = {
         title: title.trim(),
         content: currentHtml,
-        category: category.trim() || "",
-        tag: customTag.trim() || category.trim() || "",
+        tag: customTag.trim() || "",
         excerpt: excerpt.trim() || (stripHtmlText(currentHtml).slice(0, 160) + "..."),
         authorName: authorName.trim() || "",
         authorRole: authorRole.trim() || "",
@@ -309,7 +306,6 @@ export default function BlogsPage() {
     const content = blog.content || "";
     setEditingBlogId(blog.id);
     setTitle(blog.title || "");
-    setCategory(blog.category || "");
     setCustomTag(blog.tag || "");
     setExcerpt(blog.excerpt || "");
     setAuthorName(blog.author?.name || blog.authorName || "");
@@ -1789,8 +1785,7 @@ export default function BlogsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-8">
                   {blogList
                     .filter((b) =>
-                      b.title?.toLowerCase().includes(searchFilter.toLowerCase()) ||
-                      b.category?.toLowerCase().includes(searchFilter.toLowerCase())
+                      b.title?.toLowerCase().includes(searchFilter.toLowerCase())
                     )
                     .map((blog) => (
                       <div
@@ -1801,9 +1796,6 @@ export default function BlogsPage() {
                           {/* Top Badges & Actions */}
                           <div className="flex items-start justify-between gap-2 mb-3">
                             <div className="flex items-center flex-wrap gap-1.5">
-                              <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-[#F6EEFA] text-[#5D2381]">
-                                {blog.category}
-                              </span>
                               <span
                                 className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${
                                   blog.status === "Published"
@@ -1948,9 +1940,6 @@ export default function BlogsPage() {
 
                   {/* Badges */}
                   <div className="flex items-center flex-wrap gap-2">
-                    <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-[#F6EEFA] text-[#5D2381]">
-                      {viewingBlog.category}
-                    </span>
                     <span
                       className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full ${
                         viewingBlog.status === "Published"

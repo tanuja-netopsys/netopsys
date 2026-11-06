@@ -55,7 +55,7 @@ export default function ServicesPage() {
       {/* Main Interactive Services Section (Matching original Services design and styling) */}
       <section
         id="services-content"
-        className="relative w-full bg-[#F5EEF8] text-[#141010] pt-24 sm:pt-28 md:pt-30 pb-16 sm:pb-20 lg:pb-24 overflow-hidden select-none z-20"
+        className="relative w-full bg-[#F5EEF8] text-[#141010] pt-24 sm:pt-28 md:pt-30 pb-16 sm:pb-20 lg:pb-24 overflow-hidden select-none z-20 services-page-main"
         style={{ fontFamily: "'Onest', sans-serif" }}
       >
         {/* Subtle background tech grid */}
@@ -75,9 +75,9 @@ export default function ServicesPage() {
         {/* Main Container - Expanded width matching Hero and About */}
         <div className="relative w-full max-w-[2100px] mx-auto px-4 sm:px-6 md:px-8 lg:px-10 xl:px-14 2xl:px-18">
           {/* Header: Eyebrow + Large Display Title + Subtitle Below Title on Left */}
-          <div className="w-full mb-12 sm:mb-16 lg:mb-20">
+          <div className="w-full mb-12 sm:mb-16 lg:mb-20 services-page-header">
             {/* Breadcrumb Navigation: Home > Services */}
-            <nav aria-label="Breadcrumb" className="mb-4 sm:mb-5">
+            <nav aria-label="Breadcrumb" className="mb-4 sm:mb-5 services-page-breadcrumb">
               <ol className="inline-flex items-center gap-1.5 sm:gap-2 text-xs sm:text-[13.5px] font-medium">
                 <li>
                   <Link
@@ -110,7 +110,7 @@ export default function ServicesPage() {
           </div>
 
           {/* Accordion Services List (01 through 09) */}
-          <div className="w-full border-t border-[#141010]/10">
+          <div className="w-full border-t border-[#141010]/10 services-accordion-wrap">
             {SERVICES.map((service) => {
               const isOpen = openId === service.id;
 
@@ -119,7 +119,7 @@ export default function ServicesPage() {
                   key={service.id}
                   onMouseEnter={() => handleMouseEnter(service.id)}
                   onMouseLeave={handleMouseLeave}
-                  className="w-full border-b border-[#141010]/10 transition-colors"
+                  className="w-full border-b border-[#141010]/10 transition-colors services-accordion-item"
                 >
                   {/* Collapsed Button Row */}
                   <div
@@ -136,15 +136,15 @@ export default function ServicesPage() {
                       <button
                         type="button"
                         onClick={() => toggleAccordion(service.id)}
-                        className="w-full py-5 sm:py-6 lg:py-7 flex items-center justify-between text-left group cursor-pointer transition-colors"
+                        className="w-full py-5 sm:py-6 lg:py-7 flex items-center justify-between text-left group cursor-pointer transition-colors services-accordion-btn"
                         aria-expanded={isOpen}
                       >
                         <div className="flex items-center gap-5 sm:gap-8 lg:gap-12 pr-4">
-                          <span className="text-xs sm:text-sm font-mono tracking-wider font-semibold text-[#693092] flex-shrink-0 transition-colors duration-300">
+                          <span className="text-xs sm:text-sm font-mono tracking-wider font-semibold text-[#693092] flex-shrink-0 transition-colors duration-300 services-item-num">
                             {service.id}
                           </span>
                           <h3
-                            className="text-xl sm:text-2xl md:text-[1.85rem] lg:text-[2.05rem] xl:text-[2.25rem] font-light tracking-[-0.035em] leading-tight text-[#141010] group-hover:text-[#693092] transition-colors duration-300"
+                            className="text-xl sm:text-2xl md:text-[1.85rem] lg:text-[2.05rem] xl:text-[2.25rem] font-light tracking-[-0.035em] leading-tight text-[#141010] group-hover:text-[#693092] transition-colors duration-300 services-item-title"
                             style={{ fontFamily: "'Onest', sans-serif" }}
                           >
                             {service.title}
@@ -172,7 +172,7 @@ export default function ServicesPage() {
                   >
                     <div className="overflow-hidden py-3 sm:py-4">
                       <div
-                        className="w-full bg-gradient-to-r from-[#090414] via-[#110724] to-[#220B44] text-white border border-[#BE3093]/30 rounded-2xl sm:rounded-3xl p-7 sm:p-8 lg:py-10 lg:px-12 shadow-none relative overflow-hidden transition-transform duration-400 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                        className="w-full bg-gradient-to-r from-[#090414] via-[#110724] to-[#220B44] text-white border border-[#BE3093]/30 rounded-2xl sm:rounded-3xl p-7 sm:p-8 lg:py-10 lg:px-12 shadow-none relative overflow-hidden transition-transform duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] services-expanded-card"
                         style={{
                           transform: isOpen ? "translateY(0)" : "translateY(6px)",
                           boxShadow: "none",
@@ -227,18 +227,18 @@ export default function ServicesPage() {
                             {/* Title */}
                             <h3
                               onClick={() => navigate(`/services/${service.slug}`)}
-                              className="text-2xl sm:text-3xl md:text-[2.05rem] lg:text-[2.25rem] font-light tracking-[-0.035em] text-white leading-tight mb-2.5 sm:mb-3 hover:text-[#FBAE42] transition-colors cursor-pointer"
+                              className="text-2xl sm:text-3xl md:text-[2.05rem] lg:text-[2.25rem] font-light tracking-[-0.035em] text-white leading-tight mb-2.5 sm:mb-3 hover:text-[#FBAE42] transition-colors cursor-pointer services-expanded-title"
                             >
                               {service.title}
                             </h3>
 
                             {/* Description - Aligned with Title */}
-                            <p className="text-white/80 text-xs sm:text-sm md:text-[14.5px] leading-relaxed font-normal mb-5 sm:mb-6 max-w-xl">
+                            <p className="text-white/80 text-xs sm:text-sm md:text-[14.5px] leading-relaxed font-normal mb-5 sm:mb-6 max-w-xl services-expanded-desc">
                               {service.description}
                             </p>
 
                             {/* Badges / Tags - Aligned with Title & Description */}
-                            <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 mb-5 sm:mb-6">
+                            <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 mb-5 sm:mb-6 services-expanded-tags">
                               {service.tags.map((tag) => (
                                 <span
                                   key={tag}
@@ -274,13 +274,13 @@ export default function ServicesPage() {
 
           {/* Bottom CTA Card: "Ready to get started? Let's build something great together." */}
           <div className="mt-8 sm:mt-10 lg:mt-14 w-full">
-            <div className="w-full bg-[#2A1450] rounded-2xl sm:rounded-3xl px-6 sm:px-10 lg:px-14 py-10 sm:py-14 lg:py-16 shadow-xl shadow-[#2A1450]/20 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <div className="w-full bg-[#2A1450] rounded-2xl sm:rounded-3xl px-6 sm:px-10 lg:px-14 py-10 sm:py-14 lg:py-16 shadow-xl shadow-[#2A1450]/20 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 cta-banner-card">
               {/* Left Texts: Heading and subtitle */}
               <div className="flex flex-col sm:flex-row sm:items-baseline gap-2.5 sm:gap-4 md:gap-6">
-                <h3 className="text-2xl sm:text-3xl md:text-[2rem] font-light tracking-[-0.035em] text-white whitespace-nowrap">
+                <h3 className="text-2xl sm:text-3xl md:text-[2rem] font-light tracking-[-0.035em] text-white whitespace-nowrap cta-banner-title">
                   Ready to get started?
                 </h3>
-                <span className="text-white/85 text-xs sm:text-sm md:text-[15px] font-normal">
+                <span className="text-white/85 text-xs sm:text-sm md:text-[15px] font-normal cta-banner-subtitle">
                   Let&apos;s build something great together
                 </span>
               </div>
@@ -289,7 +289,7 @@ export default function ServicesPage() {
               <div className="flex-shrink-0">
                 <Link
                   to="/contact"
-                  className="hover-brand-gradient inline-flex items-center justify-center bg-[#FBAE42] text-black hover:text-white font-medium text-xs sm:text-sm md:text-[15px] px-7 sm:px-8 py-3 sm:py-3.5 rounded-full shadow-md whitespace-nowrap cursor-pointer transition-colors"
+                  className="hover-brand-gradient inline-flex items-center justify-center bg-[#FBAE42] text-black hover:text-white font-medium text-xs sm:text-sm md:text-[15px] px-7 sm:px-8 py-3 sm:py-3.5 rounded-full shadow-md whitespace-nowrap cursor-pointer transition-colors cta-banner-btn"
                 >
                   Let's Connect
                 </Link>

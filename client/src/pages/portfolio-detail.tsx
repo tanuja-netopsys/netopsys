@@ -368,7 +368,7 @@ export default function PortfolioDetailPage() {
       <Navbar activeTab="Portfolio" />
 
       {/* Main Content Area - Full width matching remaining pages */}
-      <main className="relative w-full z-10 flex-1 pb-20 sm:pb-28 select-none">
+      <main className="relative w-full z-10 flex-1 pb-20 sm:pb-28 select-none portfoliodetail-page-main">
         {/* Subtle background tech grid and ambient glows clipped in their own container */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div
@@ -389,16 +389,16 @@ export default function PortfolioDetailPage() {
             - On scroll: Contracts ONLY horizontally to the side (54% width) & smoothly adjusts height to 480px.
             - Stays pinned at top-28 until reveal is complete, then bottom content scrolls up directly.
         ========================================================================= */}
-        <div ref={heroRef} className="relative w-full min-h-[500px] h-auto lg:h-[930px] pt-20 sm:pt-24 lg:pt-26">
+        <div ref={heroRef} className="relative w-full min-h-[500px] h-auto lg:h-[930px] pt-20 sm:pt-24 lg:pt-26 portfoliodetail-hero-wrap">
           <div
-            className="relative lg:sticky top-0 lg:top-24 xl:top-28 w-full flex flex-col justify-start overflow-visible pt-1"
+            className="relative lg:sticky top-0 lg:top-24 xl:top-28 w-full flex flex-col justify-start overflow-visible pt-1 portfoliodetail-pinned-wrap"
             style={{
               top: isDesktop ? "6rem" : undefined,
             }}
           >
             <div className="relative w-full max-w-[2100px] mx-auto px-4 sm:px-6 md:px-8 lg:px-10 xl:px-14 2xl:px-18">
               {/* Back to Projects link */}
-              <div className="mb-3.5 sm:mb-4 lg:mb-5">
+              <div className="mb-3.5 sm:mb-4 lg:mb-5 portfoliodetail-back-wrap">
                 <Link
                   to="/portfolio"
                   className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full bg-white border border-[#693092]/20 hover:border-[#693092]/40 text-[#693092] text-xs sm:text-[13px] font-semibold tracking-wide shadow-sm hover:shadow-md transition-all duration-200 select-none cursor-pointer w-fit group"
@@ -409,7 +409,7 @@ export default function PortfolioDetailPage() {
                 </Link>
               </div>
 
-              <div className="relative w-full flex flex-col lg:flex-row items-start justify-between min-h-[360px] lg:min-h-[480px]">
+              <div className="relative w-full flex flex-col lg:flex-row items-start justify-between min-h-[360px] lg:min-h-[480px] portfoliodetail-hero-row">
                 {/* Left Column: Badge, Titles, Description, Tags (Reveals on scroll) */}
                 <motion.div
                   style={{
@@ -417,7 +417,7 @@ export default function PortfolioDetailPage() {
                     x: textX,
                     pointerEvents: textPointerEvents,
                   }}
-                  className="order-2 lg:order-1 w-full lg:w-[42%] text-left z-10 pt-1 lg:pt-2"
+                  className="order-2 lg:order-1 w-full lg:w-[42%] text-left z-10 pt-1 lg:pt-2 portfoliodetail-hero-text"
                 >
                   {/* Status Badge */}
                   <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white border border-[#10B981]/30 shadow-xs mb-3.5 sm:mb-4">
@@ -428,19 +428,19 @@ export default function PortfolioDetailPage() {
                   </div>
 
                   {/* Main Heading matching services detail page heading style */}
-                  <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[4.25rem] xl:text-[4.75rem] font-light tracking-[-0.035em] leading-[1.04] text-[#141010]">
+                  <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[4.25rem] xl:text-[4.75rem] font-light tracking-[-0.035em] leading-[1.04] text-[#141010] portfoliodetail-hero-title">
                     <span className="block">{project.name}</span>
                     <span className="block text-[#693092] mt-0.5">{project.taglinePart1}</span>
                     <span className="block text-[#693092]">{project.taglinePart2}</span>
                   </h1>
 
                   {/* Description matching services detail page subtitle */}
-                  <p className="text-[#554E62] text-sm sm:text-base md:text-[16px] font-normal leading-relaxed mt-4 sm:mt-5 mb-5 sm:mb-6 max-w-xl">
+                  <p className="text-[#554E62] text-sm sm:text-base md:text-[16px] font-normal leading-relaxed mt-4 sm:mt-5 mb-5 sm:mb-6 max-w-xl portfoliodetail-hero-desc">
                     {project.description}
                   </p>
 
                   {/* Tags / Pills */}
-                  <div className="flex items-center gap-2.5 sm:gap-3 flex-wrap">
+                  <div className="flex items-center gap-2.5 sm:gap-3 flex-wrap portfoliodetail-tags">
                     {project.tags.map((tag: string) => (
                       <span
                         key={tag}
@@ -463,7 +463,7 @@ export default function PortfolioDetailPage() {
                       height: imageHeight,
                       pointerEvents: "auto",
                     }}
-                    className="rounded-2xl sm:rounded-3xl overflow-hidden border border-black/[0.08] shadow-2xl shadow-purple-950/15 bg-[#120727] origin-right"
+                    className="rounded-2xl sm:rounded-3xl overflow-hidden border border-black/[0.08] shadow-2xl shadow-purple-950/15 bg-[#120727] origin-right portfoliodetail-hero-img"
                   >
                     <img
                       src={project.image}
@@ -482,18 +482,18 @@ export default function PortfolioDetailPage() {
           {/* ================================================================ */}
           {/* SECTION 2: BENEFITS CARD (Rich Purple Container)                 */}
           {/* ================================================================ */}
-          <section className="mt-4 sm:mt-6 lg:mt-6 w-full bg-[#521C74] rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-11 shadow-2xl shadow-[#521C74]/25 text-white mb-10 sm:mb-14">
-            <h2 className="text-3xl sm:text-4xl md:text-[2.65rem] lg:text-[3rem] font-light tracking-[-0.035em] leading-[1.08] text-white mb-6 sm:mb-7">
+          <section className="mt-4 sm:mt-6 lg:mt-6 w-full bg-[#521C74] rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-11 shadow-2xl shadow-[#521C74]/25 text-white mb-10 sm:mb-14 portfoliodetail-benefits-section">
+            <h2 className="text-3xl sm:text-4xl md:text-[2.65rem] lg:text-[3rem] font-light tracking-[-0.035em] leading-[1.08] text-white mb-6 sm:mb-7 portfoliodetail-section-title">
               Benefits
             </h2>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 portfoliodetail-benefits-grid">
               {project.benefits.map((benefit, idx) => {
                 const IconComponent = benefit.icon;
                 return (
                   <div
                     key={idx}
-                    className="bg-[#3B1156]/70 backdrop-blur-md rounded-2xl p-5 sm:p-6 border border-white/10 flex flex-col justify-between hover:bg-[#3B1156]/90 transition-all duration-200"
+                    className="bg-[#3B1156]/70 backdrop-blur-md rounded-2xl p-5 sm:p-6 border border-white/10 flex flex-col justify-between hover:bg-[#3B1156]/90 transition-all duration-200 portfoliodetail-benefit-card"
                   >
                     {/* Top Row: Icon badge */}
                     <div className="flex items-center">
@@ -506,7 +506,7 @@ export default function PortfolioDetailPage() {
 
                     {/* Metric Value & Label */}
                     <div className="mt-6 sm:mt-7">
-                      <div className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-1">
+                      <div className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-1 portfoliodetail-metric-val">
                         {benefit.value}
                       </div>
                       <div className="text-xs sm:text-[13px] text-white/80 font-normal">
@@ -522,16 +522,16 @@ export default function PortfolioDetailPage() {
           {/* ================================================================ */}
           {/* SECTION 3: OVERVIEW WINDOW CARD (Mockup Window with 3 Dots)       */}
           {/* ================================================================ */}
-          <section className="w-full rounded-2xl sm:rounded-3xl overflow-hidden border border-[#693092]/10 shadow-sm bg-white mb-12 sm:mb-16">
+          <section className="w-full rounded-2xl sm:rounded-3xl overflow-hidden border border-[#693092]/10 shadow-sm bg-white mb-12 sm:mb-16 portfoliodetail-overview-section">
 
             {/* Window Content */}
-            <div className="p-7 sm:p-10 lg:p-12 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 sm:gap-10 lg:gap-12">
+            <div className="p-7 sm:p-10 lg:p-12 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 sm:gap-10 lg:gap-12 portfoliodetail-overview-content">
               {/* Left Column: Icon + "Overview" Title (Side by Side) */}
               <div className="flex items-center gap-3.5 sm:gap-4 shrink-0">
                 <div className="w-12 h-12 sm:w-13 sm:h-13 rounded-2xl bg-[#BE3093] text-white flex items-center justify-center shadow-md shadow-[#BE3093]/30 shrink-0">
                   <Layers className="w-6 h-6 stroke-[2.2]" />
                 </div>
-                <h3 className="text-2xl sm:text-3xl md:text-[2.65rem] lg:text-[3rem] font-light tracking-[-0.035em] leading-[1.08] text-[#141010]">
+                <h3 className="text-2xl sm:text-3xl md:text-[2.65rem] lg:text-[3rem] font-light tracking-[-0.035em] leading-[1.08] text-[#141010] portfoliodetail-section-title">
                   Overview
                 </h3>
               </div>
@@ -540,7 +540,7 @@ export default function PortfolioDetailPage() {
               <div className="hidden md:block w-px self-stretch bg-black/[0.08]" />
 
               {/* Right Column: Paragraph moved across right side */}
-              <p className="text-[#554E62] text-sm sm:text-base md:text-[17px] font-normal leading-relaxed flex-1">
+              <p className="text-[#554E62] text-sm sm:text-base md:text-[17px] font-normal leading-relaxed flex-1 portfoliodetail-overview-desc">
                 {project.overview}
               </p>
             </div>
@@ -549,19 +549,19 @@ export default function PortfolioDetailPage() {
           {/* ================================================================ */}
           {/* SECTION 4: KEY FEATURES (3 cards top row, 2 cards bottom row)    */}
           {/* ================================================================ */}
-          <section className="w-full mb-14 sm:mb-18">
-            <h2 className="text-3xl sm:text-4xl md:text-[2.65rem] lg:text-[3rem] font-light tracking-[-0.035em] leading-[1.08] text-[#141010] mb-6 sm:mb-8">
+          <section className="w-full mb-14 sm:mb-18 portfoliodetail-features-section">
+            <h2 className="text-3xl sm:text-4xl md:text-[2.65rem] lg:text-[3rem] font-light tracking-[-0.035em] leading-[1.08] text-[#141010] mb-6 sm:mb-8 portfoliodetail-section-title">
               Key Features
             </h2>
 
             {/* Top Row: 3 equal cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6 mb-5 sm:mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6 mb-5 sm:mb-6 portfoliodetail-features-grid">
               {project.featuresTop.map((feature, idx) => {
                 const FeatIcon = feature.icon;
                 return (
                   <div
                     key={idx}
-                    className="bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-7 border border-[#693092]/10 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between min-h-[175px]"
+                    className="bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-7 border border-[#693092]/10 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between min-h-[175px] portfoliodetail-feat-card"
                   >
                     {/* Header: Number left, Squircle icon right */}
                     <div className="flex items-center justify-between mb-4">
@@ -575,10 +575,10 @@ export default function PortfolioDetailPage() {
 
                     {/* Title & Description matching services detail page */}
                     <div>
-                      <h3 className="text-xl sm:text-2xl lg:text-[1.65rem] font-bold tracking-tight leading-snug text-[#141010] mb-2 sm:mb-2.5">
+                      <h3 className="text-xl sm:text-2xl lg:text-[1.65rem] font-bold tracking-tight leading-snug text-[#141010] mb-2 sm:mb-2.5 portfoliodetail-feat-title">
                         {feature.title}
                       </h3>
-                      <p className="text-[#554E62] text-sm sm:text-[15px] md:text-[16px] leading-relaxed font-normal">
+                      <p className="text-[#554E62] text-sm sm:text-[15px] md:text-[16px] leading-relaxed font-normal portfoliodetail-feat-desc">
                         {feature.desc}
                       </p>
                     </div>
@@ -588,13 +588,13 @@ export default function PortfolioDetailPage() {
             </div>
 
             {/* Bottom Row: 2 wider cards spanning full width matching screenshot */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6 portfoliodetail-features-grid">
               {project.featuresBottom.map((feature, idx) => {
                 const FeatIcon = feature.icon;
                 return (
                   <div
                     key={idx}
-                    className="bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-7 border border-[#693092]/10 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between min-h-[175px]"
+                    className="bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-7 border border-[#693092]/10 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between min-h-[175px] portfoliodetail-feat-card"
                   >
                     {/* Header: Number left, Squircle icon right */}
                     <div className="flex items-center justify-between mb-4">
@@ -608,10 +608,10 @@ export default function PortfolioDetailPage() {
 
                     {/* Title & Description matching services detail page */}
                     <div>
-                      <h3 className="text-xl sm:text-2xl lg:text-[1.65rem] font-bold tracking-tight leading-snug text-[#141010] mb-2 sm:mb-2.5">
+                      <h3 className="text-xl sm:text-2xl lg:text-[1.65rem] font-bold tracking-tight leading-snug text-[#141010] mb-2 sm:mb-2.5 portfoliodetail-feat-title">
                         {feature.title}
                       </h3>
-                      <p className="text-[#554E62] text-sm sm:text-[15px] md:text-[16px] leading-relaxed font-normal">
+                      <p className="text-[#554E62] text-sm sm:text-[15px] md:text-[16px] leading-relaxed font-normal portfoliodetail-feat-desc">
                         {feature.desc}
                       </p>
                     </div>
@@ -624,13 +624,13 @@ export default function PortfolioDetailPage() {
           {/* ================================================================ */}
           {/* SECTION 5: READY TO GET STARTED CTA BANNER                       */}
           {/* ================================================================ */}
-          <div className="w-full bg-[#2A1450] rounded-2xl sm:rounded-3xl px-6 sm:px-10 lg:px-14 py-10 sm:py-14 lg:py-16 shadow-xl shadow-[#2A1450]/20 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div className="w-full bg-[#2A1450] rounded-2xl sm:rounded-3xl px-6 sm:px-10 lg:px-14 py-10 sm:py-14 lg:py-16 shadow-xl shadow-[#2A1450]/20 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 cta-banner-card">
             {/* Left Texts: Heading and subtitle */}
             <div className="flex flex-col sm:flex-row sm:items-baseline gap-2.5 sm:gap-4 md:gap-6">
-              <h3 className="text-2xl sm:text-3xl md:text-[2rem] font-light tracking-[-0.035em] text-white whitespace-nowrap">
+              <h3 className="text-2xl sm:text-3xl md:text-[2rem] font-light tracking-[-0.035em] text-white whitespace-nowrap cta-banner-title">
                 Ready to get started?
               </h3>
-              <span className="text-white/85 text-xs sm:text-sm md:text-[15px] font-normal">
+              <span className="text-white/85 text-xs sm:text-sm md:text-[15px] font-normal cta-banner-subtitle">
                 Let&apos;s build something great together
               </span>
             </div>
@@ -639,7 +639,7 @@ export default function PortfolioDetailPage() {
             <div className="flex-shrink-0">
               <Link
                 to="/#contact"
-                className="hover-brand-gradient inline-flex items-center justify-center bg-[#FBAE42] text-black hover:text-white font-medium text-xs sm:text-sm md:text-[15px] px-7 sm:px-8 py-3 sm:py-3.5 rounded-full shadow-md whitespace-nowrap cursor-pointer transition-colors"
+                className="hover-brand-gradient inline-flex items-center justify-center bg-[#FBAE42] text-black hover:text-white font-medium text-xs sm:text-sm md:text-[15px] px-7 sm:px-8 py-3 sm:py-3.5 rounded-full shadow-md whitespace-nowrap cursor-pointer transition-colors cta-banner-btn"
               >
                 Let&apos;s Connect
               </Link>

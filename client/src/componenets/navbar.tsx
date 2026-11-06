@@ -232,7 +232,7 @@ export default function Navbar({
           </a>
 
           {/* Desktop Navigation Links */}
-          <div className="nav-links-wrap hidden md:flex items-center md:gap-3.5 lg:gap-4.5 xl:gap-5.5">
+          <div className="nav-links-wrap hidden md:flex items-center md:gap-2.5 lg:gap-3.5 xl:gap-5">
             {navLinks.map((link) => {
               const isActive = currentTab === link;
               return (
@@ -254,94 +254,94 @@ export default function Navbar({
 
           {/* Right Action Items */}
           <div className="hidden sm:flex items-center gap-2 lg:gap-2.5 shrink-0">
-            {/* Careers Page Specific Login / User Button */}
-            {isCareersPage && (
-              currentUser ? (
-                <div
-                  className="relative"
-                  onMouseEnter={handleDropdownMouseEnter}
-                  onMouseLeave={handleDropdownMouseLeave}
-                >
-                  <button
-                    type="button"
-                    onClick={() => setIsDropdownOpen((prev) => !prev)}
-                    className="bg-white/10 hover:bg-white/15 text-white whitespace-nowrap text-xs md:text-[12px] lg:text-[12.5px] font-medium px-3 sm:px-3.5 py-1 sm:py-1.5 rounded-full border border-white/15 transition-all cursor-pointer inline-flex items-center gap-2 shadow-sm"
-                    style={{ fontFamily: "'Onest', sans-serif" }}
-                  >
-                    <User className="w-3.5 h-3.5 text-white/90 shrink-0" />
-                    <span className="max-w-[120px] truncate">{currentUser.name}</span>
-                    <ChevronDown
-                      className={`w-3.5 h-3.5 text-white/70 transition-transform duration-200 ${
-                        isDropdownOpen ? "rotate-180" : ""
-                      }`}
-                    />
-                  </button>
-
-                  {/* Dropdown Menu on Hover */}
-                  {isDropdownOpen && (
-                    <div
-                      className="absolute right-0 top-full pt-2 z-50 w-52 animate-in fade-in zoom-in-95 duration-150"
-                      onMouseEnter={handleDropdownMouseEnter}
-                      onMouseLeave={handleDropdownMouseLeave}
-                    >
-                      <div className="bg-[#140D26] text-white rounded-2xl p-2 shadow-2xl border border-white/15 backdrop-blur-md">
-                        {/* User Preview */}
-                        <div className="px-3 py-2 border-b border-white/10 mb-1">
-                          <div className="text-[13px] font-semibold text-white truncate">
-                            {currentUser.name}
-                          </div>
-                          <div className="text-[11px] text-white/60 truncate">
-                            {currentUser.email}
-                          </div>
-                        </div>
-
-                        {/* My Profile */}
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setIsDropdownOpen(false);
-                            navigate("/profile");
-                          }}
-                          className="w-full text-left px-3 py-2 rounded-xl hover:bg-white/10 text-white/90 hover:text-white text-xs sm:text-[13px] font-medium flex items-center gap-2.5 transition-colors cursor-pointer"
-                        >
-                          <User className="w-4 h-4 text-[#FBAE42]" />
-                          <span>My Profile</span>
-                        </button>
-
-                        {/* Logout */}
-                        <button
-                          type="button"
-                          onClick={handleLogout}
-                          className="w-full text-left px-3 py-2 rounded-xl hover:bg-red-500/15 text-red-300 hover:text-red-200 text-xs sm:text-[13px] font-medium flex items-center gap-2.5 transition-colors cursor-pointer mt-0.5"
-                        >
-                          <LogOut className="w-4 h-4 text-red-400" />
-                          <span>Logout</span>
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ) : (
+            {/* User Profile Button (visible when logged in) OR Log in Button (Careers page when logged out) */}
+            {currentUser ? (
+              <div
+                className="relative"
+                onMouseEnter={handleDropdownMouseEnter}
+                onMouseLeave={handleDropdownMouseLeave}
+              >
                 <button
                   type="button"
-                  onClick={() => setIsLoginModalOpen(true)}
-                  className="hover-brand-gradient bg-white/10 hover:bg-white/20 text-white whitespace-nowrap text-xs md:text-[12px] lg:text-[12.5px] font-medium px-3.5 sm:px-4 py-1 sm:py-1.5 rounded-full border border-white/15 transition-all cursor-pointer inline-flex items-center gap-1.5 shadow-sm"
+                  onClick={() => setIsDropdownOpen((prev) => !prev)}
+                  className="bg-white/10 hover:bg-white/15 text-white whitespace-nowrap text-xs md:text-[12px] lg:text-[12.5px] font-medium px-3 sm:px-3.5 py-1 sm:py-1.5 rounded-full border border-white/15 transition-all cursor-pointer inline-flex items-center gap-2 shadow-sm"
                   style={{ fontFamily: "'Onest', sans-serif" }}
                 >
-                  <LogIn className="w-3.5 h-3.5 text-[#FBAE42]" />
-                  <span>Log in</span>
+                  <User className="w-3.5 h-3.5 text-white/90 shrink-0" />
+                  <span className="max-w-[120px] truncate">{currentUser.name}</span>
+                  <ChevronDown
+                    className={`w-3.5 h-3.5 text-white/70 transition-transform duration-200 ${
+                      isDropdownOpen ? "rotate-180" : ""
+                    }`}
+                  />
                 </button>
-              )
-            )}
 
-            {/* Let's Connect CTA */}
-            <button
-              onClick={handleGetStartedClick}
-              className="nav-cta-btn hover-brand-gradient bg-[#FBAE42] text-[#141010] whitespace-nowrap text-xs md:text-[12px] lg:text-[12.5px] xl:text-[13px] font-semibold px-3.5 sm:px-4 md:px-3.5 lg:px-4 xl:px-4.5 py-1 sm:py-1.5 md:py-1.5 lg:py-1.5 xl:py-1.5 rounded-full shadow-sm cursor-pointer inline-flex items-center justify-center transition-all duration-200"
-              style={{ fontFamily: "'Onest', sans-serif" }}
-            >
-              Let's Connect
-            </button>
+                {/* Dropdown Menu on Hover */}
+                {isDropdownOpen && (
+                  <div
+                    className="absolute right-0 top-full pt-2 z-50 w-52 animate-in fade-in zoom-in-95 duration-150"
+                    onMouseEnter={handleDropdownMouseEnter}
+                    onMouseLeave={handleDropdownMouseLeave}
+                  >
+                    <div className="bg-[#140D26] text-white rounded-2xl p-2 shadow-2xl border border-white/15 backdrop-blur-md">
+                      {/* User Preview */}
+                      <div className="px-3 py-2 border-b border-white/10 mb-1">
+                        <div className="text-[13px] font-semibold text-white truncate">
+                          {currentUser.name}
+                        </div>
+                        <div className="text-[11px] text-white/60 truncate">
+                          {currentUser.email}
+                        </div>
+                      </div>
+
+                      {/* My Profile */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsDropdownOpen(false);
+                          navigate("/profile");
+                        }}
+                        className="w-full text-left px-3 py-2 rounded-xl hover:bg-white/10 text-white/90 hover:text-white text-xs sm:text-[13px] font-medium flex items-center gap-2.5 transition-colors cursor-pointer"
+                      >
+                        <User className="w-4 h-4 text-[#FBAE42]" />
+                        <span>My Profile</span>
+                      </button>
+
+                      {/* Logout */}
+                      <button
+                        type="button"
+                        onClick={handleLogout}
+                        className="w-full text-left px-3 py-2 rounded-xl hover:bg-red-500/15 text-red-300 hover:text-red-200 text-xs sm:text-[13px] font-medium flex items-center gap-2.5 transition-colors cursor-pointer mt-0.5"
+                      >
+                        <LogOut className="w-4 h-4 text-red-400" />
+                        <span>Logout</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : isCareersPage ? (
+              <button
+                type="button"
+                onClick={() => setIsLoginModalOpen(true)}
+                className="hover-brand-gradient bg-white/10 hover:bg-white/20 text-white whitespace-nowrap text-xs md:text-[12px] lg:text-[12.5px] font-medium px-3.5 sm:px-4 py-1 sm:py-1.5 rounded-full border border-white/15 transition-all cursor-pointer inline-flex items-center gap-1.5 shadow-sm"
+                style={{ fontFamily: "'Onest', sans-serif" }}
+              >
+                <LogIn className="w-3.5 h-3.5 text-[#FBAE42]" />
+                <span>Log in</span>
+              </button>
+            ) : null}
+
+            {/* Let's Connect CTA - Hidden when logged in, visible when logged out */}
+            {!currentUser && (
+              <button
+                onClick={handleGetStartedClick}
+                className="nav-cta-btn hover-brand-gradient bg-[#FBAE42] text-[#141010] whitespace-nowrap text-xs md:text-[12px] lg:text-[12.5px] xl:text-[13px] font-semibold px-3.5 sm:px-4 md:px-3.5 lg:px-4 xl:px-4.5 py-1 sm:py-1.5 md:py-1.5 lg:py-1.5 xl:py-1.5 rounded-full shadow-sm cursor-pointer inline-flex items-center justify-center transition-all duration-200"
+                style={{ fontFamily: "'Onest', sans-serif" }}
+              >
+                Let's Connect
+              </button>
+            )}
           </div>
 
           {/* Mobile Hamburger Button */}
@@ -367,61 +367,62 @@ export default function Navbar({
               </button>
             ))}
 
-            {/* Mobile Careers Login/User Actions */}
-            {isCareersPage && (
+            {/* Mobile User Actions / Careers Login */}
+            {currentUser ? (
               <div className="pt-2 border-t border-white/10 flex flex-col gap-2">
-                {currentUser ? (
-                  <>
-                    <div className="flex items-center gap-2.5 px-2 py-1">
-                      <div className="w-6 h-6 rounded-full bg-[#EADBFA] text-[#693092] font-bold text-xs flex items-center justify-center">
-                        {currentUser.initials}
-                      </div>
-                      <span className="text-sm font-medium text-white">{currentUser.name}</span>
-                    </div>
-                    <button
-                      onClick={() => {
-                        setIsMobileMenuOpen(false);
-                        navigate("/profile");
-                      }}
-                      className="text-left text-sm text-white/90 hover:text-white font-medium py-1.5 px-2 rounded-lg hover:bg-white/5 flex items-center gap-2"
-                    >
-                      <User className="w-4 h-4 text-[#FBAE42]" />
-                      <span>My Profile</span>
-                    </button>
-                    <button
-                      onClick={() => {
-                        setIsMobileMenuOpen(false);
-                        handleLogout();
-                      }}
-                      className="text-left text-sm text-red-300 hover:text-red-200 font-medium py-1.5 px-2 rounded-lg hover:bg-red-500/10 flex items-center gap-2"
-                    >
-                      <LogOut className="w-4 h-4 text-red-400" />
-                      <span>Logout</span>
-                    </button>
-                  </>
-                ) : (
-                  <button
-                    onClick={() => {
-                      setIsMobileMenuOpen(false);
-                      setIsLoginModalOpen(true);
-                    }}
-                    className="w-full bg-white/10 hover:bg-white/15 text-white text-sm font-semibold py-2 rounded-full border border-white/15 flex items-center justify-center gap-2"
-                  >
-                    <LogIn className="w-4 h-4 text-[#FBAE42]" />
-                    <span>Log in</span>
-                  </button>
-                )}
+                <div className="flex items-center gap-2.5 px-2 py-1">
+                  <div className="w-6 h-6 rounded-full bg-[#EADBFA] text-[#693092] font-bold text-xs flex items-center justify-center">
+                    {currentUser.initials}
+                  </div>
+                  <span className="text-sm font-medium text-white">{currentUser.name}</span>
+                </div>
+                <button
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    navigate("/profile");
+                  }}
+                  className="text-left text-sm text-white/90 hover:text-white font-medium py-1.5 px-2 rounded-lg hover:bg-white/5 flex items-center gap-2"
+                >
+                  <User className="w-4 h-4 text-[#FBAE42]" />
+                  <span>My Profile</span>
+                </button>
+                <button
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    handleLogout();
+                  }}
+                  className="text-left text-sm text-red-300 hover:text-red-200 font-medium py-1.5 px-2 rounded-lg hover:bg-red-500/10 flex items-center gap-2"
+                >
+                  <LogOut className="w-4 h-4 text-red-400" />
+                  <span>Logout</span>
+                </button>
+              </div>
+            ) : isCareersPage ? (
+              <div className="pt-2 border-t border-white/10 flex flex-col gap-2">
+                <button
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    setIsLoginModalOpen(true);
+                  }}
+                  className="w-full bg-white/10 hover:bg-white/15 text-white text-sm font-semibold py-2 rounded-full border border-white/15 flex items-center justify-center gap-2"
+                >
+                  <LogIn className="w-4 h-4 text-[#FBAE42]" />
+                  <span>Log in</span>
+                </button>
+              </div>
+            ) : null}
+
+            {/* Mobile Let's Connect CTA - Hidden when logged in, visible when logged out */}
+            {!currentUser && (
+              <div className="pt-2 border-t border-white/10">
+                <button
+                  onClick={handleGetStartedClick}
+                  className="w-full hover-brand-gradient bg-[#FBAE42] text-[#141010] text-sm font-semibold py-2.5 rounded-full shadow-md cursor-pointer inline-flex items-center justify-center"
+                >
+                  Let's Connect
+                </button>
               </div>
             )}
-
-            <div className="pt-2 border-t border-white/10">
-              <button
-                onClick={handleGetStartedClick}
-                className="w-full hover-brand-gradient bg-[#FBAE42] text-[#141010] text-sm font-semibold py-2.5 rounded-full shadow-md cursor-pointer inline-flex items-center justify-center"
-              >
-                Let's Connect
-              </button>
-            </div>
           </div>
         )}
       </header>

@@ -675,14 +675,14 @@ export default function Contact() {
     <section
       ref={sectionRef}
       id="contact"
-      className="contact-section-wrap relative w-full min-h-[100dvh] flex flex-col justify-center bg-[#F5EEF8] text-[#141010] px-4 sm:px-6 md:px-8 lg:px-10 xl:px-14 2xl:px-18 pt-16 sm:pt-20 lg:pt-0 pb-12 sm:pb-16 lg:pb-0 select-none overflow-x-clip scroll-mt-0"
+      className="contact-section-wrap relative w-full min-h-[100dvh] flex flex-col justify-center bg-[#F5EEF8] text-[#141010] px-4 sm:px-6 md:px-8 lg:px-10 xl:px-14 2xl:px-18 select-none overflow-x-clip scroll-mt-0"
     >
       {/* Subtle ambient glows */}
       <div className="absolute top-1/4 -right-48 w-96 h-96 rounded-full bg-[#BE3093]/5 blur-[140px] pointer-events-none" />
       <div className="absolute bottom-1/3 -left-48 w-96 h-96 rounded-full bg-[#693092]/5 blur-[140px] pointer-events-none" />
 
       {/* Main Container - Full expanded width matching all remaining sections */}
-      <div className="contact-content-wrap relative w-full max-w-[2100px] mx-auto flex-1 flex flex-col justify-center my-auto w-full">
+      <div className="contact-content-wrap relative w-full max-w-[2100px] mx-auto flex flex-col justify-center my-auto w-full">
         {/* Header Section */}
         <div className="contact-header max-w-3xl mb-8 sm:mb-10 lg:mb-8 xl:mb-10 text-left">
           {/* Eyebrow Badge: Button Design matching remaining sections */}
@@ -769,7 +769,7 @@ export default function Contact() {
         </div>
 
         {/* Centered CTA Button: "Let's Connect" */}
-        <div className="contact-cta flex justify-center">
+        <div className="contact-cta flex justify-center mt-5 sm:mt-6 lg:mt-7 xl:mt-8">
           <button
             type="button"
             onClick={() => setIsModalOpen(true)}
@@ -831,7 +831,7 @@ export default function Contact() {
                 transition: { duration: 0.24, ease: "easeInOut" },
               }}
               style={{ transformStyle: "preserve-3d" }}
-              className="relative w-full max-w-xl sm:max-w-2xl bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-2xl z-10 max-h-[90vh] overflow-y-auto text-left"
+              className="relative w-full max-w-xl sm:max-w-2xl bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-7 md:p-8 shadow-2xl z-10 max-h-[88dvh] overflow-y-auto text-left"
             >
               {/* Paper Creases Overlay (Simulates paper uncreasing/flattening out on open) */}
               <motion.div

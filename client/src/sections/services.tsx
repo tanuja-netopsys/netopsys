@@ -325,17 +325,19 @@ export default function Services() {
   if (isMobile) {
     // Mobile (< 640px): balanced radius and card proportions to prevent overlapping and clipping
     radius = 420;
-    cardWidth = Math.min(310, Math.max(260, Math.round(windowWidth * 0.84)));
-    cardHeight = Math.min(390, Math.max(300, Math.round(windowHeight * 0.46)));
+    const targetMobileH = Math.round(windowHeight * (windowHeight < 620 ? 0.40 : 0.45));
+    cardHeight = Math.min(370, Math.max(230, targetMobileH));
+    cardWidth = Math.min(310, Math.max(230, Math.round(windowWidth * 0.84)));
     perspective = 950;
-    cubeSize = Math.min(180, Math.max(140, Math.round(cardHeight * 0.44)));
+    cubeSize = Math.min(180, Math.max(130, Math.round(cardHeight * 0.44)));
     startX = 100;
   } else if (isTablet) {
     radius = 480;
-    cardHeight = Math.min(410, Math.max(320, Math.round(windowHeight * 0.48)));
-    cardWidth = Math.round(cardHeight * 0.80);
+    const targetTabletH = Math.round(windowHeight * (windowHeight < 620 ? 0.40 : 0.46));
+    cardHeight = Math.min(410, Math.max(235, targetTabletH));
+    cardWidth = Math.round(cardHeight * 0.78);
     perspective = 1100;
-    cubeSize = Math.round(cardHeight * 0.52);
+    cubeSize = Math.round(cardHeight * 0.50);
     startX = 200;
   } else if (is100Screen) {
     // 100% Windows Scaling (1920x1080, tall screen)
@@ -347,20 +349,21 @@ export default function Services() {
     startX = Math.min(380, Math.max(240, Math.round(windowWidth * 0.22)));
   } else if (is125Screen) {
     // 125% Windows Scaling (1536x864, height ~700-800px)
-    cardHeight = Math.min(420, Math.max(360, Math.round(windowHeight * 0.47)));
-    cardWidth = Math.min(340, Math.max(280, Math.round(cardHeight * 0.76)));
+    cardHeight = Math.min(420, Math.max(350, Math.round(windowHeight * 0.47)));
+    cardWidth = Math.min(340, Math.max(270, Math.round(cardHeight * 0.76)));
     radius = Math.min(620, Math.max(500, Math.round(windowWidth * 0.36)));
     perspective = Math.min(1350, Math.max(1050, Math.round(radius * 2.1)));
     cubeSize = Math.min(230, Math.max(160, Math.round(cardHeight * 0.50)));
     startX = Math.min(320, Math.max(210, Math.round(windowWidth * 0.20)));
   } else {
-    // 150% and 175% Windows Scaling (1280x720 / 1097x617, height ~500-640px)
-    cardHeight = Math.min(340, Math.max(280, Math.round(windowHeight * 0.45)));
-    cardWidth = Math.min(265, Math.max(215, Math.round(cardHeight * 0.75)));
-    radius = Math.min(520, Math.max(420, Math.round(windowWidth * 0.35)));
-    perspective = Math.min(1200, Math.max(950, Math.round(radius * 2.1)));
-    cubeSize = Math.min(190, Math.max(140, Math.round(cardHeight * 0.50)));
-    startX = Math.min(280, Math.max(180, Math.round(windowWidth * 0.18)));
+    // 150%, 175% and 200% Windows Scaling (1280x720 / 1097x617 / 960x540, height ~420-640px)
+    const targetScaledH = Math.round(windowHeight * (windowHeight < 620 ? 0.54 : 0.58));
+    cardHeight = Math.min(365, Math.max(300, targetScaledH));
+    cardWidth = Math.min(290, Math.max(235, Math.round(cardHeight * 0.78)));
+    radius = Math.min(580, Math.max(460, Math.round(windowWidth * 0.38)));
+    perspective = Math.min(1300, Math.max(1000, Math.round(radius * 2.15)));
+    cubeSize = Math.min(210, Math.max(140, Math.round(cardHeight * 0.48)));
+    startX = Math.min(300, Math.max(170, Math.round(windowWidth * 0.19)));
   }
 
   const half = cubeSize / 2;
@@ -403,12 +406,14 @@ export default function Services() {
       >
         {/* Sticky Fullscreen Stage */}
         <div
-          className={`sticky top-0 h-screen h-[100dvh] w-full overflow-hidden flex flex-col justify-between select-none ${
+          className={`services-stage-wrap sticky top-0 h-screen h-[100dvh] w-full overflow-hidden flex flex-col justify-between select-none ${
             is100Screen
               ? "pt-20 pb-5"
               : is125Screen
               ? "pt-16 pb-3.5"
-              : "pt-[62px] pb-2.5"
+              : windowHeight < 680
+              ? "pt-[72px] sm:pt-[76px] pb-2"
+              : "pt-[68px] pb-2.5"
           }`}
         >
           {/* Subtle background tech grid */}
@@ -806,7 +811,9 @@ export default function Services() {
                           ? "rounded-[24px] p-4.5 sm:p-5"
                           : isMobile
                           ? "rounded-[20px] p-3.5"
-                          : "rounded-[22px] p-3.5"
+                          : is150Screen
+                          ? "rounded-[24px] p-3.5 sm:p-4 pb-3"
+                          : "rounded-[24px] p-4 sm:p-4.5 pb-3.5"
                       }`}
                       style={{
                         width: `${cardWidth}px`,
@@ -840,10 +847,14 @@ export default function Services() {
                             : is125Screen
                             ? "135px"
                             : isTablet
-                            ? "125px"
+                            ? "120px"
                             : isMobile
-                            ? "105px"
-                            : "100px",
+                            ? "100px"
+                            : windowHeight < 620
+                            ? "95px"
+                            : is150Screen
+                            ? "100px"
+                            : "110px",
                         }}
                       >
                         <img
@@ -890,8 +901,8 @@ export default function Services() {
                                 ? "18px"
                                 : isMobile
                                 ? "15.5px"
-                                : "16px",
-                              marginBottom: is100Screen ? "6px" : is125Screen ? "4px" : "2.5px",
+                                : "16.5px",
+                              marginBottom: is100Screen ? "6px" : is125Screen ? "4px" : is150Screen ? "2px" : "2.5px",
                             }}
                           >
                             {service.title}
@@ -899,9 +910,7 @@ export default function Services() {
 
                           {/* Description - High contrast white/95 with relaxed line-height */}
                           <p
-                            className={`text-white/95 leading-relaxed font-normal line-clamp-2 ${
-                              is100Screen ? "mb-3" : "mb-1.5"
-                            }`}
+                            className={`text-white/95 leading-relaxed font-normal line-clamp-2 ${is100Screen ? "mb-3" : is150Screen ? "mb-1" : "mb-1.5"}`}
                             style={{
                               fontSize: is100Screen
                                 ? "14px"
@@ -909,7 +918,7 @@ export default function Services() {
                                 ? "12.5px"
                                 : isMobile
                                 ? "11.5px"
-                                : "11px",
+                                : "12px",
                             }}
                           >
                             {service.description}
@@ -917,14 +926,15 @@ export default function Services() {
                         </div>
 
                         {/* Tag Pills - Flexible wrapping pills with clear text */}
-                        <div className={`flex flex-wrap ${is100Screen ? "gap-2 mb-3" : is125Screen ? "gap-1 mb-2" : "gap-1 mb-1.5"}`}>
+                        <div className={`flex flex-wrap ${is100Screen ? "gap-2 mb-3" : is125Screen ? "gap-1 mb-2" : is150Screen ? "gap-1 mb-1" : "gap-1 mb-1.5"}`}>
                           {(is150Screen || isMobile ? service.tags.slice(0, 2) : service.tags).map((tag) => (
                             <span
                               key={tag}
                               className="rounded-full border border-white/20 bg-white/10 hover:bg-white/15 text-white font-medium tracking-wide transition-colors truncate backdrop-blur-sm"
                               style={{
-                                fontSize: is100Screen ? "12px" : is125Screen ? "11px" : "9.5px",
-                                padding: is100Screen ? "4px 12px" : is125Screen ? "2px 9px" : "2px 8px",
+                                fontSize: is100Screen ? "12px" : is125Screen ? "11px" : "10px",
+                                padding: is100Screen ? "4px 12px" : is125Screen ? "2px 9px" : is150Screen ? "1.5px 7.5px" : "2px 8.5px",
+                                maxWidth: is150Screen ? "130px" : undefined,
                               }}
                             >
                               {tag}
@@ -933,7 +943,7 @@ export default function Services() {
                           {(is150Screen || isMobile) && service.tags.length > 2 && (
                             <span
                               className="rounded-full border border-white/15 bg-white/5 text-white/70 font-mono tracking-wide"
-                              style={{ fontSize: "9.5px", padding: "2px 6px" }}
+                              style={{ fontSize: "10px", padding: "2px 6px" }}
                             >
                               +{service.tags.length - 2}
                             </span>
@@ -941,7 +951,7 @@ export default function Services() {
                         </div>
 
                         {/* Bottom Explore Link */}
-                        <div className={`border-t border-white/15 flex items-center justify-between ${is100Screen ? "pt-2.5" : "pt-1.5"}`}>
+                        <div className={`border-t border-white/15 flex items-center justify-between ${is100Screen ? "pt-2.5" : is125Screen ? "pt-2" : is150Screen ? "pt-1.5 pb-0.5" : "pt-2 pb-0.5"}`}>
                           <Link
                             to={`/services/${service.slug}`}
                             onClick={(e) => e.stopPropagation()}

@@ -915,7 +915,7 @@ export default function InterviewSlotsPage() {
       ===================================================================== */}
       {activeSessionForNewSlot && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs">
-          <div className="bg-white rounded-[24px] border border-[#ECE4F2] shadow-2xl w-full max-w-md p-6 sm:p-7 relative animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-white rounded-[24px] border border-[#ECE4F2] shadow-2xl w-full max-w-md p-6 sm:p-7 relative max-h-[88dvh] overflow-y-auto animate-in fade-in zoom-in-95 duration-200">
             <button
               onClick={() => setActiveSessionForNewSlot(null)}
               className="absolute top-5 right-5 text-gray-400 hover:text-gray-600 p-1.5 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer"

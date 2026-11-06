@@ -601,7 +601,7 @@ export default function AdminDashboard() {
               </div>
 
               {/* 4 Stat Cards Row - Displaying Real Live Data (Clickable navigation) */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 mb-6 items-stretch">
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-5 mb-6 items-stretch">
                 {/* Stat 1: Active Jobs */}
                 <div
                   onClick={() => navigate(isSuperAdminRoute ? "/superadmin/job-postings" : "/admin/job-postings")}
@@ -762,8 +762,8 @@ export default function AdminDashboard() {
                   </button>
                 </div>
 
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left">
+                <div className="overflow-x-auto table-responsive-container">
+                  <table className="w-full text-left min-w-[520px]">
                     <thead>
                       <tr className="border-b border-[#F5EFF8] text-[12px] font-normal text-[#867E93]">
                         <th className="pb-3.5 font-normal">Candidate</th>

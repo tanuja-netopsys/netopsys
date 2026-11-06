@@ -92,10 +92,10 @@ export default function Portfolio() {
   return (
     <section
       id="portfolio"
-      className="portfolio-section-wrap relative w-full min-h-[100dvh] flex flex-col justify-center bg-[#FBAE42] px-4 sm:px-6 md:px-8 lg:px-10 xl:px-14 2xl:px-18 py-4 sm:py-6 select-none overflow-x-clip scroll-mt-0"
+      className="portfolio-section-wrap relative w-full min-h-[100dvh] flex flex-col justify-center bg-[#FBAE42] px-4 sm:px-6 md:px-8 lg:px-10 xl:px-14 2xl:px-18 select-none overflow-x-clip scroll-mt-0"
     >
       {/* Main Container - Expanded width matching Hero, About, and Services */}
-      <div className="portfolio-content-wrap relative w-full max-w-[2100px] mx-auto flex-1 flex flex-col justify-center my-auto w-full pt-10 sm:pt-12 lg:pt-5 xl:pt-6">
+      <div className="portfolio-content-wrap relative w-full max-w-[2100px] mx-auto flex flex-col justify-center my-auto w-full">
         {/* Header Section with Navigation Arrows */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2.5 sm:gap-3 mb-2 sm:mb-2.5 lg:mb-2 xl:mb-2.5">
           <div className="portfolio-header max-w-3xl">
@@ -109,8 +109,8 @@ export default function Portfolio() {
               </div>
             </div>
 
-            {/* Large Display Title */}
-            <h2 className="portfolio-title text-2xl sm:text-3xl md:text-4xl lg:text-[2.65rem] xl:text-[3.15rem] font-light tracking-[-0.035em] leading-[1.04] text-[#141010]">
+            {/* Large Display Title: Identical font style and scale to remaining sections */}
+            <h2 className="portfolio-title text-4xl sm:text-5xl md:text-6xl lg:text-[4.75rem] font-light tracking-[-0.035em] leading-[1.04] text-[#141010] mb-2 sm:mb-2.5 lg:mb-2 xl:mb-2.5">
               AI Solutions in Action
             </h2>
 
@@ -181,7 +181,7 @@ export default function Portfolio() {
                 >
                   {/* Image Container with active green border state */}
                   <div
-                    className={`portfolio-card-img-wrap relative w-full aspect-[16/8.6] sm:aspect-[16/8.6] rounded-[10px] sm:rounded-[12px] overflow-hidden bg-black/5 transition-all duration-300 ${
+                    className={`portfolio-card-img-wrap relative w-full aspect-[16/9.8] sm:aspect-[16/9.8] rounded-[10px] sm:rounded-[12px] overflow-hidden bg-black/5 transition-all duration-300 ${
                       isActive
                         ? "border-2 border-[#10B981] shadow-[0_0_15px_rgba(16,185,129,0.3)]"
                         : "border border-black/[0.08] group-hover:border-[#10B981]/60"
@@ -198,7 +198,7 @@ export default function Portfolio() {
                   </div>
 
                   {/* Status Badge */}
-                  <div className="portfolio-card-badge-row mt-2 sm:mt-2.5 mb-1 sm:mb-1.5 flex items-center justify-between">
+                  <div className="portfolio-card-badge-row mt-2.5 sm:mt-3 mb-1.5 sm:mb-2 flex items-center justify-between">
                     <span className="portfolio-card-badge-pill inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-0.5 rounded-full bg-[#10B981]/15 text-[#047857] text-[11px] sm:text-xs font-semibold tracking-wide border border-[#10B981]/25">
                       <span className="w-1.5 h-1.5 rounded-full bg-[#10B981]" />
                       {project.status || "Deployed"}
@@ -208,33 +208,38 @@ export default function Portfolio() {
                     </span>
                   </div>
 
-                  {/* Card Title */}
-                  <h3 className="portfolio-card-title text-[#141010] font-semibold text-sm sm:text-[15px] lg:text-[1rem] xl:text-[1.08rem] leading-snug mb-1 group-hover:text-[#693092] transition-colors">
-                    <span className="block">{project.titleLine1 || project.title}</span>
-                    {project.titleLine2 && <span className="block">{project.titleLine2}</span>}
-                  </h3>
+                  {/* Card Content & CTA */}
+                  <div className="flex flex-col flex-1 justify-between">
+                    <div>
+                      {/* Card Title */}
+                      <h3 className="portfolio-card-title text-[#141010] font-semibold text-[15px] sm:text-base lg:text-[1.125rem] xl:text-[1.2rem] leading-snug mb-1.5 group-hover:text-[#693092] transition-colors">
+                        <span className="block">{project.titleLine1 || project.title}</span>
+                        {project.titleLine2 && <span className="block">{project.titleLine2}</span>}
+                      </h3>
 
-                  {/* Card Description */}
-                  <p className="portfolio-card-desc text-[#554E62] text-xs sm:text-[12px] xl:text-[12.5px] leading-relaxed mb-2 sm:mb-2.5 flex-1 font-normal line-clamp-2">
-                    {project.description}
-                  </p>
+                      {/* Card Description */}
+                      <p className="portfolio-card-desc text-[#554E62] text-xs sm:text-[12.5px] lg:text-[13px] xl:text-[13.5px] leading-relaxed mb-3 font-normal line-clamp-2">
+                        {project.description}
+                      </p>
+                    </div>
 
-                  {/* CTA Link - Opens Portfolio Detail Page */}
-                  <div className="portfolio-card-cta mt-auto pt-0.5">
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigate(`/portfolio-detail?id=${project.id}`);
-                      }}
-                      className="portfolio-card-link inline-flex items-center gap-1.5 text-[#2563EB] hover:text-[#1D4ED8] text-xs sm:text-[13px] font-semibold transition-colors cursor-pointer group/link"
-                    >
-                      <span>Explore</span>
-                      <span className="relative overflow-hidden w-4 h-4 inline-flex items-center justify-center">
-                        <ArrowUpRight className="w-3.5 h-3.5 transition-all duration-300 ease-out transform group-hover/link:translate-x-3.5 group-hover/link:-translate-y-3.5 group-hover/link:opacity-0" />
-                        <ArrowUpRight className="w-3.5 h-3.5 absolute transition-all duration-300 ease-out transform -translate-x-3.5 translate-y-3.5 opacity-0 group-hover/link:translate-x-0 group-hover/link:translate-y-0 group-hover/link:opacity-100" />
-                      </span>
-                    </button>
+                    {/* CTA Link - Opens Portfolio Detail Page */}
+                    <div className="portfolio-card-cta mt-auto pt-1">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/portfolio-detail?id=${project.id}`);
+                        }}
+                        className="portfolio-card-link inline-flex items-center gap-1.5 text-[#2563EB] hover:text-[#1D4ED8] text-xs sm:text-[13.5px] font-semibold transition-colors cursor-pointer group/link"
+                      >
+                        <span>Explore</span>
+                        <span className="relative overflow-hidden w-4 h-4 inline-flex items-center justify-center">
+                          <ArrowUpRight className="w-3.5 h-3.5 transition-all duration-300 ease-out transform group-hover/link:translate-x-3.5 group-hover/link:-translate-y-3.5 group-hover/link:opacity-0" />
+                          <ArrowUpRight className="w-3.5 h-3.5 absolute transition-all duration-300 ease-out transform -translate-x-3.5 translate-y-3.5 opacity-0 group-hover/link:translate-x-0 group-hover/link:translate-y-0 group-hover/link:opacity-100" />
+                        </span>
+                      </button>
+                    </div>
                   </div>
                 </motion.div>
               );
@@ -249,7 +254,7 @@ export default function Portfolio() {
         )}
 
         {/* Know More Button - Comfortably visible above the bottom edge */}
-        <div className="portfolio-know-more-wrap flex items-center justify-center mt-3 sm:mt-4 lg:mt-3.5 xl:mt-4">
+        <div className="portfolio-know-more-wrap flex items-center justify-center mt-5 sm:mt-6 lg:mt-7 xl:mt-8">
           <Link
             to="/portfolio"
             className="hover-brand-gradient inline-flex items-center justify-center bg-[#0B0716] text-white font-semibold text-xs sm:text-sm px-8 sm:px-9 py-2.5 sm:py-3 rounded-full shadow-md whitespace-nowrap cursor-pointer transition-all duration-200 active:scale-95"

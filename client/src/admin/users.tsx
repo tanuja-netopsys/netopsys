@@ -352,8 +352,8 @@ export default function UsersPage() {
             </div>
 
             {/* Users Table */}
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
+            <div className="overflow-x-auto table-responsive-container">
+              <table className="w-full text-left border-collapse min-w-[700px]">
                 <thead>
                   <tr className="border-b border-[#ECE4F2] text-[12.5px] font-medium text-[#7D7589]">
                     <th className="py-4 px-6 font-semibold">S.No</th>

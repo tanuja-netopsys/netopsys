@@ -358,10 +358,19 @@ img, svg, video, canvas {
   max-width: min(660px, 90vw) !important;
 }
 
+/* 100% Display Scale ONLY: expanded max-width to accommodate slightly larger cube without constraining */
+@media screen and (min-width: 1024px) and (max-resolution: 1.14dppx) and (min-height: 740px),
+       screen and (min-width: 1024px) and (-webkit-max-device-pixel-ratio: 1.14) and (min-height: 740px) {
+  .hero-cube-wrap {
+    max-width: min(720px, 92vw) !important;
+  }
+}
+
 /* Master Section Display Headings */
 .teams-title,
 .about-title,
 .services-title,
+.portfolio-title,
 .contact-title,
 .careers-title,
 .about-page-title,
@@ -375,25 +384,401 @@ img, svg, video, canvas {
 }
 
 @media (max-height: 780px) {
-  .services-title {
-    font-size: clamp(1.75rem, 1.1rem + 1.4vw + 1.2vh, 3.25rem) !important;
-    line-height: 1.05 !important;
+  /* Layout Clearance & Rhythm below Floating Navbar (Text sizes preserved identical to 100% scale) */
+  .hero-section-wrap,
+  .portfolio-section-wrap,
+  .teams-section-wrap,
+  .contact-section-wrap {
+    padding-top: clamp(3.75rem, 7vh, 5rem) !important;
+    padding-bottom: clamp(1.25rem, 2.5vh, 2.25rem) !important;
+  }
+
+  /* About Section: Scrolling Tech Marquee must stay directly at the top of the section */
+  .about-section-wrap {
+    padding-top: 0 !important;
+    padding-bottom: clamp(1.25rem, 2.5vh, 2.25rem) !important;
+  }
+
+  /* Portfolio Section Card Dimensions */
+  .portfolio-card-img-wrap {
+    aspect-ratio: 16 / 8.8 !important;
+  }
+
+  /* Teams Section Card Dimensions */
+  .teams-card-img-wrap {
+    height: clamp(210px, 30vh, 310px) !important;
+  }
+  .teams-card.card-tall .teams-card-img-wrap {
+    height: clamp(230px, 33vh, 340px) !important;
+  }
+  .teams-card.card-mid .teams-card-img-wrap {
+    height: clamp(210px, 30vh, 310px) !important;
+  }
+  .teams-card.card-short .teams-card-img-wrap {
+    height: clamp(190px, 27vh, 280px) !important;
+  }
+
+  /* Contact Section Card Dimensions */
+  .contact-card {
+    min-height: clamp(180px, 22vh, 240px) !important;
+    padding: clamp(1.25rem, 1.8vh, 1.85rem) !important;
   }
 }
 
 @media (max-height: 640px) {
-  .services-title {
-    font-size: clamp(1.45rem, 0.95rem + 1.1vw + 1vh, 2.35rem) !important;
-    line-height: 1.04 !important;
+  /* Ultra-compact viewport layout clearance (Text sizes preserved) */
+  .hero-section-wrap,
+  .portfolio-section-wrap,
+  .teams-section-wrap,
+  .contact-section-wrap {
+    padding-top: clamp(3.25rem, 6vh, 4.25rem) !important;
+    padding-bottom: clamp(1rem, 2vh, 1.75rem) !important;
+  }
+
+  /* About Section: Scrolling Tech Marquee must stay directly at the top of the section */
+  .about-section-wrap {
+    padding-top: 0 !important;
+    padding-bottom: clamp(1rem, 2vh, 1.75rem) !important;
+  }
+
+  .portfolio-card-img-wrap {
+    aspect-ratio: 16 / 8.2 !important;
+  }
+
+  .teams-card-img-wrap {
+    height: clamp(180px, 26vh, 240px) !important;
+  }
+
+  .contact-card {
+    min-height: clamp(160px, 20vh, 200px) !important;
+    padding: clamp(1rem, 1.4vh, 1.35rem) !important;
   }
 }
 
-.portfolio-title {
-  font-family: 'Onest', sans-serif !important;
-  font-weight: 300 !important;
-  letter-spacing: -0.035em !important;
-  font-size: clamp(1.75rem, 1.2rem + 1.6vw, 3.15rem) !important;
-  line-height: 1.04 !important;
+@media (max-height: 720px) {
+  /* 150% Display Scale & Compact Viewport Responsive Adaptation for About Section */
+  .about-section-wrap {
+    min-height: 100dvh !important;
+    height: auto !important;
+    overflow-y: visible !important;
+    padding-top: 0 !important;
+    padding-bottom: clamp(1rem, 2vh, 1.75rem) !important;
+  }
+
+  .about-content-wrap {
+    margin-top: 0 !important;
+    margin-bottom: auto !important;
+    padding-top: clamp(0.75rem, 1.5vh, 1.5rem) !important;
+    padding-bottom: clamp(1rem, 2vh, 1.75rem) !important;
+  }
+
+  .about-grid-container {
+    gap: clamp(1.25rem, 2vw, 2.5rem) !important;
+  }
+
+  .about-badge-wrap {
+    margin-bottom: clamp(0.35rem, 0.7vh, 0.65rem) !important;
+  }
+
+  .about-title {
+    margin-bottom: clamp(0.5rem, 1vh, 0.85rem) !important;
+    font-size: clamp(2.15rem, 1.5rem + 1.8vw, 3.25rem) !important;
+    line-height: 1.05 !important;
+  }
+
+  .about-desc {
+    margin-bottom: clamp(0.6rem, 1.2vh, 1rem) !important;
+    font-size: clamp(0.85rem, 0.78rem + 0.2vw, 0.95rem) !important;
+    line-height: 1.45 !important;
+  }
+
+  /* Stat Cards in single vertical stack for 150% scale */
+  .about-cards-wrap {
+    gap: clamp(0.35rem, 0.7vh, 0.6rem) !important;
+  }
+
+  .about-card {
+    padding: clamp(0.45rem, 0.8vh, 0.7rem) clamp(0.85rem, 1.1vw, 1.25rem) !important;
+    border-radius: clamp(0.75rem, 0.9vw, 1rem) !important;
+  }
+
+  .about-card-number {
+    font-size: clamp(1.65rem, 1.25rem + 0.9vw, 2.25rem) !important;
+    line-height: 1 !important;
+    margin-bottom: 0.15rem !important;
+  }
+
+  .about-card-suffix {
+    font-size: clamp(1.35rem, 1rem + 0.7vw, 1.75rem) !important;
+  }
+
+  .about-card-label {
+    font-size: clamp(0.8125rem, 0.75rem + 0.18vw, 0.925rem) !important;
+    line-height: 1.25 !important;
+  }
+
+  .about-card-sub {
+    font-size: clamp(11px, 0.65rem + 0.12vw, 12px) !important;
+    margin-top: 0.15rem !important;
+    line-height: 1.3 !important;
+  }
+
+  /* Services Section Responsive Adaptation for 150% Scale */
+  .services-stage-wrap {
+    padding-top: clamp(4.25rem, 8vh, 5.25rem) !important;
+    padding-bottom: clamp(0.5rem, 1.2vh, 1.25rem) !important;
+  }
+
+  .services-title {
+    font-size: clamp(2rem, 1.4rem + 1.8vw, 3rem) !important;
+    line-height: 1.05 !important;
+    margin-top: 0.25rem !important;
+  }
+
+  /* Portfolio Section Responsive Adaptation for 150% Scale */
+  .portfolio-section-wrap {
+    padding-top: clamp(3.75rem, 7vh, 4.5rem) !important;
+    padding-bottom: clamp(0.75rem, 1.5vh, 1.5rem) !important;
+  }
+
+  .portfolio-content-wrap {
+    margin-top: 0 !important;
+    margin-bottom: auto !important;
+  }
+
+  .portfolio-header {
+    margin-bottom: clamp(0.35rem, 0.7vh, 0.65rem) !important;
+  }
+
+  .portfolio-eyebrow-wrap {
+    margin-bottom: 0.2rem !important;
+  }
+
+  .portfolio-title {
+    font-size: clamp(2rem, 1.4rem + 1.8vw, 3rem) !important;
+    line-height: 1.05 !important;
+    margin-bottom: 0.25rem !important;
+  }
+
+  .portfolio-desc {
+    margin-top: 0.15rem !important;
+    font-size: clamp(0.75rem, 0.7rem + 0.1vw, 0.8125rem) !important;
+    line-height: 1.35 !important;
+  }
+
+  .portfolio-card {
+    padding: clamp(0.6rem, 1vh, 0.85rem) clamp(0.75rem, 1vw, 1.15rem) !important;
+    border-radius: clamp(0.75rem, 0.9vw, 1.1rem) !important;
+  }
+
+  .portfolio-card-img-wrap {
+    aspect-ratio: 16 / 7.6 !important;
+    max-height: clamp(120px, 17vh, 150px) !important;
+  }
+
+  .portfolio-card-badge-row {
+    margin-top: clamp(0.35rem, 0.6vh, 0.5rem) !important;
+    margin-bottom: clamp(0.2rem, 0.4vh, 0.35rem) !important;
+  }
+
+  .portfolio-card-title {
+    font-size: clamp(0.9rem, 0.82rem + 0.2vw, 1.05rem) !important;
+    line-height: 1.25 !important;
+    margin-bottom: 0.25rem !important;
+  }
+
+  .portfolio-card-desc {
+    font-size: clamp(0.75rem, 0.7rem + 0.1vw, 0.8125rem) !important;
+    line-height: 1.35 !important;
+    margin-bottom: clamp(0.4rem, 0.7vh, 0.65rem) !important;
+  }
+
+  .portfolio-card-cta {
+    margin-top: auto !important;
+    padding-top: 0.15rem !important;
+  }
+
+  .portfolio-know-more-wrap {
+    margin-top: clamp(0.6rem, 1.2vh, 1.25rem) !important;
+  }
+
+  /* Teams Section Responsive Adaptation for 150% Scale */
+  .teams-section-wrap {
+    padding-top: clamp(3.75rem, 7vh, 4.5rem) !important;
+    padding-bottom: clamp(1rem, 2vh, 1.75rem) !important;
+  }
+
+  .teams-content-wrap {
+    margin-top: 0 !important;
+    margin-bottom: auto !important;
+  }
+
+  .teams-header {
+    margin-bottom: clamp(0.5rem, 1vh, 0.85rem) !important;
+  }
+
+  .teams-eyebrow-wrap {
+    margin-bottom: 0.2rem !important;
+  }
+
+  .teams-title {
+    font-size: clamp(2rem, 1.4rem + 1.8vw, 3rem) !important;
+    line-height: 1.05 !important;
+  }
+
+  .teams-gallery {
+    gap: clamp(0.75rem, 1.2vw, 1.25rem) !important;
+    padding-bottom: clamp(0.6rem, 1.2vh, 1rem) !important;
+  }
+
+  .teams-card {
+    width: clamp(170px, 14vw, 210px) !important;
+  }
+
+  .teams-card-img-wrap {
+    height: clamp(150px, 22vh, 185px) !important;
+  }
+
+  .teams-card.card-tall .teams-card-img-wrap {
+    height: clamp(165px, 24vh, 200px) !important;
+  }
+
+  .teams-card.card-mid .teams-card-img-wrap {
+    height: clamp(150px, 22vh, 185px) !important;
+  }
+
+  .teams-card.card-short .teams-card-img-wrap {
+    height: clamp(135px, 20vh, 170px) !important;
+  }
+
+  .teams-card-info {
+    margin-top: 0.45rem !important;
+  }
+
+  .teams-card-name {
+    font-size: clamp(0.875rem, 0.82rem + 0.15vw, 0.95rem) !important;
+    line-height: 1.2 !important;
+  }
+
+  .teams-card-role {
+    font-size: clamp(0.72rem, 0.68rem + 0.1vw, 0.78rem) !important;
+    margin-top: 0.15rem !important;
+  }
+
+  /* Contact Section Responsive Adaptation for 150% Scale */
+  .contact-section-wrap {
+    padding-top: clamp(3.75rem, 7vh, 4.5rem) !important;
+    padding-bottom: clamp(0.75rem, 1.5vh, 1.5rem) !important;
+  }
+
+  .contact-content-wrap {
+    margin-top: 0 !important;
+    margin-bottom: auto !important;
+  }
+
+  .contact-header {
+    margin-bottom: clamp(0.35rem, 0.7vh, 0.65rem) !important;
+  }
+
+  .contact-eyebrow-wrap {
+    margin-bottom: 0.2rem !important;
+  }
+
+  .contact-title {
+    font-size: clamp(2rem, 1.4rem + 1.8vw, 3rem) !important;
+    line-height: 1.05 !important;
+    margin-bottom: 0.25rem !important;
+  }
+
+  .contact-desc {
+    margin-top: 0.15rem !important;
+    font-size: clamp(0.75rem, 0.7rem + 0.1vw, 0.8125rem) !important;
+    line-height: 1.35 !important;
+  }
+
+  .contact-grid {
+    gap: clamp(0.75rem, 1.2vw, 1.25rem) !important;
+    margin-bottom: clamp(0.45rem, 0.8vh, 0.8rem) !important;
+  }
+
+  .contact-card {
+    padding: clamp(0.75rem, 1.2vh, 1.1rem) clamp(0.85rem, 1.1vw, 1.35rem) !important;
+    min-height: clamp(150px, 20vh, 185px) !important;
+    border-radius: clamp(12px, 1vw, 16px) !important;
+  }
+
+  .contact-card-top {
+    margin-bottom: 0.35rem !important;
+  }
+
+  .contact-country {
+    font-size: clamp(1.15rem, 1rem + 0.4vw, 1.35rem) !important;
+    line-height: 1.2 !important;
+    margin-bottom: 0.15rem !important;
+  }
+
+  .contact-office-type {
+    font-size: clamp(11px, 0.65rem + 0.1vw, 12px) !important;
+  }
+
+  .contact-divider {
+    margin-top: 0.35rem !important;
+    margin-bottom: 0.35rem !important;
+  }
+
+  .contact-address {
+    font-size: clamp(11px, 0.65rem + 0.1vw, 12px) !important;
+    line-height: 1.3 !important;
+  }
+
+  .contact-cta {
+    margin-top: clamp(0.4rem, 0.8vh, 0.75rem) !important;
+  }
+
+  .contact-cta-btn {
+    padding: clamp(0.45rem, 0.8vh, 0.65rem) clamp(1.75rem, 2vw, 2.5rem) !important;
+    font-size: clamp(0.78rem, 0.72rem + 0.1vw, 0.85rem) !important;
+  }
+
+  /* Careers Section Responsive Adaptation for 150% Scale */
+  .careers-section-wrap {
+    padding-top: clamp(2.25rem, 4.5vh, 3.75rem) !important;
+    padding-bottom: clamp(2.25rem, 4.5vh, 3.75rem) !important;
+  }
+
+  .careers-grid {
+    gap: clamp(1.25rem, 2vw, 2.5rem) !important;
+  }
+
+  .careers-title {
+    font-size: clamp(2rem, 1.4rem + 1.8vw, 3.25rem) !important;
+    line-height: 1.05 !important;
+    margin-bottom: clamp(0.5rem, 1vh, 0.85rem) !important;
+  }
+
+  .careers-desc {
+    font-size: clamp(0.8125rem, 0.75rem + 0.15vw, 0.925rem) !important;
+    line-height: 1.45 !important;
+  }
+
+  .careers-item {
+    padding-top: clamp(0.45rem, 0.9vh, 0.75rem) !important;
+    padding-bottom: clamp(0.45rem, 0.9vh, 0.75rem) !important;
+  }
+
+  .careers-item-title {
+    font-size: clamp(0.95rem, 0.88rem + 0.15vw, 1.05rem) !important;
+    margin-bottom: 0.15rem !important;
+  }
+
+  .careers-item-desc {
+    font-size: clamp(0.75rem, 0.7rem + 0.1vw, 0.825rem) !important;
+  }
+
+  .careers-apply-btn {
+    padding: clamp(0.6rem, 1vh, 0.85rem) clamp(1.75rem, 2vw, 2.25rem) !important;
+    font-size: clamp(0.825rem, 0.78rem + 0.1vw, 0.925rem) !important;
+  }
 }
 
 .about-block-title {
@@ -407,9 +792,7 @@ img, svg, video, canvas {
 /* 2. SECTION CONTAINER PADDING & VERTICAL RHYTHM */
 /* Fluid padding that gently adapts to available viewport height and scaling */
 .about-content-wrap,
-.portfolio-content-wrap,
-.teams-content-wrap,
-.contact-content-wrap {
+.teams-content-wrap {
   padding-top: clamp(1.25rem, 2.8vh, 3.5rem) !important;
   padding-bottom: clamp(1rem, 2.2vh, 2.5rem) !important;
 }
@@ -422,7 +805,9 @@ img, svg, video, canvas {
 
 /* 3. ABOUT SECTION STAT CARDS */
 .about-cards-wrap {
-  gap: clamp(0.75rem, 1.2vh, 1.25rem) !important;
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: clamp(0.65rem, 1vh, 1.15rem) !important;
 }
 
 .about-card {
@@ -452,10 +837,33 @@ img, svg, video, canvas {
   word-break: break-word !important;
 }
 
-/* 4. PORTFOLIO SECTION CARDS */
+/* 4. PORTFOLIO SECTION */
+.portfolio-section-wrap {
+  min-height: 100dvh !important;
+  height: auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: center !important;
+  position: relative !important;
+  overflow-x: clip !important;
+  background-color: #FBAE42 !important;
+  padding-top: clamp(4.25rem, 7.5vh, 6.25rem) !important;
+  padding-bottom: clamp(2.5rem, 5vh, 4rem) !important;
+}
+
+.portfolio-content-wrap {
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  margin-top: auto !important;
+  margin-bottom: auto !important;
+}
+
 .portfolio-card {
-  padding: clamp(0.85rem, 1.2vh, 1.35rem) !important;
-  border-radius: clamp(0.85rem, 1vw, 1.35rem) !important;
+  padding: clamp(1rem, 1.3vh, 1.45rem) !important;
+  border-radius: clamp(1rem, 1.1vw, 1.45rem) !important;
   height: auto !important;
   min-height: 100% !important;
   min-width: 0 !important;
@@ -463,16 +871,16 @@ img, svg, video, canvas {
 }
 
 .portfolio-card-title {
-  font-size: clamp(1rem, 0.92rem + 0.28vw, 1.25rem) !important;
-  line-height: 1.3 !important;
-  margin-bottom: 0.35rem !important;
+  font-size: clamp(1.05rem, 0.95rem + 0.35vw, 1.3rem) !important;
+  line-height: 1.32 !important;
+  margin-bottom: 0.4rem !important;
   word-break: break-word !important;
 }
 
 .portfolio-card-desc {
-  font-size: clamp(0.8125rem, 0.76rem + 0.15vw, 0.9375rem) !important;
-  line-height: 1.45 !important;
-  margin-bottom: 0.65rem !important;
+  font-size: clamp(0.85rem, 0.8rem + 0.18vw, 0.975rem) !important;
+  line-height: 1.5 !important;
+  margin-bottom: 0.75rem !important;
   word-break: break-word !important;
 }
 
@@ -526,24 +934,39 @@ img, svg, video, canvas {
   display: flex !important;
   flex-direction: column !important;
   justify-content: center !important;
+  align-items: center !important;
   position: relative !important;
   overflow-x: clip !important;
   overflow-y: visible !important;
   background-color: #F5EEF8 !important;
+  padding-top: clamp(4.25rem, 7.5vh, 6.25rem) !important;
+  padding-bottom: clamp(2.5rem, 5vh, 4rem) !important;
+}
+
+.contact-content-wrap {
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  margin-top: auto !important;
+  margin-bottom: auto !important;
 }
 
 .contact-grid {
-  gap: clamp(0.85rem, 1.2vw, 1.75rem) !important;
-  margin-bottom: clamp(0.85rem, 1.5vh, 1.75rem) !important;
+  gap: clamp(1rem, 1.5vw, 2rem) !important;
+  margin-bottom: clamp(1.25rem, 2vh, 2.25rem) !important;
 }
 
 .contact-card {
-  padding: clamp(1rem, 1.5vh, 2rem) clamp(1rem, 1.3vw, 1.85rem) !important;
-  border-radius: clamp(14px, 1.1vw, 22px) !important;
+  padding: clamp(1.5rem, 2.2vh, 2.5rem) clamp(1.25rem, 1.6vw, 2.25rem) !important;
+  border-radius: clamp(16px, 1.2vw, 24px) !important;
+  min-height: clamp(220px, 26vh, 290px) !important;
   height: auto !important;
-  min-height: 0 !important;
   min-width: 0 !important;
   word-break: break-word !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
 }
 
 .contact-country {
@@ -567,27 +990,1524 @@ img, svg, video, canvas {
 
 /* 7. FLOATING NAVBAR RESPONSIVE FLUID SYSTEM */
 .nav-header-wrap {
-  top: clamp(0.5rem, 1vh, 1.25rem) !important;
+  top: clamp(0.45rem, 0.9vh, 1.25rem) !important;
 }
 
 .nav-pill-wrap {
-  padding: clamp(0.5rem, 0.8vh, 0.875rem) clamp(1rem, 1.3vw, 2rem) !important;
-  gap: clamp(1rem, 1.5vw, 2.5rem) !important;
+  padding: clamp(0.45rem, 0.7vh, 0.75rem) clamp(0.85rem, 1.2vw, 1.85rem) !important;
+  gap: clamp(0.65rem, 1.1vw, 1.75rem) !important;
+  max-width: min(100%, calc(100vw - 1.25rem)) !important;
 }
 
 .nav-logo-img {
-  height: clamp(1.4rem, 1.15rem + 0.38vw, 1.875rem) !important;
+  height: clamp(1.35rem, 1.1rem + 0.35vw, 1.875rem) !important;
 }
 
 .nav-links-wrap {
-  gap: clamp(0.85rem, 1.2vw, 2rem) !important;
+  gap: clamp(0.65rem, 1.1vw, 1.75rem) !important;
 }
 
 .nav-link-item {
-  font-size: clamp(0.875rem, 0.82rem + 0.18vw, 1rem) !important;
+  font-size: clamp(0.8125rem, 0.76rem + 0.16vw, 0.95rem) !important;
 }
 
 .nav-cta-btn {
-  font-size: clamp(0.8125rem, 0.76rem + 0.18vw, 0.9375rem) !important;
-  padding: clamp(0.45rem, 0.7vh, 0.625rem) clamp(1rem, 1.2vw, 1.5rem) !important;
+  font-size: clamp(0.78rem, 0.72rem + 0.16vw, 0.9rem) !important;
+  padding: clamp(0.4rem, 0.65vh, 0.6rem) clamp(0.85rem, 1.1vw, 1.35rem) !important;
 }
+
+/* ==========================================================================
+   8. ADMIN PORTAL RESPONSIVE FLUID SYSTEM (100%, 125%, 150%, 175%, 200%)
+   ========================================================================== */
+.admin-responsive-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)) !important;
+  gap: clamp(0.75rem, 1.2vw, 1.25rem) !important;
+}
+
+.table-responsive-container {
+  width: 100% !important;
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  scrollbar-width: thin !important;
+}
+
+/* ==========================================================================
+   9. UNIFIED BOTTOM CTA BANNER BADGE ("Ready to get started?")
+   Guarantees 100% identical height & width across all pages in 100% scale
+   and 100% identical height & width across all pages in 150% scale.
+   ========================================================================== */
+.cta-banner-wrapper {
+  width: 100% !important;
+  max-width: 100% !important;
+  display: flex !important;
+  justify-content: center !important;
+}
+
+.cta-banner-card {
+  width: 100% !important;
+  max-width: 100% !important;
+  background-color: #2A1450 !important;
+  border-radius: clamp(1rem, 1.4vw, 1.5rem) !important;
+  box-shadow: 0 20px 25px -5px rgba(42, 20, 80, 0.2), 0 8px 10px -6px rgba(42, 20, 80, 0.2) !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  box-sizing: border-box !important;
+}
+
+.cta-banner-title {
+  font-family: 'Onest', sans-serif !important;
+  color: #FFFFFF !important;
+  font-weight: 300 !important;
+  letter-spacing: -0.035em !important;
+  white-space: nowrap !important;
+  line-height: 1.1 !important;
+}
+
+.cta-banner-subtitle {
+  font-family: 'Onest', sans-serif !important;
+  color: rgba(255, 255, 255, 0.85) !important;
+  font-weight: 400 !important;
+  white-space: nowrap !important;
+  line-height: 1.4 !important;
+}
+
+.cta-banner-btn {
+  font-family: 'Onest', sans-serif !important;
+  background-color: #FBAE42 !important;
+  color: #000000 !important;
+  border-radius: 9999px !important;
+  font-weight: 500 !important;
+  white-space: nowrap !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1) !important;
+  transition: all 0.2s ease !important;
+  cursor: pointer !important;
+}
+.cta-banner-btn:hover {
+  color: #FFFFFF !important;
+}
+
+/* 100% Scale on Desktop: unified height and padding */
+@media screen and (min-width: 768px) {
+  .cta-banner-card {
+    padding: clamp(1.4rem, 2vh, 1.85rem) clamp(1.75rem, 2.5vw, 3.5rem) !important;
+    min-height: 104px !important;
+    max-height: 104px !important;
+  }
+  .cta-banner-title {
+    font-size: clamp(1.5rem, 1.1rem + 0.8vw, 1.95rem) !important;
+  }
+  .cta-banner-subtitle {
+    font-size: clamp(0.85rem, 0.78rem + 0.18vw, 0.95rem) !important;
+  }
+  .cta-banner-btn {
+    padding: 0.75rem 1.85rem !important;
+    font-size: 0.875rem !important;
+    min-height: 44px !important;
+  }
+}
+
+/* 150% Scale on Desktop: unified height and padding specifically tailored for 150% */
+@media screen and (min-width: 1024px) and (min-resolution: 135dpi) and (max-resolution: 160dpi),
+       screen and (min-width: 1024px) and (-webkit-min-device-pixel-ratio: 1.35) and (-webkit-max-device-pixel-ratio: 1.65),
+       screen and (min-width: 1024px) and (max-height: 720px) {
+  .cta-banner-card {
+    padding: 1.15rem clamp(1.5rem, 2vw, 2.75rem) !important;
+    min-height: 86px !important;
+    max-height: 86px !important;
+  }
+  .cta-banner-title {
+    font-size: 1.4rem !important;
+  }
+  .cta-banner-subtitle {
+    font-size: 0.825rem !important;
+  }
+  .cta-banner-btn {
+    padding: 0.55rem 1.45rem !important;
+    font-size: 0.8125rem !important;
+    min-height: 38px !important;
+  }
+}
+
+/* Mobile & Small screens (<768px) */
+@media screen and (max-width: 767px) {
+  .cta-banner-card {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    padding: 1.5rem 1.25rem !important;
+    min-height: auto !important;
+    max-height: none !important;
+    gap: 1.25rem !important;
+  }
+  .cta-banner-title {
+    font-size: 1.35rem !important;
+    white-space: normal !important;
+  }
+  .cta-banner-subtitle {
+    font-size: 0.8125rem !important;
+    white-space: normal !important;
+  }
+  .cta-banner-btn {
+    width: 100% !important;
+    text-align: center !important;
+    justify-content: center !important;
+  }
+}
+
+/* ==========================================================================
+   10. ABOUT PAGE RESPONSIVE SYSTEM FOR 150% DISPLAY SCALE ONLY
+   (144 DPI / devicePixelRatio: 1.5 - min-resolution: 135dpi, max-resolution: 158dpi)
+   Does NOT affect 100%, 125%, 175%, 200%, or other viewports.
+   ========================================================================== */
+@media screen and (min-width: 1024px) and (min-resolution: 135dpi) and (max-resolution: 158dpi),
+       screen and (min-width: 1024px) and (-webkit-min-device-pixel-ratio: 1.35) and (-webkit-max-device-pixel-ratio: 1.62),
+       screen and (min-width: 1024px) and (max-height: 720px) {
+
+  /* Section 1: Hero Arch Infographic Section */
+  .about-page-hero-section {
+    margin-bottom: 2.25rem !important;
+    width: 100% !important;
+  }
+
+  .about-page-hero-svg-wrap {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    display: flex !important;
+    justify-content: flex-start !important;
+    align-items: center !important;
+  }
+
+  .about-page-hero-svg {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    display: block !important;
+  }
+
+  /* Section 2: Timeline Section (Mission & Global Presence) */
+  .about-page-timeline-section {
+    margin-bottom: 3rem !important;
+  }
+
+  .about-page-timeline-container > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 2.25rem !important;
+  }
+
+  .about-page-timeline-grid {
+    gap: 2rem !important;
+  }
+
+  .about-page-timeline-img-wrap {
+    max-height: 270px !important;
+    border-radius: 1.25rem !important;
+  }
+
+  .about-page-timeline-grid .about-block-title {
+    font-size: 2.15rem !important;
+    line-height: 1.1 !important;
+    margin-bottom: 0.65rem !important;
+  }
+
+  .about-page-timeline-grid p {
+    font-size: 0.875rem !important;
+    line-height: 1.55 !important;
+    margin-bottom: 0.65rem !important;
+  }
+
+  .about-page-loc-pills {
+    gap: 0.45rem !important;
+  }
+
+  .about-page-loc-pill {
+    padding: 0.25rem 0.75rem !important;
+    font-size: 0.78rem !important;
+  }
+
+  /* Section 3: Why Choose Us Section */
+  .about-page-why-section {
+    margin-top: 2.5rem !important;
+    margin-bottom: 2.5rem !important;
+  }
+
+  .about-page-why-grid {
+    gap: 2rem !important;
+  }
+
+  .about-page-why-grid .about-block-title {
+    font-size: 2.25rem !important;
+    line-height: 1.1 !important;
+    margin-bottom: 0.65rem !important;
+  }
+
+  .about-page-why-grid p {
+    font-size: 0.875rem !important;
+    line-height: 1.55 !important;
+  }
+
+  .about-page-why-cards {
+    gap: 0.75rem !important;
+  }
+
+  .about-page-why-card {
+    padding: 0.95rem 1.35rem !important;
+    border-radius: 1.25rem !important;
+    gap: 1rem !important;
+  }
+
+  .about-page-why-icon {
+    width: 2.65rem !important;
+    height: 2.65rem !important;
+  }
+
+  .about-page-why-icon svg {
+    width: 1.15rem !important;
+    height: 1.15rem !important;
+  }
+
+  .about-page-why-card-title {
+    font-size: 0.95rem !important;
+    margin-bottom: 0.2rem !important;
+  }
+
+  .about-page-why-card-desc {
+    font-size: 0.78rem !important;
+    line-height: 1.4 !important;
+  }
+}
+
+/* ==========================================================================
+   11. PORTFOLIO PAGE RESPONSIVE SYSTEM FOR 150% DISPLAY SCALE ONLY
+   (144 DPI / devicePixelRatio: 1.5 - min-resolution: 135dpi, max-resolution: 158dpi)
+   Does NOT affect 100%, 125%, 175%, 200%, or other viewports.
+   ========================================================================== */
+@media screen and (min-width: 1024px) and (min-resolution: 135dpi) and (max-resolution: 158dpi),
+       screen and (min-width: 1024px) and (-webkit-min-device-pixel-ratio: 1.35) and (-webkit-max-device-pixel-ratio: 1.62),
+       screen and (min-width: 1024px) and (max-height: 720px) {
+
+  /* Main container & Breadcrumb clearance below floating Navbar */
+  .portfolio-page-main {
+    padding-top: clamp(4.5rem, 7vh, 5.25rem) !important;
+    padding-bottom: 1.5rem !important;
+  }
+
+  .portfolio-page-breadcrumb {
+    margin-bottom: clamp(0.35rem, 0.8vh, 0.65rem) !important;
+  }
+
+  /* Grid layout alignment */
+  .portfolio-page-grid {
+    gap: 1.75rem !important;
+    align-items: start !important;
+  }
+
+  /* Left Column: Heading & Subtitle */
+  .portfolio-page-left-col {
+    padding-top: 0 !important;
+  }
+
+  .portfolio-page-title {
+    font-size: clamp(2.15rem, 1.5rem + 1.2vw, 2.65rem) !important;
+    line-height: 1.05 !important;
+    margin-bottom: 0.45rem !important;
+  }
+
+  .portfolio-page-desc {
+    font-size: 0.84rem !important;
+    line-height: 1.45 !important;
+    margin-bottom: 0.85rem !important;
+  }
+
+  /* Stepper list compact sizing */
+  .portfolio-page-step-btn {
+    width: 1.75rem !important;
+    height: 1.75rem !important;
+    font-size: 0.72rem !important;
+  }
+
+  .portfolio-page-step-line {
+    min-height: 1.25rem !important;
+    margin-top: 0.2rem !important;
+    margin-bottom: 0.2rem !important;
+  }
+
+  .portfolio-page-step-content {
+    padding-bottom: 0.65rem !important;
+  }
+
+  .portfolio-page-step-title {
+    font-size: 0.92rem !important;
+    line-height: 1.3 !important;
+  }
+
+  /* Right Column: Card wrapper & alignment */
+  .portfolio-page-card-wrap {
+    margin-top: clamp(0.75rem, 1.6vh, 1.5rem) !important;
+    overflow: hidden !important;
+  }
+
+  .portfolio-page-card {
+    min-height: clamp(340px, 48vh, 390px) !important;
+    max-height: calc(100dvh - 145px) !important;
+    padding: clamp(1.15rem, 1.8vh, 1.5rem) clamp(1.35rem, 1.8vw, 1.85rem) !important;
+    border-radius: 1.5rem !important;
+  }
+
+  .portfolio-page-card-top {
+    margin-bottom: 0.65rem !important;
+  }
+
+  .portfolio-page-card-icon {
+    width: 2.25rem !important;
+    height: 2.25rem !important;
+    border-radius: 0.65rem !important;
+    margin-bottom: 0.45rem !important;
+  }
+
+  .portfolio-page-card-icon svg {
+    width: 1.05rem !important;
+    height: 1.05rem !important;
+  }
+
+  .portfolio-page-card-pill {
+    padding: 0.18rem 0.6rem !important;
+    font-size: 0.7rem !important;
+  }
+
+  .portfolio-page-card-mid {
+    margin-bottom: 0.65rem !important;
+  }
+
+  .portfolio-page-card-title {
+    font-size: clamp(1.25rem, 1.05rem + 0.5vw, 1.6rem) !important;
+    line-height: 1.15 !important;
+    margin-bottom: 0.35rem !important;
+  }
+
+  .portfolio-page-card-desc {
+    font-size: 0.8rem !important;
+    line-height: 1.4 !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  .portfolio-page-card-cta {
+    padding-top: 0.25rem !important;
+  }
+
+  .portfolio-page-card-cta button {
+    font-size: 0.82rem !important;
+  }
+}
+
+/* ==========================================================================
+   12. BLOGS PAGE RESPONSIVE SYSTEM FOR 150% DISPLAY SCALE ONLY
+   (144 DPI / devicePixelRatio: 1.5 - min-resolution: 135dpi, max-resolution: 158dpi)
+   Does NOT affect 100%, 125%, 175%, 200%, or other viewports.
+   ========================================================================== */
+@media screen and (min-width: 1024px) and (min-resolution: 135dpi) and (max-resolution: 158dpi),
+       screen and (min-width: 1024px) and (-webkit-min-device-pixel-ratio: 1.35) and (-webkit-max-device-pixel-ratio: 1.62),
+       screen and (min-width: 1024px) and (max-height: 720px) {
+
+  /* Main container clearance below floating Navbar */
+  .blogs-page-main {
+    padding-top: clamp(3.75rem, 6vh, 4.35rem) !important;
+    padding-bottom: 2rem !important;
+  }
+
+  .blogs-page-breadcrumb {
+    margin-bottom: clamp(0.25rem, 0.6vh, 0.45rem) !important;
+  }
+
+  .blogs-page-header {
+    margin-bottom: clamp(0.75rem, 1.5vh, 1.25rem) !important;
+  }
+
+  /* Display Title & Subtitle */
+  .blogs-page-title {
+    font-size: clamp(2.15rem, 1.5rem + 1.2vw, 2.75rem) !important;
+    line-height: 1.05 !important;
+    margin-bottom: 0.35rem !important;
+  }
+
+  .blogs-page-desc {
+    font-size: 0.84rem !important;
+    line-height: 1.45 !important;
+  }
+
+  /* 3-Column Articles Grid */
+  .blogs-page-grid {
+    gap: 1.25rem !important;
+    margin-bottom: 2rem !important;
+  }
+
+  /* Blog Cards */
+  .blogs-page-card {
+    padding: 0.85rem 1rem !important;
+    border-radius: 1.25rem !important;
+  }
+
+  .blogs-page-card-media {
+    margin-bottom: 0.5rem !important;
+  }
+
+  .blogs-graphic-wrap {
+    min-height: 110px !important;
+    max-height: 130px !important;
+    border-radius: 0.95rem !important;
+  }
+
+  .blogs-page-card-media img {
+    max-height: 130px !important;
+  }
+
+  .blogs-page-card-title {
+    font-size: 1rem !important;
+    line-height: 1.25 !important;
+    margin-bottom: 0.35rem !important;
+  }
+
+  .blogs-page-card-excerpt {
+    font-size: 0.78rem !important;
+    line-height: 1.35 !important;
+    margin-bottom: 0.65rem !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+  }
+
+  .blogs-page-card-footer {
+    padding-top: 0.45rem !important;
+    font-size: 0.72rem !important;
+  }
+}
+
+/* ==========================================================================
+   13. CAREERS PAGE RESPONSIVE SYSTEM FOR 150% DISPLAY SCALE ONLY
+   (144 DPI / devicePixelRatio: 1.5 - min-resolution: 135dpi, max-resolution: 158dpi)
+   Does NOT affect 100%, 125%, 175%, 200%, or other viewports.
+   ========================================================================== */
+@media screen and (min-width: 1024px) and (min-resolution: 135dpi) and (max-resolution: 158dpi),
+       screen and (min-width: 1024px) and (-webkit-min-device-pixel-ratio: 1.35) and (-webkit-max-device-pixel-ratio: 1.62),
+       screen and (min-width: 1024px) and (max-height: 720px) {
+
+  /* Main container clearance below floating Navbar */
+  .careers-page-main {
+    padding-top: clamp(3.75rem, 6vh, 4.35rem) !important;
+    padding-bottom: 2rem !important;
+  }
+
+  .careers-page-breadcrumb {
+    margin-bottom: clamp(0.25rem, 0.6vh, 0.45rem) !important;
+  }
+
+  .careers-page-header {
+    margin-bottom: clamp(0.85rem, 1.8vh, 1.35rem) !important;
+  }
+
+  /* Display Title & Subtitle */
+  .careers-page-title {
+    font-size: clamp(2.15rem, 1.5rem + 1.2vw, 2.75rem) !important;
+    line-height: 1.05 !important;
+    margin-bottom: 0.35rem !important;
+  }
+
+  .careers-page-desc {
+    font-size: 0.84rem !important;
+    line-height: 1.45 !important;
+  }
+
+  /* Open Positions Section */
+  .careers-page-positions {
+    margin-bottom: 2.5rem !important;
+  }
+
+  .careers-open-title {
+    font-size: clamp(1.45rem, 1.15rem + 0.6vw, 1.85rem) !important;
+    line-height: 1.15 !important;
+    margin-bottom: clamp(0.5rem, 1vh, 0.75rem) !important;
+  }
+
+  .careers-roles-list {
+    gap: 0.75rem !important;
+  }
+
+  /* Role Card Compact Sizing */
+  .careers-role-card {
+    padding: 0.75rem 1.15rem !important;
+    border-radius: 1.15rem !important;
+    gap: 0.75rem !important;
+  }
+
+  .careers-role-dept {
+    font-size: 0.72rem !important;
+    margin-bottom: 0.1rem !important;
+  }
+
+  .careers-role-title {
+    font-size: clamp(1.05rem, 0.95rem + 0.3vw, 1.25rem) !important;
+  }
+
+  .careers-role-pills {
+    gap: 0.45rem !important;
+  }
+
+  .careers-role-pill {
+    padding: 0.25rem 0.65rem !important;
+    font-size: 0.72rem !important;
+    gap: 0.35rem !important;
+  }
+
+  .careers-role-pill svg {
+    width: 0.8rem !important;
+    height: 0.8rem !important;
+  }
+
+  .careers-role-actions {
+    gap: 0.5rem !important;
+  }
+
+  .careers-role-btn-outline,
+  .careers-role-btn-primary {
+    padding: 0.45rem 1.15rem !important;
+    font-size: 0.78rem !important;
+  }
+
+  /* Job Alert Banner in 150% Scale */
+  .careers-alert-banner {
+    padding-top: clamp(2.25rem, 4vh, 3rem) !important;
+    padding-bottom: clamp(2.25rem, 4vh, 3rem) !important;
+    min-height: clamp(140px, 20vh, 170px) !important;
+  }
+
+  .careers-alert-title {
+    font-size: clamp(1.05rem, 0.95rem + 0.3vw, 1.25rem) !important;
+    line-height: 1.2 !important;
+  }
+
+  .careers-alert-desc {
+    font-size: 0.84rem !important;
+    line-height: 1.45 !important;
+    margin-top: 0.25rem !important;
+  }
+}
+
+/* ==========================================================================
+   14. JOB DESCRIPTION PAGE RESPONSIVE SYSTEM FOR 150% DISPLAY SCALE ONLY
+   (144 DPI / devicePixelRatio: 1.5 - min-resolution: 135dpi, max-resolution: 158dpi)
+   Does NOT affect 100%, 125%, 175%, 200%, or other viewports.
+   ========================================================================== */
+@media screen and (min-width: 1024px) and (min-resolution: 135dpi) and (max-resolution: 158dpi),
+       screen and (min-width: 1024px) and (-webkit-min-device-pixel-ratio: 1.35) and (-webkit-max-device-pixel-ratio: 1.62),
+       screen and (min-width: 1024px) and (max-height: 720px) {
+
+  /* Main container clearance below floating Navbar */
+  .jobdesc-page-main {
+    padding-top: clamp(3.75rem, 6vh, 4.35rem) !important;
+    padding-bottom: 2rem !important;
+  }
+
+  .jobdesc-page-breadcrumb {
+    margin-bottom: clamp(0.25rem, 0.6vh, 0.45rem) !important;
+  }
+
+  .jobdesc-page-pills {
+    gap: 0.45rem !important;
+    margin-bottom: clamp(0.35rem, 0.8vh, 0.55rem) !important;
+  }
+
+  .jobdesc-page-pill {
+    padding: 0.2rem 0.65rem !important;
+    font-size: 0.72rem !important;
+    gap: 0.35rem !important;
+  }
+
+  .jobdesc-page-pill svg {
+    width: 0.8rem !important;
+    height: 0.8rem !important;
+  }
+
+  /* Display Job Title */
+  .jobdesc-page-title {
+    font-size: clamp(2.15rem, 1.5rem + 1.2vw, 2.75rem) !important;
+    line-height: 1.05 !important;
+    margin-bottom: 0.35rem !important;
+  }
+
+  .jobdesc-page-desc {
+    font-size: 0.84rem !important;
+    line-height: 1.45 !important;
+    margin-bottom: clamp(0.75rem, 1.5vh, 1.25rem) !important;
+  }
+
+  /* 2-Column Layout Grid */
+  .jobdesc-page-grid {
+    gap: 1.25rem !important;
+  }
+
+  /* Left Column Cards */
+  .jobdesc-page-card {
+    padding: 1rem 1.35rem !important;
+    border-radius: 1.25rem !important;
+  }
+
+  .jobdesc-page-card-header {
+    margin-bottom: 0.75rem !important;
+    padding-bottom: 0.65rem !important;
+    gap: 0.65rem !important;
+  }
+
+  .jobdesc-page-card-icon {
+    width: 2.25rem !important;
+    height: 2.25rem !important;
+    border-radius: 0.65rem !important;
+  }
+
+  .jobdesc-page-card-icon svg {
+    width: 1.1rem !important;
+    height: 1.1rem !important;
+  }
+
+  .jobdesc-page-card-title {
+    font-size: 1.25rem !important;
+    line-height: 1.15 !important;
+  }
+
+  .jobdesc-page-card li {
+    font-size: 0.82rem !important;
+    line-height: 1.4 !important;
+    gap: 0.5rem !important;
+  }
+
+  .jobdesc-page-card li svg {
+    width: 1rem !important;
+    height: 1rem !important;
+    margin-top: 0.15rem !important;
+  }
+
+  /* Right Column Action Panel */
+  .jobdesc-page-sidebar {
+    gap: 0.75rem !important;
+    top: 5rem !important;
+  }
+
+  .jobdesc-page-actions-card {
+    padding: 1rem 1.15rem !important;
+    border-radius: 1.25rem !important;
+    gap: 0.65rem !important;
+  }
+
+  .jobdesc-page-btn-apply {
+    padding: 0.65rem 1.25rem !important;
+    font-size: 0.85rem !important;
+    border-radius: 0.75rem !important;
+  }
+
+  .jobdesc-page-btn-share {
+    padding: 0.5rem 1rem !important;
+    font-size: 0.78rem !important;
+    border-radius: 0.75rem !important;
+  }
+
+  .jobdesc-page-notice-card {
+    padding: 0.85rem 1rem !important;
+    border-radius: 1.15rem !important;
+  }
+}
+
+/* ==========================================================================
+   15. APPLY PAGE RESPONSIVE SYSTEM FOR 150% DISPLAY SCALE ONLY
+   (144 DPI / devicePixelRatio: 1.5 - min-resolution: 135dpi, max-resolution: 158dpi)
+   Does NOT affect 100%, 125%, 175%, 200%, or other viewports.
+   ========================================================================== */
+@media screen and (min-width: 1024px) and (min-resolution: 135dpi) and (max-resolution: 158dpi),
+       screen and (min-width: 1024px) and (-webkit-min-device-pixel-ratio: 1.35) and (-webkit-max-device-pixel-ratio: 1.62),
+       screen and (min-width: 1024px) and (max-height: 720px) {
+
+  /* Main container clearance below floating Navbar */
+  .apply-page-main {
+    padding-top: clamp(3.75rem, 6vh, 4.35rem) !important;
+    padding-bottom: 2rem !important;
+  }
+
+  .apply-page-breadcrumb {
+    margin-bottom: clamp(0.25rem, 0.6vh, 0.45rem) !important;
+  }
+
+  /* Top Job Card Banner */
+  .apply-page-banner {
+    padding: clamp(0.75rem, 1.5vh, 1rem) clamp(1rem, 1.5vw, 1.35rem) !important;
+    border-radius: 1.25rem !important;
+    margin-bottom: clamp(0.75rem, 1.5vh, 1.15rem) !important;
+  }
+
+  .apply-page-banner-badges {
+    gap: 0.45rem !important;
+    margin-bottom: clamp(0.35rem, 0.8vh, 0.55rem) !important;
+  }
+
+  .apply-page-banner-badges span {
+    padding: 0.2rem 0.65rem !important;
+    font-size: 0.72rem !important;
+    gap: 0.35rem !important;
+  }
+
+  .apply-page-banner-badges svg {
+    width: 0.8rem !important;
+    height: 0.8rem !important;
+  }
+
+  /* Job Title & Summary */
+  .apply-page-banner-title {
+    font-size: clamp(1.85rem, 1.35rem + 1vw, 2.35rem) !important;
+    line-height: 1.05 !important;
+    margin-bottom: 0.25rem !important;
+  }
+
+  .apply-page-banner-desc {
+    font-size: 0.82rem !important;
+    line-height: 1.4 !important;
+  }
+
+  /* 2-Column Grid Layout */
+  .apply-page-grid {
+    gap: 1.25rem !important;
+  }
+
+  /* Left Column: Form Card */
+  .apply-page-form-card {
+    padding: 1.15rem 1.45rem !important;
+    border-radius: 1.25rem !important;
+  }
+
+  .apply-page-form-title {
+    font-size: 1.25rem !important;
+    line-height: 1.15 !important;
+    padding-bottom: 0.5rem !important;
+    margin-bottom: 0.75rem !important;
+  }
+
+  .apply-page-form > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 0.85rem !important;
+  }
+
+  .apply-page-form label {
+    font-size: 0.78rem !important;
+    margin-bottom: 0.15rem !important;
+  }
+
+  .apply-page-form p {
+    font-size: 0.75rem !important;
+    margin-bottom: 0.35rem !important;
+  }
+
+  .apply-page-textarea {
+    padding: 0.65rem 0.85rem !important;
+    font-size: 0.78rem !important;
+    min-height: 100px !important;
+    border-radius: 0.85rem !important;
+  }
+
+  .apply-page-dropzone {
+    padding: 1.15rem 1rem !important;
+    border-radius: 0.85rem !important;
+  }
+
+  .apply-page-dropzone svg {
+    width: 1.1rem !important;
+    height: 1.1rem !important;
+  }
+
+  /* Right Column: Sidebar */
+  .apply-page-sidebar {
+    gap: 0.75rem !important;
+    top: 5rem !important;
+  }
+
+  .apply-page-user-card {
+    padding: 0.75rem 1rem !important;
+    border-radius: 1rem !important;
+  }
+
+  .apply-page-review-card {
+    padding: 1rem 1.15rem !important;
+    border-radius: 1.25rem !important;
+  }
+
+  .apply-page-review-card h3 {
+    font-size: 1.15rem !important;
+    margin-bottom: 0.25rem !important;
+  }
+
+  .apply-page-review-card p {
+    font-size: 0.78rem !important;
+    margin-bottom: 0.75rem !important;
+  }
+
+  .apply-page-review-card button {
+    padding: 0.55rem 1rem !important;
+    font-size: 0.8rem !important;
+    border-radius: 0.75rem !important;
+  }
+}
+
+/* ==========================================================================
+   16. BLOG DETAIL PAGE RESPONSIVE SYSTEM FOR 150% DISPLAY SCALE ONLY
+   (144 DPI / devicePixelRatio: 1.5 - min-resolution: 135dpi, max-resolution: 158dpi)
+   Does NOT affect 100%, 125%, 175%, 200%, or other viewports.
+   ========================================================================== */
+@media screen and (min-width: 1024px) and (min-resolution: 135dpi) and (max-resolution: 158dpi),
+       screen and (min-width: 1024px) and (-webkit-min-device-pixel-ratio: 1.35) and (-webkit-max-device-pixel-ratio: 1.62),
+       screen and (min-width: 1024px) and (max-height: 720px) {
+
+  /* Main container clearance below floating Navbar */
+  .blogdetail-page-main {
+    padding-top: clamp(3.75rem, 6vh, 4.35rem) !important;
+    padding-bottom: 2rem !important;
+  }
+
+  .blogdetail-back-wrap {
+    margin-bottom: clamp(0.35rem, 0.8vh, 0.65rem) !important;
+  }
+
+  /* Top Hero Card */
+  .blogdetail-hero-card {
+    padding: clamp(0.85rem, 1.6vh, 1.25rem) clamp(1.15rem, 1.8vw, 1.5rem) !important;
+    border-radius: 1.25rem !important;
+  }
+
+  .blogdetail-hero-grid {
+    gap: 1.25rem !important;
+  }
+
+  .blogdetail-breadcrumb {
+    margin-bottom: clamp(0.25rem, 0.6vh, 0.45rem) !important;
+  }
+
+  /* Hero Display Title & Excerpt */
+  .blogdetail-hero-title {
+    font-size: clamp(1.75rem, 1.25rem + 1vw, 2.25rem) !important;
+    line-height: 1.05 !important;
+    margin-bottom: clamp(0.25rem, 0.6vh, 0.45rem) !important;
+  }
+
+  .blogdetail-hero-desc {
+    font-size: 0.82rem !important;
+    line-height: 1.4 !important;
+    margin-bottom: clamp(0.45rem, 1vh, 0.65rem) !important;
+  }
+
+  .blogdetail-hero-author {
+    padding-top: 0 !important;
+    gap: 0.5rem !important;
+  }
+
+  .blogdetail-hero-author .w-9 {
+    width: 1.85rem !important;
+    height: 1.85rem !important;
+    font-size: 0.7rem !important;
+  }
+
+  /* Right Column Graphic Container */
+  .blogdetail-graphic-wrap {
+    height: clamp(150px, 22vh, 185px) !important;
+    border-radius: 1rem !important;
+  }
+
+  /* 2-Column Body Layout */
+  .blogdetail-body-grid {
+    gap: 1.25rem !important;
+  }
+
+  /* Left Column: Article Content Card */
+  .blogdetail-content-card {
+    padding: 1.15rem 1.45rem !important;
+    border-radius: 1.25rem !important;
+  }
+
+  .blogdetail-lead {
+    margin-bottom: 1.15rem !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+
+  .blogdetail-lead p {
+    font-size: 0.85rem !important;
+    line-height: 1.45 !important;
+  }
+
+  .blogdetail-sections-wrap > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 1.15rem !important;
+  }
+
+  .blogdetail-section-title {
+    font-size: 1.15rem !important;
+    line-height: 1.2 !important;
+  }
+
+  .blogdetail-section-body {
+    font-size: 0.82rem !important;
+    line-height: 1.45 !important;
+  }
+
+  /* Left Column: Quote Card */
+  .blogdetail-quote-card {
+    padding: 1rem 1.25rem !important;
+    border-radius: 1.25rem !important;
+  }
+
+  .blogdetail-quote-card p:first-child {
+    font-size: 1.05rem !important;
+    line-height: 1.25 !important;
+    margin-bottom: 0.35rem !important;
+  }
+
+  /* Right Column: Sidebar Widgets */
+  .blogdetail-sidebar > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 0.75rem !important;
+  }
+
+  .blogdetail-sidebar-card {
+    padding: 0.85rem 1rem !important;
+    border-radius: 1.15rem !important;
+  }
+
+  .blogdetail-sidebar-card h3 {
+    font-size: 0.78rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  .blogdetail-sidebar-card nav > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 0.45rem !important;
+  }
+
+  .blogdetail-sidebar-card button {
+    font-size: 0.82rem !important;
+  }
+
+  .blogdetail-sidebar-card ul > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 0.45rem !important;
+  }
+
+  .blogdetail-sidebar-card ul {
+    font-size: 0.82rem !important;
+    line-height: 1.4 !important;
+  }
+}
+
+/* ==========================================================================
+   17. SERVICES PAGE RESPONSIVE SYSTEM FOR 150% DISPLAY SCALE ONLY
+   (144 DPI / devicePixelRatio: 1.5 - min-resolution: 135dpi, max-resolution: 158dpi)
+   Does NOT affect 100%, 125%, 175%, 200%, or other viewports.
+   ========================================================================== */
+@media screen and (min-width: 1024px) and (min-resolution: 135dpi) and (max-resolution: 158dpi),
+       screen and (min-width: 1024px) and (-webkit-min-device-pixel-ratio: 1.35) and (-webkit-max-device-pixel-ratio: 1.62),
+       screen and (min-width: 1024px) and (max-height: 720px) {
+
+  /* Main container clearance below floating Navbar */
+  .services-page-main {
+    padding-top: clamp(3.75rem, 6vh, 4.35rem) !important;
+    padding-bottom: 2.5rem !important;
+  }
+
+  .services-page-breadcrumb {
+    margin-bottom: clamp(0.25rem, 0.6vh, 0.45rem) !important;
+  }
+
+  .services-page-header {
+    margin-bottom: clamp(1rem, 2.2vh, 1.65rem) !important;
+  }
+
+  /* Display Title & Subtitle */
+  .services-page-title {
+    font-size: clamp(2.15rem, 1.5rem + 1.2vw, 2.75rem) !important;
+    line-height: 1.05 !important;
+    margin-bottom: 0.35rem !important;
+  }
+
+  .services-page-desc {
+    font-size: 0.84rem !important;
+    line-height: 1.45 !important;
+    max-width: 38rem !important;
+  }
+
+  /* Accordion Rows */
+  .services-accordion-btn {
+    padding-top: clamp(0.75rem, 1.4vh, 1rem) !important;
+    padding-bottom: clamp(0.75rem, 1.4vh, 1rem) !important;
+  }
+
+  .services-item-num {
+    font-size: 0.78rem !important;
+  }
+
+  .services-item-title {
+    font-size: clamp(1.2rem, 1.05rem + 0.4vw, 1.45rem) !important;
+  }
+
+  /* Expanded Service Card */
+  .services-expanded-card {
+    padding: clamp(1rem, 2vh, 1.35rem) clamp(1.25rem, 2vw, 1.85rem) !important;
+    border-radius: 1.25rem !important;
+  }
+
+  .services-expanded-title {
+    font-size: clamp(1.35rem, 1.15rem + 0.5vw, 1.65rem) !important;
+    line-height: 1.15 !important;
+    margin-bottom: 0.35rem !important;
+  }
+
+  .services-expanded-desc {
+    font-size: 0.82rem !important;
+    line-height: 1.45 !important;
+    margin-bottom: 0.75rem !important;
+  }
+
+  .services-expanded-tags {
+    margin-bottom: 0.75rem !important;
+    gap: 0.45rem !important;
+  }
+
+  .services-expanded-tags span {
+    padding: 0.2rem 0.65rem !important;
+    font-size: 0.72rem !important;
+  }
+}
+
+/* ==========================================================================
+   18. SERVICE DETAIL PAGE RESPONSIVE SYSTEM FOR 150% DISPLAY SCALE ONLY
+   (144 DPI / devicePixelRatio: 1.5 - min-resolution: 135dpi, max-resolution: 158dpi)
+   Does NOT affect 100%, 125%, 175%, 200%, or other viewports.
+   ========================================================================== */
+@media screen and (min-width: 1024px) and (min-resolution: 135dpi) and (max-resolution: 158dpi),
+       screen and (min-width: 1024px) and (-webkit-min-device-pixel-ratio: 1.35) and (-webkit-max-device-pixel-ratio: 1.62),
+       screen and (min-width: 1024px) and (max-height: 720px) {
+
+  /* Pinned Hero Section Container & Clearance */
+  .servicedetail-hero-wrap {
+    padding-top: clamp(3.75rem, 6vh, 4.35rem) !important;
+    height: 780px !important;
+  }
+
+  .servicedetail-pinned-wrap {
+    top: clamp(3.75rem, 6vh, 4.35rem) !important;
+  }
+
+  .servicedetail-back-wrap {
+    margin-bottom: clamp(0.35rem, 0.8vh, 0.65rem) !important;
+  }
+
+  /* Hero Row & Content */
+  .servicedetail-hero-row {
+    min-height: clamp(380px, 58vh, 450px) !important;
+  }
+
+  .servicedetail-hero-title {
+    font-size: clamp(1.85rem, 1.25rem + 1vw, 2.35rem) !important;
+    line-height: 1.05 !important;
+  }
+
+  .servicedetail-hero-desc {
+    font-size: 0.82rem !important;
+    line-height: 1.4 !important;
+    margin-top: 0.35rem !important;
+  }
+
+  /* Hero Featured Image with increased height for 150% display scale */
+  .servicedetail-hero-img {
+    height: clamp(380px, 58vh, 450px) !important;
+    max-height: clamp(380px, 60vh, 460px) !important;
+    min-height: 360px !important;
+    border-radius: 1.5rem !important;
+  }
+
+  /* Sections Below Hero */
+  .servicedetail-section-title {
+    font-size: clamp(1.45rem, 1.15rem + 0.6vw, 1.85rem) !important;
+    line-height: 1.15 !important;
+    margin-bottom: 0.35rem !important;
+  }
+
+  .servicedetail-section-desc {
+    font-size: 0.82rem !important;
+    line-height: 1.4 !important;
+  }
+
+  .servicedetail-grid {
+    gap: 1.25rem !important;
+  }
+
+  .servicedetail-card {
+    padding: 1.15rem 1.35rem !important;
+    border-radius: 1.25rem !important;
+  }
+
+  .servicedetail-card-num {
+    margin-bottom: 0.45rem !important;
+    font-size: 0.82rem !important;
+  }
+
+  .servicedetail-card-title {
+    font-size: 1.15rem !important;
+    line-height: 1.2 !important;
+    margin-bottom: 0.35rem !important;
+  }
+
+  .servicedetail-card-desc {
+    font-size: 0.8rem !important;
+    line-height: 1.4 !important;
+  }
+
+  .servicedetail-why-section {
+    margin-top: 2.25rem !important;
+  }
+
+  .servicedetail-badge-wrap {
+    margin-bottom: 0.65rem !important;
+  }
+}
+
+/* ==========================================================================
+   19. PORTFOLIO DETAIL PAGE RESPONSIVE SYSTEM FOR 150% DISPLAY SCALE ONLY
+   (144 DPI / devicePixelRatio: 1.5 - min-resolution: 135dpi, max-resolution: 158dpi)
+   Does NOT affect 100%, 125%, 175%, 200%, or other viewports.
+   ========================================================================== */
+@media screen and (min-width: 1024px) and (min-resolution: 135dpi) and (max-resolution: 158dpi),
+       screen and (min-width: 1024px) and (-webkit-min-device-pixel-ratio: 1.35) and (-webkit-max-device-pixel-ratio: 1.62),
+       screen and (min-width: 1024px) and (max-height: 720px) {
+
+  /* Pinned Hero Section Container & Clearance */
+  .portfoliodetail-hero-wrap {
+    padding-top: clamp(3.75rem, 6vh, 4.35rem) !important;
+    height: 780px !important;
+  }
+
+  .portfoliodetail-pinned-wrap {
+    top: clamp(3.75rem, 6vh, 4.35rem) !important;
+  }
+
+  .portfoliodetail-back-wrap {
+    margin-bottom: clamp(0.35rem, 0.8vh, 0.65rem) !important;
+  }
+
+  /* Hero Row & Content */
+  .portfoliodetail-hero-row {
+    min-height: clamp(360px, 56vh, 430px) !important;
+  }
+
+  .portfoliodetail-hero-title {
+    font-size: clamp(1.85rem, 1.25rem + 1vw, 2.35rem) !important;
+    line-height: 1.05 !important;
+  }
+
+  .portfoliodetail-hero-desc {
+    font-size: 0.82rem !important;
+    line-height: 1.4 !important;
+    margin-top: 0.35rem !important;
+    margin-bottom: 0.65rem !important;
+  }
+
+  .portfoliodetail-tags span {
+    padding: 0.2rem 0.65rem !important;
+    font-size: 0.72rem !important;
+  }
+
+  /* Hero Featured Image Capped to Viewport Proportions */
+  .portfoliodetail-hero-img {
+    height: clamp(360px, 56vh, 430px) !important;
+    max-height: clamp(360px, 58vh, 440px) !important;
+    min-height: 340px !important;
+    border-radius: 1.5rem !important;
+  }
+
+  /* Sections Below Hero */
+  .portfoliodetail-section-title {
+    font-size: clamp(1.45rem, 1.15rem + 0.6vw, 1.85rem) !important;
+    line-height: 1.15 !important;
+    margin-bottom: 0.45rem !important;
+  }
+
+  .portfoliodetail-benefits-section {
+    padding: 1.25rem 1.5rem !important;
+    border-radius: 1.25rem !important;
+    margin-bottom: 1.5rem !important;
+  }
+
+  .portfoliodetail-benefit-card {
+    padding: 0.85rem 1rem !important;
+    border-radius: 1rem !important;
+  }
+
+  .portfoliodetail-benefit-card .mt-6 {
+    margin-top: 0.85rem !important;
+  }
+
+  .portfoliodetail-metric-val {
+    font-size: 1.65rem !important;
+  }
+
+  .portfoliodetail-overview-section {
+    border-radius: 1.25rem !important;
+    margin-bottom: 1.5rem !important;
+  }
+
+  .portfoliodetail-overview-content {
+    padding: 1.25rem 1.5rem !important;
+  }
+
+  .portfoliodetail-overview-desc {
+    font-size: 0.84rem !important;
+    line-height: 1.45 !important;
+  }
+
+  .portfoliodetail-feat-card {
+    padding: 0.85rem 1rem !important;
+    border-radius: 1.15rem !important;
+    min-height: auto !important;
+  }
+
+  .portfoliodetail-feat-title {
+    font-size: 1.1rem !important;
+    line-height: 1.2 !important;
+    margin-bottom: 0.25rem !important;
+  }
+
+  .portfoliodetail-feat-desc {
+    font-size: 0.8rem !important;
+    line-height: 1.4 !important;
+  }
+}
+
+/* ==========================================================================
+   20. LEGAL PAGES (PRIVACY POLICY & TERMS) FOR 150% DISPLAY SCALE ONLY
+   (144 DPI / devicePixelRatio: 1.5 - min-resolution: 135dpi, max-resolution: 158dpi)
+   Does NOT affect 100%, 125%, 175%, 200%, or other viewports.
+   ========================================================================== */
+@media screen and (min-width: 1024px) and (min-resolution: 135dpi) and (max-resolution: 158dpi),
+       screen and (min-width: 1024px) and (-webkit-min-device-pixel-ratio: 1.35) and (-webkit-max-device-pixel-ratio: 1.62),
+       screen and (min-width: 1024px) and (max-height: 720px) {
+
+  /* Main container & Breadcrumb clearance below floating Navbar */
+  .legal-page-main {
+    padding-top: clamp(3.75rem, 6vh, 4.35rem) !important;
+    padding-bottom: 2rem !important;
+  }
+
+  .legal-page-breadcrumb {
+    margin-bottom: clamp(0.5rem, 1vh, 0.85rem) !important;
+  }
+
+  /* Header Section */
+  .legal-page-header {
+    margin-bottom: clamp(1rem, 2vh, 1.5rem) !important;
+  }
+
+  .legal-page-badge {
+    margin-bottom: 0.45rem !important;
+    padding: 0.2rem 0.75rem !important;
+    font-size: 0.72rem !important;
+  }
+
+  .legal-page-badge svg {
+    width: 0.85rem !important;
+    height: 0.85rem !important;
+  }
+
+  .legal-page-title {
+    font-size: clamp(2rem, 1.4rem + 1.2vw, 2.5rem) !important;
+    line-height: 1.08 !important;
+    margin-bottom: 0.35rem !important;
+  }
+
+  .legal-page-desc {
+    font-size: 0.84rem !important;
+    line-height: 1.45 !important;
+  }
+
+  /* Main Card with Structured Sections */
+  .legal-page-card {
+    padding: clamp(1.25rem, 2.2vh, 1.75rem) clamp(1.35rem, 2vw, 2.25rem) !important;
+    border-radius: 1.5rem !important;
+  }
+
+  .legal-page-sections > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 1.25rem !important;
+  }
+
+  .legal-page-section-item {
+    padding-bottom: 1.25rem !important;
+    gap: 1.15rem !important;
+  }
+
+  .legal-page-icon {
+    width: 2.75rem !important;
+    height: 2.75rem !important;
+    border-radius: 0.85rem !important;
+  }
+
+  .legal-page-icon svg {
+    width: 1.25rem !important;
+    height: 1.25rem !important;
+  }
+
+  .legal-page-sec-num {
+    font-size: 0.68rem !important;
+  }
+
+  .legal-page-section-title {
+    font-size: 1.05rem !important;
+    line-height: 1.2 !important;
+  }
+
+  .legal-page-highlight {
+    font-size: 0.68rem !important;
+    padding: 0.15rem 0.55rem !important;
+  }
+
+  .legal-page-section-content {
+    font-size: 0.82rem !important;
+    line-height: 1.45 !important;
+  }
+
+  .legal-page-footer-meta {
+    margin-top: 1.25rem !important;
+    padding-top: 1rem !important;
+    font-size: 0.78rem !important;
+  }
+}
+
+/* ==========================================================================
+   21. PROFILE PAGE RESPONSIVE SYSTEM FOR 150% DISPLAY SCALE ONLY
+   (144 DPI / devicePixelRatio: 1.5 - min-resolution: 135dpi, max-resolution: 158dpi)
+   Does NOT affect 100%, 125%, 175%, 200%, or other viewports.
+   ========================================================================== */
+@media screen and (min-width: 1024px) and (min-resolution: 135dpi) and (max-resolution: 158dpi),
+       screen and (min-width: 1024px) and (-webkit-min-device-pixel-ratio: 1.35) and (-webkit-max-device-pixel-ratio: 1.62),
+       screen and (min-width: 1024px) and (max-height: 720px) {
+
+  /* Main container clearance below floating Navbar */
+  .profile-page-main {
+    padding-top: clamp(3.5rem, 5.5vh, 4rem) !important;
+    padding-bottom: 1.5rem !important;
+  }
+
+  /* Header Section */
+  .profile-page-header {
+    margin-bottom: clamp(0.45rem, 1vh, 0.75rem) !important;
+  }
+
+  .profile-page-title {
+    font-size: clamp(1.75rem, 1.25rem + 1vw, 2.15rem) !important;
+    line-height: 1.05 !important;
+  }
+
+  .profile-page-desc {
+    font-size: 0.78rem !important;
+    line-height: 1.35 !important;
+    margin-top: 0.15rem !important;
+  }
+
+  /* Tabs Bar */
+  .profile-page-tabs-bar {
+    margin-bottom: clamp(0.5rem, 1.2vh, 0.85rem) !important;
+  }
+
+  .profile-page-tabs-wrap {
+    padding: 0.25rem !important;
+    gap: 0.25rem !important;
+  }
+
+  .profile-page-tab-btn {
+    padding: 0.3rem 0.75rem !important;
+    font-size: 0.75rem !important;
+    gap: 0.35rem !important;
+  }
+
+  .profile-page-tab-btn svg {
+    width: 0.8rem !important;
+    height: 0.8rem !important;
+  }
+
+  /* Main Card */
+  .profile-page-card {
+    padding: clamp(0.85rem, 1.5vh, 1.15rem) clamp(1.15rem, 1.8vw, 1.65rem) !important;
+    border-radius: 1.35rem !important;
+  }
+
+  /* Card Header */
+  .profile-page-card-header {
+    gap: 0.65rem !important;
+    margin-bottom: 0.55rem !important;
+  }
+
+  .profile-page-card-icon {
+    width: 1.85rem !important;
+    height: 1.85rem !important;
+  }
+
+  .profile-page-card-icon svg {
+    width: 0.95rem !important;
+    height: 0.95rem !important;
+  }
+
+  .profile-page-card-title {
+    font-size: 1.05rem !important;
+    line-height: 1.2 !important;
+  }
+
+  /* Form Elements */
+  .profile-page-form > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 0.45rem !important;
+  }
+
+  .profile-page-label {
+    font-size: 0.72rem !important;
+    margin-bottom: 0.15rem !important;
+  }
+
+  .profile-page-input,
+  .profile-page-select {
+    padding-top: 0.35rem !important;
+    padding-bottom: 0.35rem !important;
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+    font-size: 0.78rem !important;
+    border-radius: 0.65rem !important;
+  }
+
+  .profile-page-textarea {
+    padding: 0.45rem 0.75rem !important;
+    font-size: 0.78rem !important;
+    border-radius: 0.65rem !important;
+  }
+
+  /* Verification Alert Notice */
+  .profile-page-alert {
+    padding: 0.45rem 0.75rem !important;
+    border-radius: 0.65rem !important;
+    gap: 0.45rem !important;
+  }
+
+  .profile-page-alert-text {
+    font-size: 0.72rem !important;
+    line-height: 1.35 !important;
+  }
+
+  .profile-page-alert svg {
+    width: 0.95rem !important;
+    height: 0.95rem !important;
+  }
+
+  .profile-page-alert-badge {
+    padding: 0.15rem 0.55rem !important;
+    font-size: 0.68rem !important;
+  }
+}
+
+

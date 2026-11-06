@@ -302,7 +302,7 @@ export default function SubscribersAdminPage() {
           </div>
 
           {/* Metric Cards - 1 col on mobile, 2 on tablet, 4 on desktop */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4 md:gap-5 mb-6 sm:mb-7">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3.5 sm:gap-4 md:gap-5 mb-6 sm:mb-7">
             {/* 1. Total Subscribers */}
             <div className="bg-white rounded-[20px] sm:rounded-[22px] border border-[#ECE4F2] p-4.5 sm:p-5 shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
               <div className="flex items-center justify-between">

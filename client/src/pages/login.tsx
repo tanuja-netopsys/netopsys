@@ -21,6 +21,7 @@ export interface CareerUser {
   role?: string;
   registeredDate?: string;
   verificationStatus?: string;
+  isEmailVerified?: boolean;
   accountStatus?: string;
 }
 
@@ -672,7 +673,8 @@ export default function LoginPage({
             phone: data.user.phone || "",
             role: data.user.role || "Candidate",
             registeredDate: data.user.registeredDate || "28/10/2026",
-            verificationStatus: data.user.verificationStatus || "verified",
+            verificationStatus: data.user.verificationStatus || (data.user.emailVerified ? "verified" : "Unverified"),
+            isEmailVerified: Boolean(data.user.isEmailVerified || data.user.emailVerified),
             accountStatus: data.user.accountStatus || "Active",
           });
         }, 500);
@@ -775,7 +777,9 @@ export default function LoginPage({
         return;
       }
 
-      throw new Error(data.message || "Failed to send verification code.");
+      const msg = data.message || "This email is not registered. Please register first.";
+      setErrorMessage(msg);
+      toast.error(msg, { title: "Email Not Registered" });
     } catch (err: unknown) {
       const error = err as Error;
       const msg = error.message || "Failed to send verification code. Please check your email.";
@@ -812,7 +816,9 @@ export default function LoginPage({
         return;
       }
 
-      throw new Error(data.message || "Failed to resend verification code.");
+      const msg = data.message || "This email is not registered. Please register first.";
+      setErrorMessage(msg);
+      toast.error(msg, { title: "Email Not Registered" });
     } catch (err: unknown) {
       const error = err as Error;
       const msg = error.message || "Failed to resend code.";
@@ -974,7 +980,8 @@ export default function LoginPage({
             phone: data.user.phone || mobileNumber.trim(),
             role: "Candidate",
             registeredDate: data.user.registeredDate || new Date().toLocaleDateString("en-GB"),
-            verificationStatus: "verified",
+            verificationStatus: data.user.verificationStatus || "Unverified",
+            isEmailVerified: Boolean(data.user.isEmailVerified || data.user.emailVerified),
             accountStatus: "Active",
           });
         }, 500);
@@ -993,7 +1000,8 @@ export default function LoginPage({
         phone: mobileNumber.trim(),
         role: "Candidate",
         registeredDate: new Date().toLocaleDateString("en-GB"),
-        verificationStatus: "verified",
+        verificationStatus: "Unverified",
+        isEmailVerified: false,
         accountStatus: "Active",
       });
     } finally {
@@ -1501,21 +1509,38 @@ export default function LoginPage({
                   </form>
                 </div>
 
-                {/* Bottom Switcher */}
-                <div className="text-center mt-5 text-xs sm:text-[13px] text-[#554E62]">
-                  Remember your password?{" "}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMode("signin");
-                      setActiveField(null);
-                      setErrorMessage("");
-                      setSuccessMessage("");
-                    }}
-                    className="text-[#5E2282] font-bold hover:underline cursor-pointer ml-1"
-                  >
-                    Sign in
-                  </button>
+                {/* Bottom Switchers */}
+                <div className="space-y-2 mt-5 text-center text-xs sm:text-[13px] text-[#554E62]">
+                  <div>
+                    Remember your password?{" "}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMode("signin");
+                        setActiveField(null);
+                        setErrorMessage("");
+                        setSuccessMessage("");
+                      }}
+                      className="text-[#5E2282] font-bold hover:underline cursor-pointer ml-1"
+                    >
+                      Sign in
+                    </button>
+                  </div>
+                  <div>
+                    Don't have an account?{" "}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMode("create");
+                        setActiveField(null);
+                        setErrorMessage("");
+                        setSuccessMessage("");
+                      }}
+                      className="text-[#5E2282] font-bold hover:underline cursor-pointer ml-1"
+                    >
+                      Register here
+                    </button>
+                  </div>
                 </div>
               </div>
             )}

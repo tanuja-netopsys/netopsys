@@ -100,7 +100,7 @@ export default function Footer() {
       <FallingToolsPhysics>
         {/* Top 5-Column Navigation Layout */}
         <div className="relative z-30 pointer-events-auto select-auto w-full max-w-[2100px] mx-auto px-4 sm:px-6 md:px-8 lg:px-10 xl:px-14 2xl:px-18">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 sm:gap-6 xl:gap-8 pb-12 sm:pb-16 text-left">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-8 sm:gap-6 xl:gap-8 pb-12 sm:pb-16 text-left">
             {/* Column 1: Brand Info */}
             <div className="flex flex-col items-start pr-0 lg:pr-4">
               {/* Brand Logo */}

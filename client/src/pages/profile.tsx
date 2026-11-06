@@ -13,6 +13,7 @@ import {
   CheckCircle2,
   Plus,
   Trash2,
+  Loader2,
 } from "lucide-react";
 import Navbar from "../componenets/navbar.tsx";
 import Footer from "../componenets/footer.tsx";
@@ -37,6 +38,7 @@ interface CareerUser {
   role?: string;
   registeredDate?: string;
   verificationStatus?: string;
+  isEmailVerified?: boolean;
   accountStatus?: string;
 }
 
@@ -46,6 +48,21 @@ export default function ProfilePage() {
   const [isEmailVerified, setIsEmailVerified] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+
+  // OTP Verification States
+  const [isOtpOpen, setIsOtpOpen] = useState(false);
+  const [otpInput, setOtpInput] = useState("");
+  const [otpCountdown, setOtpCountdown] = useState(0);
+  const [otpError, setOtpError] = useState("");
+  const [isSubmittingOtp, setIsSubmittingOtp] = useState(false);
+
+  useEffect(() => {
+    if (otpCountdown <= 0) return;
+    const timer = setInterval(() => {
+      setOtpCountdown((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [otpCountdown]);
 
   // ---------------------------------------------------------------------------
   // Personal Info State
@@ -340,14 +357,86 @@ export default function ProfilePage() {
     });
   };
 
-  const handleSendVerification = () => {
+  const handleSendVerification = async () => {
+    if (!email || !email.includes("@") || email === "xxxxx@gmail.com") {
+      showToast("Please enter a valid email address first.");
+      return;
+    }
     setIsVerifying(true);
-    setTimeout(() => {
+    setOtpError("");
+    try {
+      const res = await fetch("/api/auth/send-verification-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setIsOtpOpen(true);
+        setOtpCountdown(60);
+        showToast(data.message || `Verification code sent to ${email}`);
+      } else if (data.alreadyVerified) {
+        setIsEmailVerified(true);
+        setIsOtpOpen(false);
+        showToast("Your email is already verified!");
+      } else {
+        setOtpError(data.message || "Failed to send verification code.");
+        showToast(data.message || "Failed to send code.");
+      }
+    } catch (err) {
+      setOtpError("Network error. Please try again.");
+      showToast("Network error. Please check connection.");
+    } finally {
       setIsVerifying(false);
-      setIsEmailVerified(true);
-      saveAllToDatabaseAndStorage({ isEmailVerified: true });
-      showToast("Verification link sent! Email successfully verified.");
-    }, 1200);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    const cleanOtp = otpInput.trim();
+    if (!cleanOtp || cleanOtp.length < 6) {
+      setOtpError("Please enter the complete 6-digit verification code.");
+      return;
+    }
+    setIsSubmittingOtp(true);
+    setOtpError("");
+    try {
+      const res = await fetch("/api/auth/verify-email-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, otp: cleanOtp }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setIsEmailVerified(true);
+        setIsOtpOpen(false);
+        setOtpInput("");
+        showToast("Email successfully verified! You can now apply for jobs.");
+
+        // Update localStorage career_user and career_profile_details
+        try {
+          const cur = localStorage.getItem("career_user");
+          if (cur) {
+            const u = JSON.parse(cur);
+            u.verificationStatus = "verified";
+            u.isEmailVerified = true;
+            localStorage.setItem("career_user", JSON.stringify(u));
+            window.dispatchEvent(new Event("career_user_change"));
+          }
+          const prof = localStorage.getItem("career_profile_details");
+          if (prof) {
+            const p = JSON.parse(prof);
+            p.isEmailVerified = true;
+            localStorage.setItem("career_profile_details", JSON.stringify(p));
+          }
+        } catch {}
+      } else {
+        setOtpError(data.message || "Invalid verification code.");
+      }
+    } catch (err) {
+      setOtpError("Unable to verify. Please try again.");
+    } finally {
+      setIsSubmittingOtp(false);
+    }
   };
 
   const handleUpdateExperience = (
@@ -462,7 +551,7 @@ export default function ProfilePage() {
       )}
 
       {/* Main Page Content */}
-      <main className="relative w-full z-10 flex-1 pt-24 sm:pt-28 md:pt-30 pb-16 sm:pb-20 select-none">
+      <main className="relative w-full z-10 flex-1 pt-24 sm:pt-28 md:pt-30 pb-16 sm:pb-20 select-none profile-page-main">
         {/* Subtle background tech grid */}
         <div
           className="absolute inset-0 opacity-[0.03] pointer-events-none"
@@ -480,23 +569,23 @@ export default function ProfilePage() {
         {/* Outer content container with full width matching all remaining pages (max-w-[2100px]) */}
         <div className="relative w-full max-w-[2100px] mx-auto px-4 sm:px-6 md:px-8 lg:px-10 xl:px-14 2xl:px-18">
           {/* Title and Subtitle */}
-          <div className="text-center mb-8 sm:mb-10">
-            <h1 className="text-[34px] sm:text-[40px] md:text-[44px] lg:text-[48px] font-bold text-[#141010] tracking-tight">
+          <div className="text-center mb-8 sm:mb-10 profile-page-header">
+            <h1 className="profile-page-title text-4xl sm:text-5xl md:text-6xl lg:text-[4.25rem] font-light tracking-[-0.035em] text-[#141010] leading-[1.05]">
               My Profile
             </h1>
-            <p className="text-[14px] sm:text-[15.5px] font-normal text-[#6B617B] mt-2">
+            <p className="profile-page-desc text-[#554E62] text-sm sm:text-base md:text-[16px] lg:text-[17px] leading-relaxed font-normal mt-2 sm:mt-3">
               Manage your account and application details
             </p>
           </div>
 
           {/* Navigation Tabs Bar */}
-          <div className="flex justify-center mb-8 sm:mb-10">
-            <div className="inline-flex items-center justify-center p-1.5 bg-white rounded-2xl sm:rounded-full border border-[#ECE4F2] shadow-xs gap-1 sm:gap-2 flex-wrap sm:flex-nowrap">
+          <div className="flex justify-center mb-8 sm:mb-10 profile-page-tabs-bar">
+            <div className="inline-flex items-center justify-center p-1.5 bg-white rounded-2xl sm:rounded-full border border-[#ECE4F2] shadow-xs gap-1 sm:gap-2 flex-wrap sm:flex-nowrap profile-page-tabs-wrap">
               {/* 1. Personal */}
               <button
                 type="button"
                 onClick={() => setActiveTab("personal")}
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl sm:rounded-full text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
+                className={`profile-page-tab-btn flex items-center gap-2 px-5 py-2.5 rounded-xl sm:rounded-full text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
                   activeTab === "personal"
                     ? "bg-[#652297] text-white shadow-xs"
                     : "text-[#554E62] hover:text-[#141010]"
@@ -510,7 +599,7 @@ export default function ProfilePage() {
               <button
                 type="button"
                 onClick={() => setActiveTab("professional")}
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl sm:rounded-full text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
+                className={`profile-page-tab-btn flex items-center gap-2 px-5 py-2.5 rounded-xl sm:rounded-full text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
                   activeTab === "professional"
                     ? "bg-[#652297] text-white shadow-xs"
                     : "text-[#554E62] hover:text-[#141010]"
@@ -524,7 +613,7 @@ export default function ProfilePage() {
               <button
                 type="button"
                 onClick={() => setActiveTab("education")}
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl sm:rounded-full text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
+                className={`profile-page-tab-btn flex items-center gap-2 px-5 py-2.5 rounded-xl sm:rounded-full text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
                   activeTab === "education"
                     ? "bg-[#652297] text-white shadow-xs"
                     : "text-[#554E62] hover:text-[#141010]"
@@ -538,7 +627,7 @@ export default function ProfilePage() {
               <button
                 type="button"
                 onClick={() => setActiveTab("certs")}
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl sm:rounded-full text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
+                className={`profile-page-tab-btn flex items-center gap-2 px-5 py-2.5 rounded-xl sm:rounded-full text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
                   activeTab === "certs"
                     ? "bg-[#652297] text-white shadow-xs"
                     : "text-[#554E62] hover:text-[#141010]"
@@ -552,7 +641,7 @@ export default function ProfilePage() {
               <button
                 type="button"
                 onClick={() => setActiveTab("jobs")}
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl sm:rounded-full text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
+                className={`profile-page-tab-btn flex items-center gap-2 px-5 py-2.5 rounded-xl sm:rounded-full text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
                   activeTab === "jobs"
                     ? "bg-[#652297] text-white shadow-xs"
                     : "text-[#554E62] hover:text-[#141010]"
@@ -571,23 +660,23 @@ export default function ProfilePage() {
         {/* TAB 1: PERSONAL INFORMATION (MATCHES THE SCREENSHOT EXACTLY)        */}
         {/* =================================================================== */}
         {activeTab === "personal" && (
-          <div className="bg-white rounded-[28px] sm:rounded-[32px] border border-[#ECE4F2] shadow-sm p-6 sm:p-9 md:p-11 lg:p-12 w-full text-[#141010] animate-in fade-in duration-200">
+          <div className="bg-white rounded-[28px] sm:rounded-[32px] border border-[#ECE4F2] shadow-sm p-6 sm:p-9 md:p-11 lg:p-12 w-full text-[#141010] animate-in fade-in duration-200 profile-page-card">
             {/* Header */}
-            <div className="flex items-center gap-3.5 mb-6 sm:mb-7">
-              <div className="w-10 h-10 rounded-full bg-[#F5EDF9] text-[#652297] flex items-center justify-center shrink-0">
+            <div className="flex items-center gap-3.5 mb-6 sm:mb-7 profile-page-card-header">
+              <div className="w-10 h-10 rounded-full bg-[#F5EDF9] text-[#652297] flex items-center justify-center shrink-0 profile-page-card-icon">
                 <User className="w-5 h-5 stroke-[2.2]" />
               </div>
-              <h2 className="text-xl sm:text-[22px] font-bold text-[#141010]">
+              <h2 className="text-xl sm:text-[22px] font-bold text-[#141010] profile-page-card-title">
                 Personal Information
               </h2>
             </div>
 
             {/* Form Fields */}
-            <div className="space-y-5">
+            <div className="space-y-5 profile-page-form">
               {/* Row 1: First Name & Last Name */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 text-left">
                 <div>
-                  <label className="block text-xs sm:text-[13px] font-semibold text-[#141010] mb-2">
+                  <label className="block text-xs sm:text-[13px] font-semibold text-[#141010] mb-2 profile-page-label">
                     First Name
                   </label>
                   <input
@@ -595,11 +684,11 @@ export default function ProfilePage() {
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
                     placeholder="Enter your first name"
-                    className="w-full bg-[#FAF8FC] border border-[#E2DBEA] hover:border-[#C8B8D7] focus:border-[#652297] focus:bg-white rounded-2xl px-4 py-3 sm:py-3.5 text-xs sm:text-sm text-[#141010] placeholder:text-[#9F96AC] outline-none transition-colors"
+                    className="w-full bg-[#FAF8FC] border border-[#E2DBEA] hover:border-[#C8B8D7] focus:border-[#652297] focus:bg-white rounded-2xl px-4 py-3 sm:py-3.5 text-xs sm:text-sm text-[#141010] placeholder:text-[#9F96AC] outline-none transition-colors profile-page-input"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs sm:text-[13px] font-semibold text-[#141010] mb-2">
+                  <label className="block text-xs sm:text-[13px] font-semibold text-[#141010] mb-2 profile-page-label">
                     Last Name
                   </label>
                   <input
@@ -607,14 +696,14 @@ export default function ProfilePage() {
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
                     placeholder="Enter your last name"
-                    className="w-full bg-[#FAF8FC] border border-[#E2DBEA] hover:border-[#C8B8D7] focus:border-[#652297] focus:bg-white rounded-2xl px-4 py-3 sm:py-3.5 text-xs sm:text-sm text-[#141010] placeholder:text-[#9F96AC] outline-none transition-colors"
+                    className="w-full bg-[#FAF8FC] border border-[#E2DBEA] hover:border-[#C8B8D7] focus:border-[#652297] focus:bg-white rounded-2xl px-4 py-3 sm:py-3.5 text-xs sm:text-sm text-[#141010] placeholder:text-[#9F96AC] outline-none transition-colors profile-page-input"
                   />
                 </div>
               </div>
 
               {/* Row 2: Email */}
               <div className="text-left">
-                <label className="block text-xs sm:text-[13px] font-semibold text-[#141010] mb-2">
+                <label className="block text-xs sm:text-[13px] font-semibold text-[#141010] mb-2 profile-page-label">
                   Email
                 </label>
                 <input
@@ -622,41 +711,115 @@ export default function ProfilePage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="xxxxx@gmail.com"
-                  className="w-full bg-[#F5EDF9]/70 border border-[#E2DBEA] hover:border-[#C8B8D7] focus:border-[#652297] focus:bg-white rounded-2xl px-4 py-3 sm:py-3.5 text-xs sm:text-sm text-[#554E62] placeholder:text-[#9F96AC] outline-none transition-colors"
+                  className="w-full bg-[#F5EDF9]/70 border border-[#E2DBEA] hover:border-[#C8B8D7] focus:border-[#652297] focus:bg-white rounded-2xl px-4 py-3 sm:py-3.5 text-xs sm:text-sm text-[#554E62] placeholder:text-[#9F96AC] outline-none transition-colors profile-page-input"
                 />
               </div>
 
-              {/* Row 3: Verification Alert Notice */}
-              <div className="rounded-2xl bg-[#FFF8EE] border border-[#FFE7BA] p-4 sm:p-4.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-left">
-                <div className="flex items-start sm:items-center gap-3">
-                  <AlertCircle className="w-5 h-5 text-[#D48806] shrink-0 mt-0.5 sm:mt-0 stroke-[2.2]" />
-                  <p className="text-xs sm:text-[13px] font-medium text-[#7D4A00] leading-relaxed">
-                    {isEmailVerified
-                      ? "Your email address is verified. You will receive updates about your applications."
-                      : "Please verify your email address to enhance your profile credibility and receive important updates about your applications."}
-                  </p>
+              {/* Row 3: Verification Alert Notice & OTP Form */}
+              <div className="rounded-2xl bg-[#FFF8EE] border border-[#FFE7BA] p-4 sm:p-5 flex flex-col gap-4 text-left profile-page-alert">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div className="flex items-start sm:items-center gap-3">
+                    <AlertCircle className="w-5 h-5 text-[#D48806] shrink-0 mt-0.5 sm:mt-0 stroke-[2.2]" />
+                    <p className="text-xs sm:text-[13px] font-medium text-[#7D4A00] leading-relaxed profile-page-alert-text">
+                      {isEmailVerified
+                        ? "Your email address is verified. You can now apply for open positions and receive updates."
+                        : "Email verification is required before applying for jobs. Please verify your email with a one-time passcode (OTP)."}
+                    </p>
+                  </div>
+                  {!isEmailVerified ? (
+                    <button
+                      type="button"
+                      onClick={handleSendVerification}
+                      disabled={isVerifying || (isOtpOpen && otpCountdown > 0)}
+                      className="bg-[#FBAE42] hover:bg-[#efa132] hover-brand-gradient text-[#141010] font-semibold text-xs sm:text-[13px] px-4.5 py-2.5 rounded-full inline-flex items-center gap-1.5 shadow-xs cursor-pointer transition-all whitespace-nowrap self-start sm:self-auto disabled:opacity-60 profile-page-alert-badge"
+                    >
+                      {isVerifying ? (
+                        <>
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          <span>Sending Code...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Send className="w-3.5 h-3.5" />
+                          <span>
+                            {isOtpOpen && otpCountdown > 0
+                              ? `Resend in ${otpCountdown}s`
+                              : isOtpOpen
+                              ? "Resend Code"
+                              : "Send Verification Code"}
+                          </span>
+                        </>
+                      )}
+                    </button>
+                  ) : (
+                    <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700 bg-emerald-100 px-3 py-1.5 rounded-full shrink-0">
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      Verified
+                    </span>
+                  )}
                 </div>
-                {!isEmailVerified ? (
-                  <button
-                    type="button"
-                    onClick={handleSendVerification}
-                    disabled={isVerifying}
-                    className="bg-[#FBAE42] hover:bg-[#efa132] hover-brand-gradient text-[#141010] font-semibold text-xs sm:text-[13px] px-4.5 py-2.5 rounded-full inline-flex items-center gap-1.5 shadow-xs cursor-pointer transition-all whitespace-nowrap self-start sm:self-auto disabled:opacity-60"
-                  >
-                    <Send className="w-3.5 h-3.5" />
-                    <span>{isVerifying ? "Sending..." : "Send Verification Code"}</span>
-                  </button>
-                ) : (
-                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700 bg-emerald-100 px-3 py-1.5 rounded-full shrink-0">
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                    Verified
-                  </span>
+
+                {/* OTP Entry Panel */}
+                {!isEmailVerified && isOtpOpen && (
+                  <div className="pt-3.5 border-t border-[#FFE7BA]/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-[#7D4A00] mb-1">
+                        Enter 6-Digit Verification Code sent to <span className="font-bold underline">{email}</span>:
+                      </label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          maxLength={6}
+                          value={otpInput}
+                          onChange={(e) => {
+                            const val = e.target.value.replace(/\D/g, "");
+                            setOtpInput(val);
+                            if (otpError) setOtpError("");
+                          }}
+                          placeholder="e.g. 582914"
+                          className="w-44 bg-white border border-[#E2DBEA] focus:border-[#652297] rounded-xl px-3.5 py-2 text-sm tracking-widest font-mono text-[#141010] placeholder:tracking-normal placeholder:font-sans placeholder:text-[#9F96AC] outline-none"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleVerifyOtp}
+                          disabled={isSubmittingOtp || otpInput.trim().length !== 6}
+                          className="bg-[#652297] hover:bg-[#521780] text-white font-semibold text-xs px-4 py-2 rounded-xl inline-flex items-center gap-1.5 shadow-xs cursor-pointer transition-all disabled:opacity-50"
+                        >
+                          {isSubmittingOtp ? (
+                            <>
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                              <span>Verifying...</span>
+                            </>
+                          ) : (
+                            <>
+                              <CheckCircle2 className="w-3.5 h-3.5" />
+                              <span>Verify</span>
+                            </>
+                          )}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsOtpOpen(false);
+                            setOtpError("");
+                          }}
+                          className="text-xs font-medium text-[#7D4A00]/80 hover:text-[#7D4A00] px-2 py-2 cursor-pointer"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                      {otpError && (
+                        <p className="text-xs text-rose-600 font-semibold mt-1">{otpError}</p>
+                      )}
+                    </div>
+                  </div>
                 )}
               </div>
 
               {/* Row 4: Mobile Number */}
               <div className="text-left">
-                <label className="block text-xs sm:text-[13px] font-semibold text-[#141010] mb-2">
+                <label className="block text-xs sm:text-[13px] font-semibold text-[#141010] mb-2 profile-page-label">
                   Mobile Number
                 </label>
                 <input
@@ -664,7 +827,7 @@ export default function ProfilePage() {
                   value={mobileNumber}
                   onChange={(e) => setMobileNumber(e.target.value)}
                   placeholder=""
-                  className="w-full bg-[#FAF8FC] border border-[#E2DBEA] hover:border-[#C8B8D7] focus:border-[#652297] focus:bg-white rounded-2xl px-4 py-3 sm:py-3.5 text-xs sm:text-sm text-[#141010] placeholder:text-[#9F96AC] outline-none transition-colors"
+                  className="w-full bg-[#FAF8FC] border border-[#E2DBEA] hover:border-[#C8B8D7] focus:border-[#652297] focus:bg-white rounded-2xl px-4 py-3 sm:py-3.5 text-xs sm:text-sm text-[#141010] placeholder:text-[#9F96AC] outline-none transition-colors profile-page-input"
                 />
               </div>
 
@@ -672,7 +835,7 @@ export default function ProfilePage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 text-left">
                 {/* Date of Birth */}
                 <div>
-                  <label className="block text-xs sm:text-[13px] font-semibold text-[#141010] mb-2">
+                  <label className="block text-xs sm:text-[13px] font-semibold text-[#141010] mb-2 profile-page-label">
                     Date of Birth
                   </label>
                   <div className="relative">
@@ -681,7 +844,7 @@ export default function ProfilePage() {
                       value={dob}
                       onChange={(e) => setDob(e.target.value)}
                       placeholder="mm/dd/yyyy"
-                      className="w-full bg-[#FAF8FC] border border-[#E2DBEA] hover:border-[#C8B8D7] focus:border-[#652297] focus:bg-white rounded-2xl pl-4 pr-11 py-3 sm:py-3.5 text-xs sm:text-sm text-[#141010] placeholder:text-[#9F96AC] outline-none transition-colors"
+                      className="w-full bg-[#FAF8FC] border border-[#E2DBEA] hover:border-[#C8B8D7] focus:border-[#652297] focus:bg-white rounded-2xl pl-4 pr-11 py-3 sm:py-3.5 text-xs sm:text-sm text-[#141010] placeholder:text-[#9F96AC] outline-none transition-colors profile-page-input"
                     />
                     <Calendar className="w-4 h-4 text-[#8E869B] absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" />
                   </div>
@@ -689,14 +852,14 @@ export default function ProfilePage() {
 
                 {/* Gender */}
                 <div>
-                  <label className="block text-xs sm:text-[13px] font-semibold text-[#141010] mb-2">
+                  <label className="block text-xs sm:text-[13px] font-semibold text-[#141010] mb-2 profile-page-label">
                     Gender
                   </label>
                   <div className="relative">
                     <select
                       value={gender}
                       onChange={(e) => setGender(e.target.value)}
-                      className="w-full bg-[#FAF8FC] border border-[#E2DBEA] hover:border-[#C8B8D7] focus:border-[#652297] focus:bg-white rounded-2xl pl-4 pr-11 py-3 sm:py-3.5 text-xs sm:text-sm text-[#141010] outline-none transition-colors appearance-none cursor-pointer"
+                      className="w-full bg-[#FAF8FC] border border-[#E2DBEA] hover:border-[#C8B8D7] focus:border-[#652297] focus:bg-white rounded-2xl pl-4 pr-11 py-3 sm:py-3.5 text-xs sm:text-sm text-[#141010] outline-none transition-colors appearance-none cursor-pointer profile-page-select"
                     >
                       <option value="">Select gender</option>
                       <option value="Male">Male</option>
@@ -806,17 +969,17 @@ export default function ProfilePage() {
         {/* TAB 2: PROFESSIONAL                                                 */}
         {/* =================================================================== */}
         {activeTab === "professional" && (
-          <div className="bg-white rounded-[28px] sm:rounded-[32px] border border-[#ECE4F2] shadow-sm p-6 sm:p-9 md:p-11 lg:p-12 w-full text-[#141010] animate-in fade-in duration-200">
-            <div className="flex items-center gap-3.5 mb-6 sm:mb-7">
-              <div className="w-10 h-10 rounded-full bg-[#F5EDF9] text-[#652297] flex items-center justify-center shrink-0">
+          <div className="bg-white rounded-[28px] sm:rounded-[32px] border border-[#ECE4F2] shadow-sm p-6 sm:p-9 md:p-11 lg:p-12 w-full text-[#141010] animate-in fade-in duration-200 profile-page-card">
+            <div className="flex items-center gap-3.5 mb-6 sm:mb-7 profile-page-card-header">
+              <div className="w-10 h-10 rounded-full bg-[#F5EDF9] text-[#652297] flex items-center justify-center shrink-0 profile-page-card-icon">
                 <Briefcase className="w-5 h-5 stroke-[2.2]" />
               </div>
-              <h2 className="text-xl sm:text-[22px] font-bold text-[#141010]">
+              <h2 className="text-xl sm:text-[22px] font-bold text-[#141010] profile-page-card-title">
                 Professional Information
               </h2>
             </div>
 
-            <div className="space-y-5 text-left">
+            <div className="space-y-5 text-left profile-page-form">
               {/* Row 1: Current Job Title & Current Company */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
                 <div>
@@ -1044,17 +1207,17 @@ export default function ProfilePage() {
         {/* TAB 3: EDUCATION                                                    */}
         {/* =================================================================== */}
         {activeTab === "education" && (
-          <div className="bg-white rounded-[28px] sm:rounded-[32px] border border-[#ECE4F2] shadow-sm p-6 sm:p-9 md:p-11 lg:p-12 w-full text-[#141010] animate-in fade-in duration-200">
-            <div className="flex items-center gap-3.5 mb-6 sm:mb-7">
-              <div className="w-10 h-10 rounded-full bg-[#F5EDF9] text-[#652297] flex items-center justify-center shrink-0">
+          <div className="bg-white rounded-[28px] sm:rounded-[32px] border border-[#ECE4F2] shadow-sm p-6 sm:p-9 md:p-11 lg:p-12 w-full text-[#141010] animate-in fade-in duration-200 profile-page-card">
+            <div className="flex items-center gap-3.5 mb-6 sm:mb-7 profile-page-card-header">
+              <div className="w-10 h-10 rounded-full bg-[#F5EDF9] text-[#652297] flex items-center justify-center shrink-0 profile-page-card-icon">
                 <GraduationCap className="w-5 h-5 stroke-[2.2]" />
               </div>
-              <h2 className="text-xl sm:text-[22px] font-bold text-[#141010]">
+              <h2 className="text-xl sm:text-[22px] font-bold text-[#141010] profile-page-card-title">
                 Education Background
               </h2>
             </div>
 
-            <div className="space-y-5 text-left">
+            <div className="space-y-5 text-left profile-page-form">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
                 <div>
                   <label className="block text-xs sm:text-[13px] font-semibold text-[#141010] mb-2">
@@ -1140,17 +1303,17 @@ export default function ProfilePage() {
         {/* TAB 4: CERTS                                                        */}
         {/* =================================================================== */}
         {activeTab === "certs" && (
-          <div className="bg-white rounded-[28px] sm:rounded-[32px] border border-[#ECE4F2] shadow-sm p-6 sm:p-9 md:p-11 lg:p-12 w-full text-[#141010] animate-in fade-in duration-200">
-            <div className="flex items-center gap-3.5 mb-6 sm:mb-7">
-              <div className="w-10 h-10 rounded-full bg-[#F5EDF9] text-[#652297] flex items-center justify-center shrink-0">
+          <div className="bg-white rounded-[28px] sm:rounded-[32px] border border-[#ECE4F2] shadow-sm p-6 sm:p-9 md:p-11 lg:p-12 w-full text-[#141010] animate-in fade-in duration-200 profile-page-card">
+            <div className="flex items-center gap-3.5 mb-6 sm:mb-7 profile-page-card-header">
+              <div className="w-10 h-10 rounded-full bg-[#F5EDF9] text-[#652297] flex items-center justify-center shrink-0 profile-page-card-icon">
                 <Award className="w-5 h-5 stroke-[2.2]" />
               </div>
-              <h2 className="text-xl sm:text-[22px] font-bold text-[#141010]">
+              <h2 className="text-xl sm:text-[22px] font-bold text-[#141010] profile-page-card-title">
                 Certifications & Badges
               </h2>
             </div>
 
-            <div className="space-y-5 text-left mb-8">
+            <div className="space-y-5 text-left mb-8 profile-page-form">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
                 <div>
                   <label className="block text-xs sm:text-[13px] font-semibold text-[#141010] mb-2">
@@ -1254,18 +1417,18 @@ export default function ProfilePage() {
         {/* TAB 5: JOBS (APPLICATIONS & STATUS)                                 */}
         {/* =================================================================== */}
         {activeTab === "jobs" && (
-          <div className="bg-white rounded-[28px] sm:rounded-[32px] border border-[#ECE4F2] shadow-sm p-6 sm:p-9 md:p-11 lg:p-12 w-full text-[#141010] animate-in fade-in duration-200">
-            <div className="flex items-center gap-3.5 mb-6 sm:mb-7">
-              <div className="w-10 h-10 rounded-full bg-[#F5EDF9] text-[#652297] flex items-center justify-center shrink-0">
+          <div className="bg-white rounded-[28px] sm:rounded-[32px] border border-[#ECE4F2] shadow-sm p-6 sm:p-9 md:p-11 lg:p-12 w-full text-[#141010] animate-in fade-in duration-200 profile-page-card">
+            <div className="flex items-center gap-3.5 mb-6 sm:mb-7 profile-page-card-header">
+              <div className="w-10 h-10 rounded-full bg-[#F5EDF9] text-[#652297] flex items-center justify-center shrink-0 profile-page-card-icon">
                 <FileText className="w-5 h-5 stroke-[2.2]" />
               </div>
-              <h2 className="text-xl sm:text-[22px] font-bold text-[#141010]">
+              <h2 className="text-xl sm:text-[22px] font-bold text-[#141010] profile-page-card-title">
                 Application History & Status
               </h2>
             </div>
 
             {/* Active application card */}
-            <div className="space-y-4 text-left">
+            <div className="space-y-4 text-left profile-page-form">
               <div className="p-5 rounded-2xl bg-[#FAF8FC] border border-[#ECE4F2] hover:border-[#652297]/30 transition-all">
                 <div className="flex items-start justify-between gap-4 mb-2">
                   <div>

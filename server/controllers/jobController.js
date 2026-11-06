@@ -70,11 +70,12 @@ exports.getAllJobs = async (req, res) => {
  */
 exports.getJobById = async (req, res) => {
   try {
-    const rawId = req.params.id;
-    const numericId = parseInt(String(rawId).replace("job-", ""), 10);
+    const rawId = String(req.params.id || "").trim();
+    const cleanId = rawId.replace(/^job[-_]?/i, "");
+    const numericId = parseInt(cleanId, 10);
 
     let job = null;
-    if (!isNaN(numericId)) {
+    if (!isNaN(numericId) && String(numericId) === cleanId) {
       job = await prisma.job_postings.findUnique({
         where: { id: numericId },
       });
@@ -82,7 +83,18 @@ exports.getJobById = async (req, res) => {
 
     if (!job) {
       job = await prisma.job_postings.findFirst({
-        where: { job_id: rawId },
+        where: {
+          OR: [
+            { job_id: rawId },
+            { job_id: { equals: rawId, mode: "insensitive" } },
+          ],
+        },
+      });
+    }
+
+    if (!job && !isNaN(numericId)) {
+      job = await prisma.job_postings.findUnique({
+        where: { id: numericId },
       });
     }
 

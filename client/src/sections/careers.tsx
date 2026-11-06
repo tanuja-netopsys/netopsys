@@ -90,12 +90,12 @@ export default function Careers() {
   return (
     <section
       id="careers"
-      className="relative w-full bg-[#FBAE42] text-[#141010] px-4 sm:px-6 md:px-8 lg:px-10 xl:px-14 2xl:px-18 py-10 sm:py-14 lg:py-16 xl:py-18 select-none overflow-hidden"
+      className="careers-section-wrap relative w-full bg-[#FBAE42] text-[#141010] px-4 sm:px-6 md:px-8 lg:px-10 xl:px-14 2xl:px-18 py-10 sm:py-14 lg:py-16 xl:py-18 select-none overflow-hidden"
     >
       {/* Main Container - Expanded width matching all sections */}
       <div className="relative w-full max-w-[2100px] mx-auto">
         {/* 3-Column Layout from Screenshot */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 xl:gap-12 items-center justify-between">
+        <div className="careers-grid grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 xl:gap-12 items-center justify-between">
           {/* ================================================================ */}
           {/* LEFT COLUMN: TITLE + DESCRIPTION                                 */}
           {/* ================================================================ */}
@@ -111,35 +111,35 @@ export default function Careers() {
           {/* ================================================================ */}
           {/* MIDDLE COLUMN: 3 CULTURE / PERKS POINTS WITH DIVIDERS            */}
           {/* ================================================================ */}
-          <div className="lg:col-span-4 xl:col-span-5 text-left flex flex-col justify-center">
+          <div className="careers-items-wrap lg:col-span-4 xl:col-span-5 text-left flex flex-col justify-center">
             {/* Item 1: Amazing Team */}
-            <div className="pb-4">
-              <h3 className="text-[#141010] font-bold text-base sm:text-[17px] tracking-tight mb-1">
+            <div className="careers-item pb-4">
+              <h3 className="careers-item-title text-[#141010] font-bold text-base sm:text-[17px] tracking-tight mb-1">
                 Amazing Team
               </h3>
-              <p className="text-[#141010]/80 text-xs sm:text-[14.5px] md:text-[15px] font-normal">
+              <p className="careers-item-desc text-[#141010]/80 text-xs sm:text-[14.5px] md:text-[15px] font-normal">
                 Work with passionate professionals
               </p>
             </div>
             <div className="h-[1px] w-full bg-black/15" />
 
             {/* Item 2: Growth Paths */}
-            <div className="py-4">
-              <h3 className="text-[#141010] font-bold text-base sm:text-[17px] tracking-tight mb-1">
+            <div className="careers-item py-4">
+              <h3 className="careers-item-title text-[#141010] font-bold text-base sm:text-[17px] tracking-tight mb-1">
                 Growth Paths
               </h3>
-              <p className="text-[#141010]/80 text-xs sm:text-[14.5px] md:text-[15px] font-normal">
+              <p className="careers-item-desc text-[#141010]/80 text-xs sm:text-[14.5px] md:text-[15px] font-normal">
                 Continuous learning & career development
               </p>
             </div>
             <div className="h-[1px] w-full bg-black/15" />
 
             {/* Item 3: Global Reach */}
-            <div className="pt-4">
-              <h3 className="text-[#141010] font-bold text-base sm:text-[17px] tracking-tight mb-1">
+            <div className="careers-item pt-4">
+              <h3 className="careers-item-title text-[#141010] font-bold text-base sm:text-[17px] tracking-tight mb-1">
                 Global Reach
               </h3>
-              <p className="text-[#141010]/80 text-xs sm:text-[14.5px] md:text-[15px] font-normal">
+              <p className="careers-item-desc text-[#141010]/80 text-xs sm:text-[14.5px] md:text-[15px] font-normal">
                 Work on projects for clients worldwide
               </p>
             </div>
@@ -152,7 +152,7 @@ export default function Careers() {
           <div className="lg:col-span-3 xl:col-span-2 flex items-center justify-start lg:justify-end">
             <Link
               to="/careers"
-              className="hover-brand-gradient inline-flex items-center justify-center bg-[#0B0716] text-white font-semibold text-sm sm:text-[15px] px-8 sm:px-9 py-3.5 rounded-full shadow-md whitespace-nowrap cursor-pointer transition-all active:scale-95"
+              className="careers-apply-btn hover-brand-gradient inline-flex items-center justify-center bg-[#0B0716] text-white font-semibold text-sm sm:text-[15px] px-8 sm:px-9 py-3.5 rounded-full shadow-md whitespace-nowrap cursor-pointer transition-all active:scale-95"
             >
               Apply Now
             </Link>

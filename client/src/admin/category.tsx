@@ -247,7 +247,7 @@ export default function CategoryPage() {
       ========================================================================= */}
       {isAddModalOpen && (
         <div className="fixed inset-0 bg-black/55 backdrop-blur-xs flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-[22px] sm:rounded-[24px] p-6 sm:p-8 max-w-2xl w-full border border-[#ECE4F2] shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-white rounded-[22px] sm:rounded-[24px] p-6 sm:p-8 max-w-2xl w-full border border-[#ECE4F2] shadow-2xl max-h-[88dvh] overflow-y-auto animate-in fade-in zoom-in-95 duration-200">
             {/* Header: Title on left, Close X on right */}
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-[20px] sm:text-[22px] font-bold text-[#141010] tracking-tight">

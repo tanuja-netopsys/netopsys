@@ -37,14 +37,18 @@ if (SMTP_HOST && SMTP_USER && SMTP_PASS) {
  * If no valid credentials are present, logs safely to console and records in DB.
  */
 async function sendRawEmail({ to, subject, html, replyTo }) {
-  const replyToAddress = replyTo || "helpdesk@netopsys.net";
+  const replyToAddress = replyTo || process.env.SMTP_FROM || "helpdesk@netopsys.net";
   const recipientList = Array.isArray(to) ? to : [to];
 
   // 1. Prioritize direct SMTP if configured
   if (smtpTransporter) {
     try {
+      const fromAddress = process.env.SMTP_FROM
+        ? (process.env.SMTP_FROM.includes("<") ? process.env.SMTP_FROM : `Netopsys AI <${process.env.SMTP_FROM}>`)
+        : EMAIL_FROM;
+
       const info = await smtpTransporter.sendMail({
-        from: EMAIL_FROM,
+        from: fromAddress,
         to: recipientList.join(", "),
         subject,
         html,
@@ -248,9 +252,10 @@ function getJobWelcomeHtml({ unsubscribeToken }) {
 /**
  * HTML Template: New Blog Published
  */
-function getNewBlogPostHtml({ blog, unsubscribeToken }) {
+function getNewBlogPostHtml({ blog, unsubscribeToken, subscriberType = "blog" }) {
   const articleUrl = `${FRONTEND_URL}/blogs/${blog.slug || blog.id}`;
-  const unsubUrl = `${BACKEND_URL}/api/subscribers/unsubscribe?type=blog&token=${unsubscribeToken}`;
+  const unsubType = subscriberType === "job" ? "job" : "blog";
+  const unsubUrl = `${BACKEND_URL}/api/subscribers/unsubscribe?type=${unsubType}&token=${unsubscribeToken}`;
   const excerptText = blog.excerpt || "Read the latest engineering insights from the Netopsys team.";
 
   return `
@@ -426,23 +431,57 @@ async function sendBlogPublishedNotification(blog) {
     try {
       console.log(`📡 Triggering blog notification broadcast for Blog ID ${blog.id}: "${blog.title}"`);
 
-      // 1. Fetch active & verified subscribers
-      let subscribers = [];
+      // 1. Fetch active & verified subscribers from BOTH blog_subscribers ("Subscribe") and job_subscribers ("Notify Me")
+      let blogSubs = [];
+      let jobSubs = [];
       try {
-        subscribers = await prisma.$queryRawUnsafe(
-          `SELECT id, email, unsubscribe_token FROM blog_subscribers WHERE is_active = true AND is_verified = true`
-        );
+        const [blogResults, jobResults] = await Promise.all([
+          prisma.$queryRawUnsafe(
+            `SELECT id, email, unsubscribe_token FROM blog_subscribers WHERE is_active = true AND is_verified = true`
+          ),
+          prisma.$queryRawUnsafe(
+            `SELECT id, email, unsubscribe_token FROM job_subscribers WHERE is_active = true AND is_verified = true`
+          ),
+        ]);
+        blogSubs = Array.isArray(blogResults) ? blogResults : [];
+        jobSubs = Array.isArray(jobResults) ? jobResults : [];
       } catch (err) {
-        console.error("Failed to query blog_subscribers for broadcast:", err.message);
+        console.error("Failed to query subscribers for blog broadcast:", err.message);
         return;
       }
 
-      if (!Array.isArray(subscribers) || subscribers.length === 0) {
-        console.log("No active blog subscribers found to notify.");
+      // Merge and deduplicate by email (blog subscribers take precedence for unsub token)
+      const subscriberMap = new Map();
+      blogSubs.forEach((sub) => {
+        if (sub.email) {
+          subscriberMap.set(sub.email.toLowerCase().trim(), {
+            ...sub,
+            sourceType: "blog",
+          });
+        }
+      });
+      jobSubs.forEach((sub) => {
+        if (sub.email) {
+          const key = sub.email.toLowerCase().trim();
+          if (!subscriberMap.has(key)) {
+            subscriberMap.set(key, {
+              ...sub,
+              sourceType: "job",
+            });
+          }
+        }
+      });
+
+      const subscribers = Array.from(subscriberMap.values());
+
+      if (subscribers.length === 0) {
+        console.log("No active subscribers found to notify for this blog.");
         return;
       }
 
-      console.log(`Found ${subscribers.length} active blog subscriber(s). Starting dispatch from ${EMAIL_FROM}...`);
+      console.log(
+        `Found ${subscribers.length} total active subscriber(s) (${blogSubs.length} Subscribe, ${jobSubs.length} Notify-Me). Starting dispatch...`
+      );
 
       // 2. Process in batches of 50
       const BATCH_SIZE = 50;
@@ -464,13 +503,14 @@ async function sendBlogPublishedNotification(blog) {
             const html = getNewBlogPostHtml({
               blog,
               unsubscribeToken: sub.unsubscribe_token || "default",
+              subscriberType: sub.sourceType || "blog",
             });
 
             const res = await sendRawEmail({
               to: sub.email,
               subject: `New from Netopsys: ${blog.title}`,
               html,
-              replyTo: "helpdesk@netopsys.net",
+              replyTo: process.env.SMTP_FROM || "helpdesk@netopsys.net",
             });
 
             await recordNotificationLog({
@@ -594,7 +634,7 @@ async function sendJobPublishedNotification(job) {
               to: sub.email,
               subject: `We're Hiring: ${job.title} at Netopsys`,
               html,
-              replyTo: "helpdesk@netopsys.net",
+              replyTo: process.env.SMTP_FROM || "helpdesk@netopsys.net",
             });
 
             await recordNotificationLog({
@@ -706,6 +746,87 @@ async function sendPasswordResetOtpEmail({ email, name, otp }) {
   }
 }
 
+/**
+ * HTML Template: Email Verification OTP
+ */
+function getEmailVerificationOtpHtml({ name, otp }) {
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #FAF7FC; margin: 0; padding: 24px; color: #141010; }
+    .container { max-width: 560px; margin: 0 auto; background: #ffffff; border: 1px solid #ECE4F2; border-radius: 24px; overflow: hidden; box-shadow: 0 4px 24px rgba(94, 34, 130, 0.06); }
+    .header { background: linear-gradient(135deg, #1C0F2B 0%, #5E2282 100%); padding: 36px 32px; text-align: center; }
+    .header h1 { margin: 0; color: #ffffff; font-size: 22px; font-weight: 700; letter-spacing: -0.01em; }
+    .header p { margin: 8px 0 0; color: #EEDBFA; font-size: 13.5px; }
+    .body { padding: 36px 32px; font-size: 15px; line-height: 1.6; color: #4A4458; }
+    .otp-box { background: #FAF5FD; border: 2px dashed #B88BD4; border-radius: 16px; padding: 24px; text-align: center; margin: 24px 0; }
+    .otp-code { font-size: 36px; font-weight: 800; letter-spacing: 0.28em; color: #5E2282; font-family: 'Courier New', monospace; margin: 0; }
+    .expiry-note { font-size: 13px; color: #7E748B; margin-top: 10px; margin-bottom: 0; }
+    .note-box { background: #FAF5FD; border-left: 4px solid #5E2282; padding: 12px 16px; border-radius: 8px; font-size: 13px; color: #554E62; margin-top: 24px; }
+    .footer { padding: 24px 32px; background: #FAF7FC; border-top: 1px solid #ECE4F2; font-size: 12px; color: #8C849B; text-align: center; line-height: 1.5; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Verify Your Email Address</h1>
+      <p>Netopsys Careers &amp; Applications</p>
+    </div>
+    <div class="body">
+      <p>Hello${name ? " " + name : ""},</p>
+      <p>Thank you for creating an account with Netopsys. Please use the 6-digit verification code below to verify your email address and activate your ability to apply for positions:</p>
+      
+      <div class="otp-box">
+        <p class="otp-code">${otp}</p>
+        <p class="expiry-note">This code is valid for <strong>15 minutes</strong>.</p>
+      </div>
+
+      <div class="note-box">
+        <strong>Important:</strong> Verifying your email ensures you receive real-time interview invitations, assessment slots, and job updates.
+      </div>
+    </div>
+    <div class="footer">
+      <p>&copy; ${new Date().getFullYear()} Netopsys. All rights reserved.</p>
+      <p>Sent from Netopsys Account Security</p>
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
+/**
+ * Send Email Verification OTP Email
+ */
+async function sendEmailVerificationOtpEmail({ email, name, otp }) {
+  console.log(`📧 [EMAIL VERIFICATION OTP] For ${email}: ${otp}`);
+  try {
+    const html = getEmailVerificationOtpHtml({ name, otp });
+    const result = await sendRawEmail({
+      to: email,
+      subject: `${otp} is your Netopsys email verification code`,
+      html,
+      replyTo: process.env.SMTP_FROM || "helpdesk@netopsys.net",
+    });
+
+    await recordNotificationLog({
+      type: "email_verification_otp",
+      contentId: "email_otp",
+      contentTitle: "Candidate Email Verification Code",
+      recipientEmail: email,
+      status: result.success ? "sent" : "failed",
+      errorMessage: result.error,
+    });
+
+    return result;
+  } catch (err) {
+    console.error("sendEmailVerificationOtpEmail error:", err.message);
+    return { success: false, error: err.message };
+  }
+}
+
 module.exports = {
   sendRawEmail,
   sendBlogWelcomeEmail,
@@ -713,6 +834,7 @@ module.exports = {
   sendBlogPublishedNotification,
   sendJobPublishedNotification,
   sendPasswordResetOtpEmail,
+  sendEmailVerificationOtpEmail,
   recordNotificationLog,
   hasAlreadyReceivedNotification,
 };

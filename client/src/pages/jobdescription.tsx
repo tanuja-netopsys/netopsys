@@ -14,6 +14,7 @@ import {
   Upload,
   Check,
   Loader2,
+  AlertCircle,
 } from "lucide-react";
 import Navbar from "../componenets/navbar.tsx";
 import Footer from "../componenets/footer.tsx";
@@ -56,6 +57,7 @@ export default function JobDescriptionPage() {
 
   // Login Modal & Apply State
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [isVerificationRequiredOpen, setIsVerificationRequiredOpen] = useState(false);
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -69,8 +71,16 @@ export default function JobDescriptionPage() {
 
   const handleApplyNow = () => {
     if (!job) return;
-    const user = localStorage.getItem("career_user");
-    if (user) {
+    const userStr = localStorage.getItem("career_user");
+    if (userStr) {
+      try {
+        const u = JSON.parse(userStr);
+        const isVerified = u.verificationStatus === "verified" || u.isEmailVerified === true;
+        if (!isVerified) {
+          setIsVerificationRequiredOpen(true);
+          return;
+        }
+      } catch {}
       navigate(`/apply?id=${job.id}`, { state: { job } });
     } else {
       setIsLoginModalOpen(true);
@@ -79,7 +89,11 @@ export default function JobDescriptionPage() {
 
   const handleLoginSuccess = (_user: CareerUser) => {
     setIsLoginModalOpen(false);
-    if (job) {
+    if (!job) return;
+    const isVerified = _user.verificationStatus === "verified" || (_user as any).isEmailVerified === true;
+    if (!isVerified) {
+      setIsVerificationRequiredOpen(true);
+    } else {
       navigate(`/apply?id=${job.id}`, { state: { job } });
     }
   };
@@ -270,7 +284,7 @@ export default function JobDescriptionPage() {
       <Navbar activeTab="Careers" />
 
       {/* Main Content Area */}
-      <main className="relative w-full z-10 flex-1 pt-24 sm:pt-28 md:pt-30 pb-14 sm:pb-20">
+      <main className="jobdesc-page-main relative w-full z-10 flex-1 pt-24 sm:pt-28 md:pt-30 pb-14 sm:pb-20">
         {/* Ambient background glows matching remaining pages */}
         <div className="absolute top-1/6 -right-40 w-80 h-80 rounded-full bg-[#BE3093]/10 blur-[130px] pointer-events-none" />
         <div className="absolute top-1/2 -left-40 w-80 h-80 rounded-full bg-[#693092]/10 blur-[130px] pointer-events-none" />
@@ -301,7 +315,7 @@ export default function JobDescriptionPage() {
           ) : (
             <>
               {/* Breadcrumb Navigation: Home > Careers > Job Title */}
-              <nav aria-label="Breadcrumb" className="mb-4 sm:mb-6">
+              <nav aria-label="Breadcrumb" className="jobdesc-page-breadcrumb mb-4 sm:mb-6">
                 <ol className="inline-flex items-center gap-1.5 sm:gap-2 text-xs sm:text-[13.5px] font-medium">
                   <li>
                     <Link
@@ -334,10 +348,10 @@ export default function JobDescriptionPage() {
               </nav>
 
               {/* Badges / Pill Tags Row */}
-              <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 mb-4 sm:mb-5">
+              <div className="jobdesc-page-pills flex flex-wrap items-center gap-2.5 sm:gap-3 mb-4 sm:mb-5">
                 {/* Location Pill */}
                 {job.location && (
-                  <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-[#EADBFA] text-xs sm:text-[13px] font-medium text-[#554E62] shadow-2xs">
+                  <span className="jobdesc-page-pill inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-[#EADBFA] text-xs sm:text-[13px] font-medium text-[#554E62] shadow-2xs">
                     <MapPin className="w-3.5 h-3.5 text-[#693092]" />
                     <span>{job.location}</span>
                   </span>
@@ -345,7 +359,7 @@ export default function JobDescriptionPage() {
 
                 {/* Employment Type Pill */}
                 {job.employmentType && (
-                  <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-[#EADBFA] text-xs sm:text-[13px] font-medium text-[#554E62] shadow-2xs">
+                  <span className="jobdesc-page-pill inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-[#EADBFA] text-xs sm:text-[13px] font-medium text-[#554E62] shadow-2xs">
                     <Briefcase className="w-3.5 h-3.5 text-[#693092]" />
                     <span>{job.employmentType}</span>
                   </span>
@@ -353,7 +367,7 @@ export default function JobDescriptionPage() {
 
                 {/* Category / Department Pill */}
                 {job.category && (
-                  <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-[#EADBFA] text-xs sm:text-[13px] font-medium text-[#554E62] shadow-2xs">
+                  <span className="jobdesc-page-pill inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-[#EADBFA] text-xs sm:text-[13px] font-medium text-[#554E62] shadow-2xs">
                     <Tag className="w-3.5 h-3.5 text-[#693092]" />
                     <span>{job.category}</span>
                   </span>
@@ -361,29 +375,29 @@ export default function JobDescriptionPage() {
               </div>
 
               {/* Main Job Title Heading matching other pages font and size */}
-              <h1 className="font-light tracking-[-0.035em] text-[#141010] text-4xl sm:text-5xl md:text-6xl lg:text-[4.5rem] xl:text-[4.75rem] leading-[1.04] mb-4 sm:mb-5">
+              <h1 className="jobdesc-page-title font-light tracking-[-0.035em] text-[#141010] text-4xl sm:text-5xl md:text-6xl lg:text-[4.5rem] xl:text-[4.75rem] leading-[1.04] mb-4 sm:mb-5">
                 {job.title}
               </h1>
 
               {/* Job Summary / Role Subtitle matching other pages */}
               {job.summary && (
-                <p className="text-[#554E62] leading-relaxed font-normal text-sm sm:text-base md:text-[17px] lg:text-[17.5px] max-w-4xl mb-10 sm:mb-14">
+                <p className="jobdesc-page-desc text-[#554E62] leading-relaxed font-normal text-sm sm:text-base md:text-[17px] lg:text-[17.5px] max-w-4xl mb-10 sm:mb-14">
                   {job.summary}
                 </p>
               )}
 
               {/* 2-Column Responsive Layout Matching Image */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 xl:gap-12 items-start">
+              <div className="jobdesc-page-grid grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 xl:gap-12 items-start">
                 {/* Left Column: Role Overview & Key Requirements Cards */}
                 <div className="lg:col-span-8 flex flex-col gap-7 sm:gap-8">
                   {/* Card 1: Role Overview */}
-                  <div className="bg-white rounded-[28px] sm:rounded-[34px] p-7 sm:p-9 md:p-10 border border-black/[0.04] shadow-[0_8px_30px_rgba(0,0,0,0.03)]">
+                  <div className="jobdesc-page-card bg-white rounded-[28px] sm:rounded-[34px] p-7 sm:p-9 md:p-10 border border-black/[0.04] shadow-[0_8px_30px_rgba(0,0,0,0.03)]">
                     {/* Card Header with Icon */}
-                    <div className="flex items-center gap-3.5 mb-6 pb-5 border-b border-[#F0E6F5]">
-                      <div className="w-11 h-11 rounded-2xl bg-[#F6EEFA] flex items-center justify-center text-[#693092] shrink-0">
+                    <div className="jobdesc-page-card-header flex items-center gap-3.5 mb-6 pb-5 border-b border-[#F0E6F5]">
+                      <div className="jobdesc-page-card-icon w-11 h-11 rounded-2xl bg-[#F6EEFA] flex items-center justify-center text-[#693092] shrink-0">
                         <FileText className="w-5 h-5 stroke-[2.2]" />
                       </div>
-                      <h2 className="text-2xl sm:text-3xl font-bold text-[#141010] tracking-tight">
+                      <h2 className="jobdesc-page-card-title text-2xl sm:text-3xl font-bold text-[#141010] tracking-tight">
                         Role Overview
                       </h2>
                     </div>
@@ -410,13 +424,13 @@ export default function JobDescriptionPage() {
 
                   {/* Card 2: Key Requirements */}
                   {job.requirements && job.requirements.length > 0 && (
-                    <div className="bg-white rounded-[28px] sm:rounded-[34px] p-7 sm:p-9 md:p-10 border border-black/[0.04] shadow-[0_8px_30px_rgba(0,0,0,0.03)]">
+                    <div className="jobdesc-page-card bg-white rounded-[28px] sm:rounded-[34px] p-7 sm:p-9 md:p-10 border border-black/[0.04] shadow-[0_8px_30px_rgba(0,0,0,0.03)]">
                       {/* Card Header with Icon */}
-                      <div className="flex items-center gap-3.5 mb-6 pb-5 border-b border-[#F0E6F5]">
-                        <div className="w-11 h-11 rounded-2xl bg-[#F6EEFA] flex items-center justify-center text-[#693092] shrink-0">
+                      <div className="jobdesc-page-card-header flex items-center gap-3.5 mb-6 pb-5 border-b border-[#F0E6F5]">
+                        <div className="jobdesc-page-card-icon w-11 h-11 rounded-2xl bg-[#F6EEFA] flex items-center justify-center text-[#693092] shrink-0">
                           <FileText className="w-5 h-5 stroke-[2.2]" />
                         </div>
-                        <h2 className="text-2xl sm:text-3xl font-bold text-[#141010] tracking-tight">
+                        <h2 className="jobdesc-page-card-title text-2xl sm:text-3xl font-bold text-[#141010] tracking-tight">
                           Key Requirements
                         </h2>
                       </div>
@@ -438,20 +452,20 @@ export default function JobDescriptionPage() {
                 </div>
 
                 {/* Right Column: Actions Box, Important Notice & Do Not Apply Boxes */}
-                <div className="lg:col-span-4 flex flex-col gap-6 lg:sticky lg:top-32">
+                <div className="jobdesc-page-sidebar lg:col-span-4 flex flex-col gap-6 lg:sticky lg:top-32">
                   {/* Box 1: Dark Purple Action Panel with Apply Now & Share Job */}
-                  <div className="bg-[#210D35] text-white rounded-[28px] p-7 sm:p-8 shadow-xl border border-white/10 flex flex-col gap-4">
+                  <div className="jobdesc-page-actions-card bg-[#210D35] text-white rounded-[28px] p-7 sm:p-8 shadow-xl border border-white/10 flex flex-col gap-4">
                     <button
                       type="button"
                       onClick={handleApplyNow}
-                      className="w-full py-3.5 sm:py-4 px-6 rounded-2xl font-bold text-sm sm:text-base text-[#141010] hover-brand-gradient bg-[#FCAE3B] hover:bg-[#F29F25] active:scale-[0.99] transition-all duration-200 shadow-md hover:shadow-lg cursor-pointer"
+                      className="jobdesc-page-btn-apply w-full py-3.5 sm:py-4 px-6 rounded-2xl font-bold text-sm sm:text-base text-[#141010] hover-brand-gradient bg-[#FCAE3B] hover:bg-[#F29F25] active:scale-[0.99] transition-all duration-200 shadow-md hover:shadow-lg cursor-pointer"
                     >
                       Apply Now
                     </button>
                     <button
                       type="button"
                       onClick={handleShareJob}
-                      className="w-full py-3 sm:py-3.5 px-6 rounded-2xl font-semibold text-xs sm:text-sm text-white bg-white/10 hover:bg-white/15 transition-all duration-200 border border-white/15 inline-flex items-center justify-center gap-2 cursor-pointer"
+                      className="jobdesc-page-btn-share w-full py-3 sm:py-3.5 px-6 rounded-2xl font-semibold text-xs sm:text-sm text-white bg-white/10 hover:bg-white/15 transition-all duration-200 border border-white/15 inline-flex items-center justify-center gap-2 cursor-pointer"
                     >
                       <Share2 className="w-4 h-4" />
                       <span>{copied ? "Link Copied!" : "Share Job"}</span>
@@ -460,7 +474,7 @@ export default function JobDescriptionPage() {
 
                   {/* Box 2: Soft Amber "IMPORTANT" Notice Box */}
                   {job.importantNote && (
-                    <div className="bg-[#FFF8EC] border border-[#FDE6BA] rounded-[26px] p-6 sm:p-7 text-left">
+                    <div className="jobdesc-page-notice-card bg-[#FFF8EC] border border-[#FDE6BA] rounded-[26px] p-6 sm:p-7 text-left">
                       <div className="flex items-center gap-2 mb-2.5 text-amber-800 font-bold text-xs sm:text-[13px] uppercase tracking-wider">
                         <Info className="w-4 h-4 text-amber-600 stroke-[2.5]" />
                         <span>IMPORTANT</span>
@@ -642,6 +656,42 @@ export default function JobDescriptionPage() {
           </div>
         </div>
       )}
+      {/* Email Verification Required Modal */}
+      {isVerificationRequiredOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="relative w-full max-w-md bg-white rounded-3xl p-6 sm:p-7 shadow-2xl border border-[#ECE4F2] text-center">
+            <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600">
+              <AlertCircle className="w-7 h-7 stroke-[2.2]" />
+            </div>
+            <h3 className="text-xl font-bold text-[#141010] mb-2 tracking-tight">
+              Email Verification Required
+            </h3>
+            <p className="text-xs sm:text-sm text-[#554E62] leading-relaxed mb-6">
+              Before you can apply for <strong>{job?.title}</strong>, your email address must be verified. Please verify your email with a one-time passcode (OTP) on your profile.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setIsVerificationRequiredOpen(false)}
+                className="w-full sm:w-1/2 py-2.5 px-4 rounded-xl border border-gray-200 text-xs sm:text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsVerificationRequiredOpen(false);
+                  navigate("/profile");
+                }}
+                className="w-full sm:w-1/2 py-2.5 px-4 rounded-xl bg-[#693092] hover:bg-[#58257C] hover-brand-gradient text-white text-xs sm:text-sm font-semibold shadow-md transition-all cursor-pointer"
+              >
+                Verify on Profile
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Login & Create Account Modal */}
       {isLoginModalOpen && (
         <LoginModal

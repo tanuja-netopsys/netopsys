@@ -368,9 +368,8 @@ exports.saveUserProfile = async (req, res) => {
       if (mobileNumber !== undefined) {
         updateData.mobileNumber = mobileNumber ? String(mobileNumber).trim() : null;
       }
-      if (isEmailVerified !== undefined) {
-        updateData.emailVerified = Boolean(isEmailVerified);
-      }
+      // Note: emailVerified cannot be modified via general profile save.
+      // It must be verified via OTP through /api/auth/verify-email-otp.
 
       if (Object.keys(updateData).length > 0) {
         user = await prisma.user.update({
@@ -390,7 +389,7 @@ exports.saveUserProfile = async (req, res) => {
           lastName: (lastName || "").trim(),
           mobileNumber: mobileNumber ? String(mobileNumber).trim() : null,
           password: hashedPassword,
-          emailVerified: Boolean(isEmailVerified),
+          emailVerified: false,
           isBlocked: false,
         },
       });
