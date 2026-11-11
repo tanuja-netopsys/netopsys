@@ -478,48 +478,6 @@ export default function Footer() {
           <p className="mt-1 text-[#666173] text-[11.5px] sm:text-[12.5px]">
             All company names, product names, and logos are trademarks of their respective owners.
           </p>
-          <div className="mt-2.5 flex flex-wrap items-center justify-center gap-x-6 gap-y-1 text-xs text-[#9B94AA]">
-            <a
-              href="/privacy-policy"
-              onClick={(e) => {
-                e.preventDefault();
-                navigate("/privacy-policy");
-                window.scrollTo({ top: 0, behavior: "instant" });
-              }}
-              className="hover:text-white transition-colors underline cursor-pointer"
-            >
-              Privacy Policy
-            </a>
-            <a
-              href="/terms-conditions"
-              onClick={(e) => {
-                e.preventDefault();
-                navigate("/terms-conditions");
-                window.scrollTo({ top: 0, behavior: "instant" });
-              }}
-              className="hover:text-white transition-colors underline cursor-pointer"
-            >
-              Terms &amp; Conditions
-            </a>
-            <a
-              href="/cookie-policy"
-              onClick={(e) => {
-                e.preventDefault();
-                navigate("/cookie-policy");
-                window.scrollTo({ top: 0, behavior: "instant" });
-              }}
-              className="hover:text-white transition-colors underline cursor-pointer"
-            >
-              Cookie Policy
-            </a>
-            <button
-              type="button"
-              onClick={() => openCookiePreferences()}
-              className="hover:text-white transition-colors underline cursor-pointer bg-transparent border-0 p-0 text-xs text-[#9B94AA]"
-            >
-              Cookie Settings
-            </button>
-          </div>
         </div>
       </div>
     </footer>
