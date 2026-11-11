@@ -42,6 +42,7 @@ import PrivacyPolicyPage from "./pages/privacypolicy.tsx";
 import CookiePolicyPage from "./pages/cookie-policy.tsx";
 import NotFoundPage from "./pages/not-found.tsx";
 import ProtectedRoute from "./componenets/ProtectedRoute.tsx";
+import SmoothScrollController from "./componenets/SmoothScrollController.tsx";
 import CookieConsent from "./componenets/cookie-consent.tsx";
 import { preloadRecaptcha } from "./utils/recaptcha.ts";
 
@@ -138,6 +139,7 @@ export default function App() {
     <BrowserRouter>
       <RouteThemeSync />
       <ScrollToHashElement />
+      <SmoothScrollController />
       <ToastContainer />
       <CookieConsent />
       <Routes>

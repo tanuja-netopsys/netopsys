@@ -659,8 +659,8 @@ export default function FallingToolsPhysics({ children }: FallingToolsPhysicsPro
       ref={containerRef}
       className="relative w-full overflow-hidden pb-2"
     >
-      {/* Footer Content: Top 5-columns navigation + Giant NETOPSYS AI text */}
-      <div className="w-full relative z-20 pointer-events-none">{children}</div>
+      {/* Footer Content: Top 5-columns navigation (z-30) + Giant NETOPSYS AI text (z-0) */}
+      <div className="w-full relative pointer-events-none">{children}</div>
 
       {/* Foreground Canvas: Falling & Stacked 2D Physics Tools */}
       <canvas

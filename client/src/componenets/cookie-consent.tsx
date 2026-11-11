@@ -11,6 +11,8 @@ import {
   Info,
 } from "lucide-react";
 import {
+  CONSENT_EVENT_NAME,
+  CONSENT_STORAGE_KEY,
   getSavedCookieConsent,
   saveCookieConsent,
   OPEN_PREFERENCES_EVENT_NAME,
@@ -27,17 +29,23 @@ export default function CookieConsent() {
   const [marketing, setMarketing] = useState(false);
 
   useEffect(() => {
-    const saved = getSavedCookieConsent();
-    if (!saved) {
-      // First-time visitor: reveal consent banner
-      setShowBanner(true);
-    } else {
-      // Load saved preferences into state
-      setFunctional(saved.functional);
-      setAnalytics(saved.analytics);
-      setMarketing(saved.marketing);
-    }
-    setHasCheckedConsent(true);
+    const syncConsentState = () => {
+      const saved = getSavedCookieConsent();
+      if (!saved) {
+        setFunctional(false);
+        setAnalytics(false);
+        setMarketing(false);
+        setShowBanner(true);
+      } else {
+        setFunctional(saved.functional);
+        setAnalytics(saved.analytics);
+        setMarketing(saved.marketing);
+        setShowBanner(false);
+      }
+      setHasCheckedConsent(true);
+    };
+
+    syncConsentState();
 
     // Listen for custom trigger to open preferences modal (e.g. from footer or policy page)
     const handleOpenModal = () => {
@@ -46,13 +54,28 @@ export default function CookieConsent() {
         setFunctional(current.functional);
         setAnalytics(current.analytics);
         setMarketing(current.marketing);
+      } else {
+        setFunctional(false);
+        setAnalytics(false);
+        setMarketing(false);
       }
       setShowModal(true);
     };
 
+    // Sync across tabs when localStorage is modified or cleared
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === null || e.key === CONSENT_STORAGE_KEY) {
+        syncConsentState();
+      }
+    };
+
     window.addEventListener(OPEN_PREFERENCES_EVENT_NAME, handleOpenModal);
+    window.addEventListener(CONSENT_EVENT_NAME, syncConsentState);
+    window.addEventListener("storage", handleStorageChange);
     return () => {
       window.removeEventListener(OPEN_PREFERENCES_EVENT_NAME, handleOpenModal);
+      window.removeEventListener(CONSENT_EVENT_NAME, syncConsentState);
+      window.removeEventListener("storage", handleStorageChange);
     };
   }, []);
 
@@ -114,12 +137,12 @@ export default function CookieConsent() {
       {showBanner && !showModal && (
         <aside
           aria-label="Cookie consent banner"
-          className="fixed bottom-3 sm:bottom-5 inset-x-3 sm:inset-x-5 md:inset-x-auto md:right-6 md:max-w-[580px] lg:max-w-[620px] z-[9990] bg-[#120D1B]/95 backdrop-blur-md border border-[#693092]/30 text-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 md:p-6 shadow-[0_20px_50px_rgba(0,0,0,0.55),0_0_30px_rgba(105,48,146,0.18)] transition-all duration-300 animate-in fade-in slide-in-from-bottom-6"
+          className="fixed bottom-3 sm:bottom-5 inset-x-3 sm:inset-x-5 md:inset-x-auto md:right-6 md:max-w-[580px] lg:max-w-[620px] max-h-[calc(100dvh-1.5rem)] overflow-y-auto z-[9990] bg-[#120D1B]/95 backdrop-blur-md border border-[#693092]/30 text-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 md:p-6 shadow-[0_20px_50px_rgba(0,0,0,0.55),0_0_30px_rgba(105,48,146,0.18)] transition-all duration-300 animate-in fade-in slide-in-from-bottom-6"
           style={{ fontFamily: "'Onest', sans-serif" }}
         >
-          <div className="flex items-start gap-3.5 sm:gap-4">
-            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-[#693092]/20 border border-[#BE3093]/30 flex items-center justify-center text-[#BE3093] shrink-0 mt-0.5">
-              <Cookie className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2]" />
+          <div className="flex items-start gap-3 sm:gap-4">
+            <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-[#693092]/20 border border-[#BE3093]/30 flex items-center justify-center text-[#BE3093] shrink-0 mt-0.5">
+              <Cookie className="w-4.5 h-4.5 sm:w-6 sm:h-6 stroke-[2]" />
             </div>
 
             <div className="flex-1 min-w-0">
@@ -129,7 +152,7 @@ export default function CookieConsent() {
                 </h3>
               </div>
 
-              <p className="text-[#A79FB6] text-xs sm:text-[13px] leading-relaxed mb-4">
+              <p className="text-[#A79FB6] text-xs sm:text-[13px] leading-relaxed mb-3.5 sm:mb-4">
                 We use essential cookies to maintain platform security, session authentication,
                 and Google reCAPTCHA v2 bot protection. Optional functional, analytics, and
                 marketing cookies are only activated with your consent. Learn more in our{" "}
@@ -147,7 +170,7 @@ export default function CookieConsent() {
                 <button
                   type="button"
                   onClick={handleAcceptAll}
-                  className="px-4 py-2 sm:py-2.5 rounded-xl bg-gradient-to-r from-[#693092] to-[#BE3093] hover:from-[#58277c] hover:to-[#a82981] text-white text-xs sm:text-[13px] font-semibold transition-all shadow-md cursor-pointer hover:shadow-lg hover:scale-[1.01] active:scale-[0.99]"
+                  className="min-h-[40px] px-4 py-2 sm:py-2.5 rounded-xl bg-gradient-to-r from-[#693092] to-[#BE3093] hover:from-[#58277c] hover:to-[#a82981] text-white text-xs sm:text-[13px] font-semibold transition-all shadow-md cursor-pointer hover:shadow-lg hover:scale-[1.01] active:scale-[0.99]"
                 >
                   Accept All
                 </button>
@@ -155,7 +178,7 @@ export default function CookieConsent() {
                 <button
                   type="button"
                   onClick={handleRejectOptional}
-                  className="px-3.5 py-2 sm:py-2.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] border border-white/15 text-[#E2DCED] hover:text-white text-xs sm:text-[13px] font-medium transition-colors cursor-pointer"
+                  className="min-h-[40px] px-3.5 py-2 sm:py-2.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] border border-white/15 text-[#E2DCED] hover:text-white text-xs sm:text-[13px] font-medium transition-colors cursor-pointer"
                 >
                   Reject Optional
                 </button>
@@ -163,7 +186,7 @@ export default function CookieConsent() {
                 <button
                   type="button"
                   onClick={handleOpenCustomize}
-                  className="px-3 py-2 sm:py-2.5 rounded-xl text-[#BE3093] hover:text-[#d942ab] hover:bg-[#BE3093]/10 text-xs sm:text-[13px] font-medium transition-colors cursor-pointer inline-flex items-center gap-1"
+                  className="min-h-[40px] px-3 py-2 sm:py-2.5 rounded-xl text-[#BE3093] hover:text-[#d942ab] hover:bg-[#BE3093]/10 text-xs sm:text-[13px] font-medium transition-colors cursor-pointer inline-flex items-center gap-1"
                 >
                   <span>Customize Preferences</span>
                   <ChevronRight className="w-3.5 h-3.5" />

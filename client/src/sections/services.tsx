@@ -27,43 +27,83 @@ export default function Services() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Compute scroll progress through Part 2 (cards track) and entrance from Image 1 to Image 2
+  // Compute & smoothly interpolate scroll progress through Part 2 (cards track) and entrance descent
   useEffect(() => {
-    let ticking = false;
-    const handleScroll = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          if (cardsTrackRef.current) {
-            const rect = cardsTrackRef.current.getBoundingClientRect();
-            const winH = window.innerHeight;
-            const totalScrollable = rect.height - winH;
+    let targetDescent = 0;
+    let targetScroll = 0;
+    let smoothDescent = 0;
+    let smoothScroll = 0;
+    let currentSeen = false;
+    let rafId: number | null = null;
+    let lastTime = 0;
 
-            // 1. Entrance / Descent progress: Starts as soon as Services boundary appears (Image 2)
-            // rect.top moves from winH down to 0 (Image 1)
-            const enterDistance = winH;
-            const currentEntered = enterDistance - rect.top;
-            const dProgress = Math.max(0, Math.min(1, currentEntered / enterDistance));
-            setDescentProgress(dProgress);
+    const updateTargets = () => {
+      if (!cardsTrackRef.current) return;
+      const rect = cardsTrackRef.current.getBoundingClientRect();
+      const winH = window.innerHeight;
+      const totalScrollable = rect.height - winH;
 
-            // Is services section seen on screen?
-            setIsServicesSeen(rect.top < winH);
+      const enterDistance = winH;
+      const currentEntered = enterDistance - rect.top;
+      targetDescent = Math.max(0, Math.min(1, currentEntered / enterDistance));
 
-            // 2. Track scroll progress for ring rotation once Services pins (rect.top <= 0)
-            if (totalScrollable > 0) {
-              const current = -rect.top;
-              const progress = Math.max(0, Math.min(1, current / totalScrollable));
-              setScrollProgress(progress);
-            }
-          }
-          ticking = false;
-        });
-        ticking = true;
+      const seen = rect.top < winH;
+      if (seen !== currentSeen) {
+        currentSeen = seen;
+        setIsServicesSeen(seen);
+      }
+
+      if (totalScrollable > 0) {
+        const current = -rect.top;
+        targetScroll = Math.max(0, Math.min(1, current / totalScrollable));
       }
     };
 
+    const tickLerp = (now: number) => {
+      if (!lastTime) lastTime = now;
+      const dt = Math.min(0.05, Math.max(0.001, (now - lastTime) / 1000));
+      lastTime = now;
+
+      const ease = 1 - Math.exp(-dt * 12);
+      smoothDescent += (targetDescent - smoothDescent) * ease;
+      smoothScroll += (targetScroll - smoothScroll) * ease;
+
+      const dDone = Math.abs(targetDescent - smoothDescent) < 0.0004;
+      const sDone = Math.abs(targetScroll - smoothScroll) < 0.0004;
+
+      if (dDone) smoothDescent = targetDescent;
+      if (sDone) smoothScroll = targetScroll;
+
+      setDescentProgress(smoothDescent);
+      setScrollProgress(smoothScroll);
+
+      if (!dDone || !sDone) {
+        rafId = requestAnimationFrame(tickLerp);
+      } else {
+        rafId = null;
+        lastTime = 0;
+      }
+    };
+
+    const handleScroll = () => {
+      updateTargets();
+      if (rafId === null) {
+        lastTime = 0;
+        rafId = requestAnimationFrame(tickLerp);
+      }
+    };
+
+    updateTargets();
+    smoothDescent = targetDescent;
+    smoothScroll = targetScroll;
+    setDescentProgress(smoothDescent);
+    setScrollProgress(smoothScroll);
+
     window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener("scroll", handleScroll);
+    return () => {
+      if (rafId !== null) cancelAnimationFrame(rafId);
+      window.removeEventListener("scroll", handleScroll);
+    };
   }, []);
 
   // Exact 3D physics, ambient rotation & pointer drag tracking (identical to Hero section cube)
@@ -165,7 +205,6 @@ export default function Services() {
 
     const onWindowTouchMove = (e: TouchEvent) => {
       if (!isCubeDraggingRef.current || e.touches.length === 0) return;
-      if (e.cancelable) e.preventDefault();
       const touch = e.touches[0];
       handleCubePointerMovement(touch.clientX, touch.clientY, true);
     };
@@ -180,7 +219,7 @@ export default function Services() {
 
     window.addEventListener("mousemove", onWindowMouseMove);
     window.addEventListener("mouseup", onWindowMouseUp);
-    window.addEventListener("touchmove", onWindowTouchMove, { passive: false });
+    window.addEventListener("touchmove", onWindowTouchMove, { passive: true });
     window.addEventListener("touchend", onWindowTouchEnd);
 
     return () => {
@@ -371,15 +410,15 @@ export default function Services() {
   // Top-right starting coordinates: positioned completely behind/underneath the About section top edge
   const startY = -Math.round(windowHeight * 0.50 + half + 20);
 
-  // As user scrolls from Image 1 to Image 2, cube rolls itself from underneath About to exact middle (0, 0)
-  const cubeX = Math.round(startX * (1 - descentProgress));
-  const cubeY = Math.round(startY * (1 - descentProgress));
+  // As user scrolls from Image 1 to Image 2, cube rolls smoothly from underneath About to exact middle (0, 0)
+  const cubeX = Number((startX * (1 - descentProgress)).toFixed(2));
+  const cubeY = Number((startY * (1 - descentProgress)).toFixed(2));
 
-  // Update scroll roll deltas: combines with ambient rotation so it rolls dynamically on scroll
+  // Update scroll roll deltas: combines with ambient rotation so it rolls smoothly on scroll
   useEffect(() => {
-    scrollRollXRef.current = Math.round(-360 * (1 - descentProgress));
-    scrollRollYRef.current = Math.round(-270 * (1 - descentProgress));
-    scrollRollZRef.current = Math.round(20 * (1 - descentProgress));
+    scrollRollXRef.current = -360 * (1 - descentProgress);
+    scrollRollYRef.current = -270 * (1 - descentProgress);
+    scrollRollZRef.current = 20 * (1 - descentProgress);
   }, [descentProgress]);
 
   // Cube visibility: visible as soon as Services is seen (Image 1), 100% solid (no fading in bit by bit)
@@ -411,6 +450,8 @@ export default function Services() {
               ? "pt-20 pb-5"
               : is125Screen
               ? "pt-16 pb-3.5"
+              : isMobile
+              ? "pt-[76px] pb-3"
               : windowHeight < 680
               ? "pt-[72px] sm:pt-[76px] pb-2"
               : "pt-[68px] pb-2.5"
@@ -991,21 +1032,26 @@ export default function Services() {
               pointerEvents: blastProgress >= 0.85 ? "auto" : "none",
             }}
           >
-            {/* Center: 9 Dot/Pill Indicators */}
-            <div className="flex items-center gap-1 sm:gap-2 mx-auto">
+            {/* Center: 9 Dot/Pill Indicators (generous touch hit area on mobile) */}
+            <div className="flex items-center gap-0.5 sm:gap-1 mx-auto">
               {SERVICES.map((s, idx) => {
                 const isActive = activeIntIndex === idx;
                 return (
                   <button
                     key={s.id}
+                    type="button"
                     onClick={() => scrollToCard(idx)}
-                    className={`transition-all duration-300 rounded-full cursor-pointer ${
-                      isActive
-                        ? "w-6 sm:w-10 h-1.5 sm:h-2 bg-[#693092] shadow-xs"
-                        : "w-1.5 sm:w-2 h-1.5 sm:h-2 bg-[#693092]/25 hover:bg-[#693092]/50"
-                    }`}
+                    className="min-w-[24px] min-h-[32px] px-1 py-2 inline-flex items-center justify-center cursor-pointer group/dot"
                     aria-label={`Jump to ${s.title}`}
-                  />
+                  >
+                    <span
+                      className={`block transition-all duration-300 rounded-full ${
+                        isActive
+                          ? "w-6 sm:w-10 h-1.5 sm:h-2 bg-[#693092] shadow-xs"
+                          : "w-1.5 sm:w-2 h-1.5 sm:h-2 bg-[#693092]/25 group-hover/dot:bg-[#693092]/50"
+                      }`}
+                    />
+                  </button>
                 );
               })}
             </div>

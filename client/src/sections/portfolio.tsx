@@ -100,7 +100,7 @@ export default function Portfolio() {
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2.5 sm:gap-3 mb-2 sm:mb-2.5 lg:mb-2 xl:mb-2.5">
           <div className="portfolio-header max-w-3xl">
             {/* Eyebrow Badge: Button Design matching remaining sections */}
-            <div className="portfolio-eyebrow-wrap mb-1 sm:mb-1.5">
+            <div className="portfolio-eyebrow-wrap mb-3 sm:mb-4 lg:mb-3 xl:mb-3.5">
               <div className="portfolio-eyebrow-text inline-flex items-center gap-2 sm:gap-2.5 px-3.5 sm:px-4 py-0.5 sm:py-1 rounded-full bg-white border border-[#693092]/20 text-[#693092] text-xs sm:text-[13px] font-semibold tracking-wide shadow-xs select-none cursor-default">
                 <span>Portfolio</span>
                 <div className="w-3.5 sm:w-4 h-3.5 sm:h-4 rounded-full bg-[#693092] text-white flex items-center justify-center">
@@ -120,14 +120,14 @@ export default function Portfolio() {
             </p>
           </div>
 
-          {/* Horizontal Scroll Navigation Arrows (visible when more than 3 projects exist or on mobile) */}
-          {projects.length > 3 && (
-            <div className="flex items-center gap-2 self-start sm:self-end shrink-0 pb-1">
+          {/* Horizontal Scroll Navigation Arrows (visible on mobile/tablet when multiple cards exist, and desktop when > 3) */}
+          {projects.length > 1 && (
+            <div className={`items-center gap-2 self-start sm:self-end shrink-0 pb-1 ${projects.length > 3 ? "flex" : "flex lg:hidden"}`}>
               <button
                 type="button"
                 onClick={() => handleScroll("left")}
                 disabled={!canScrollLeft}
-                className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#141010] text-white flex items-center justify-center hover:bg-[#693092] transition-all disabled:opacity-30 disabled:pointer-events-none cursor-pointer shadow-md"
+                className="w-10 h-10 sm:w-9 sm:h-9 rounded-full bg-[#141010] text-white flex items-center justify-center hover:bg-[#693092] transition-all disabled:opacity-30 disabled:pointer-events-none cursor-pointer shadow-md"
                 aria-label="Previous projects"
                 title="Scroll left"
               >
@@ -137,7 +137,7 @@ export default function Portfolio() {
                 type="button"
                 onClick={() => handleScroll("right")}
                 disabled={!canScrollRight}
-                className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#141010] text-white flex items-center justify-center hover:bg-[#693092] transition-all disabled:opacity-30 disabled:pointer-events-none cursor-pointer shadow-md"
+                className="w-10 h-10 sm:w-9 sm:h-9 rounded-full bg-[#141010] text-white flex items-center justify-center hover:bg-[#693092] transition-all disabled:opacity-30 disabled:pointer-events-none cursor-pointer shadow-md"
                 aria-label="Next projects"
                 title="Scroll right"
               >
@@ -174,10 +174,8 @@ export default function Portfolio() {
                 <motion.div
                   key={project.id}
                   onMouseEnter={() => setActiveCardId(projId)}
-                  whileHover={{ y: -5 }}
-                  transition={{ duration: 0.25, ease: "easeOut" }}
                   onClick={() => navigate(`/portfolio-detail?id=${project.id}`)}
-                  className="portfolio-card group relative bg-[#F5EEF8] rounded-[16px] sm:rounded-[18px] p-3.5 sm:p-4 lg:p-4 xl:p-5 flex flex-col justify-between h-auto min-h-full border border-black/[0.06] shadow-lg shadow-black/[0.06] hover:shadow-xl hover:shadow-black/15 transition-all duration-300 w-[85%] sm:w-[calc(50%-12px)] lg:w-[calc((100%-2*1.25rem)/3)] xl:w-[calc((100%-2*1.5rem)/3)] shrink-0 cursor-pointer snap-start min-w-0 break-words"
+                  className="portfolio-card group relative bg-[#F5EEF8] rounded-[16px] sm:rounded-[18px] p-3.5 sm:p-4 lg:p-4 xl:p-5 flex flex-col justify-between h-auto min-h-full border border-black/[0.06] shadow-lg shadow-black/[0.06] hover:shadow-xl hover:shadow-black/15 lg:hover:-translate-y-1 transition-all duration-300 w-[85%] sm:w-[calc(50%-12px)] lg:w-[calc((100%-2*1.25rem)/3)] xl:w-[calc((100%-2*1.5rem)/3)] shrink-0 cursor-pointer snap-start min-w-0 break-words"
                 >
                   {/* Image Container with active green border state */}
                   <div

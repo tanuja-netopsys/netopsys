@@ -14,7 +14,12 @@ export default function ServicesPage() {
     window.scrollTo(0, 0);
   }, []);
 
+  const supportsFineHover = () =>
+    typeof window !== "undefined" &&
+    window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+
   const handleMouseEnter = (id: string) => {
+    if (!supportsFineHover()) return;
     if (hoverTimeoutRef.current) {
       clearTimeout(hoverTimeoutRef.current);
     }
@@ -24,6 +29,7 @@ export default function ServicesPage() {
   };
 
   const handleMouseLeave = () => {
+    if (!supportsFineHover()) return;
     if (hoverTimeoutRef.current) {
       clearTimeout(hoverTimeoutRef.current);
     }
@@ -136,21 +142,21 @@ export default function ServicesPage() {
                       <button
                         type="button"
                         onClick={() => toggleAccordion(service.id)}
-                        className="w-full py-5 sm:py-6 lg:py-7 flex items-center justify-between text-left group cursor-pointer transition-colors services-accordion-btn"
+                        className="w-full py-4 sm:py-6 lg:py-7 flex items-center justify-between text-left group cursor-pointer transition-colors services-accordion-btn"
                         aria-expanded={isOpen}
                       >
-                        <div className="flex items-center gap-5 sm:gap-8 lg:gap-12 pr-4">
+                        <div className="flex items-center gap-3.5 sm:gap-8 lg:gap-12 pr-3 sm:pr-4 min-w-0">
                           <span className="text-xs sm:text-sm font-mono tracking-wider font-semibold text-[#693092] flex-shrink-0 transition-colors duration-300 services-item-num">
                             {service.id}
                           </span>
                           <h3
-                            className="text-xl sm:text-2xl md:text-[1.85rem] lg:text-[2.05rem] xl:text-[2.25rem] font-light tracking-[-0.035em] leading-tight text-[#141010] group-hover:text-[#693092] transition-colors duration-300 services-item-title"
+                            className="text-lg sm:text-2xl md:text-[1.85rem] lg:text-[2.05rem] xl:text-[2.25rem] font-light tracking-[-0.035em] leading-tight text-[#141010] group-hover:text-[#693092] transition-colors duration-300 services-item-title break-words"
                             style={{ fontFamily: "'Onest', sans-serif" }}
                           >
                             {service.title}
                           </h3>
                         </div>
-                        <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center">
+                        <div className="flex-shrink-0 w-9 h-9 sm:w-8 sm:h-8 flex items-center justify-center">
                           <span className="text-xl sm:text-2xl font-normal text-[#141010]/40 group-hover:text-[#141010] transition-colors duration-300">
                             +
                           </span>
@@ -172,7 +178,7 @@ export default function ServicesPage() {
                   >
                     <div className="overflow-hidden py-3 sm:py-4">
                       <div
-                        className="w-full bg-gradient-to-r from-[#090414] via-[#110724] to-[#220B44] text-white border border-[#BE3093]/30 rounded-2xl sm:rounded-3xl p-7 sm:p-8 lg:py-10 lg:px-12 shadow-none relative overflow-hidden transition-transform duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] services-expanded-card"
+                        className="w-full bg-gradient-to-r from-[#090414] via-[#110724] to-[#220B44] text-white border border-[#BE3093]/30 rounded-2xl sm:rounded-3xl p-5 sm:p-8 lg:py-10 lg:px-12 shadow-none relative overflow-hidden transition-transform duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] services-expanded-card"
                         style={{
                           transform: isOpen ? "translateY(0)" : "translateY(6px)",
                           boxShadow: "none",
@@ -186,7 +192,7 @@ export default function ServicesPage() {
                           <img
                             src={service.image}
                             alt={service.title}
-                            className="w-full h-full object-cover object-center"
+                            className="w-full h-full object-cover object-center opacity-50 sm:opacity-100"
                             style={{
                               maskImage:
                                 "linear-gradient(to right, transparent 0%, rgba(0,0,0,0.15) 12%, rgba(0,0,0,0.7) 38%, black 75%)",
@@ -196,7 +202,7 @@ export default function ServicesPage() {
                             }}
                           />
                           {/* Smooth gradient blend overlay on the left edge */}
-                          <div className="absolute inset-0 bg-gradient-to-r from-[#090414] via-[#090414]/50 to-transparent pointer-events-none" />
+                          <div className="absolute inset-0 bg-gradient-to-r from-[#090414]/95 sm:from-[#090414] via-[#090414]/70 sm:via-[#090414]/50 to-transparent pointer-events-none" />
                           {/* Subtle top & bottom edge softening */}
                           <div className="absolute inset-0 bg-gradient-to-b from-[#090414]/25 via-transparent to-[#090414]/35 pointer-events-none" />
                         </div>
@@ -209,14 +215,14 @@ export default function ServicesPage() {
                             if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
                             setOpenId(null);
                           }}
-                          className="absolute top-5 right-5 sm:top-6 sm:right-6 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer z-20 backdrop-blur-sm"
+                          className="absolute top-3.5 right-3.5 sm:top-6 sm:right-6 w-10 h-10 sm:w-8 sm:h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer z-20 backdrop-blur-sm"
                           aria-label="Close service details"
                         >
                           <X className="w-4 h-4" />
                         </button>
 
                         {/* Foreground Content: Number on left + Text column on right where ALL text shares the exact same starting point */}
-                        <div className="relative z-10 max-w-2xl flex items-start gap-4 sm:gap-6 lg:gap-8">
+                        <div className="relative z-10 max-w-2xl flex flex-col sm:flex-row items-start gap-2 sm:gap-6 lg:gap-8 pr-8 sm:pr-0">
                           {/* Number Column */}
                           <span className="text-xs sm:text-sm font-mono tracking-wider font-semibold text-white/50 pt-1.5 flex-shrink-0">
                             {service.id}

@@ -3,7 +3,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { Send, Mail, Loader2, Check } from "lucide-react";
 import netopsysLogo from "../assets/netopsys-logo.png";
 import { toast } from "./toast.tsx";
-import FallingToolsPhysics from "./FallingToolsPhysics.tsx";
 import { openCookiePreferences } from "../utils/cookie-consent.ts";
 
 export default function Footer() {
@@ -123,8 +122,8 @@ export default function Footer() {
       {/* Subtle ambient lighting */}
       <div className="absolute top-0 left-1/3 w-[500px] h-[300px] rounded-full bg-[#693092]/10 blur-[160px] pointer-events-none" />
 
-      {/* 2D Physics Falling Tools spanning from the very top of the footer navigation columns all the way down to the floor */}
-      <FallingToolsPhysics>
+      {/* Footer Main Content & Big Watermark */}
+      <div className="relative w-full overflow-hidden pb-2">
         {/* Top 5-Column Navigation Layout */}
         <div className="relative z-30 pointer-events-auto select-auto w-full max-w-[2100px] mx-auto px-4 sm:px-6 md:px-8 lg:px-10 xl:px-14 2xl:px-18">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-8 sm:gap-6 xl:gap-8 pb-12 sm:pb-16 text-left">
@@ -461,7 +460,7 @@ export default function Footer() {
             </span>
           </div>
         </div>
-      </FallingToolsPhysics>
+      </div>
 
       {/* Bottom Container: Divider & Legal Copyright Notice */}
       <div className="relative w-full max-w-[2100px] mx-auto px-4 sm:px-6 md:px-8 lg:px-10 xl:px-14 2xl:px-18">

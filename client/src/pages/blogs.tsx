@@ -299,7 +299,7 @@ export default function BlogsPage() {
                 </div>
 
                 {/* Card Footer: Date & Read more */}
-                <div className="blogs-page-card-footer flex items-center justify-between pt-3 border-t border-[#F5EEF8] text-xs mt-auto">
+                <div className="blogs-page-card-footer flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-[#F5EEF8] text-xs mt-auto">
                   <span className="text-[#8E869B]">
                     {post.date} · {post.readTime}
                   </span>

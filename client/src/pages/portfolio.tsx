@@ -166,6 +166,9 @@ export default function PortfolioPage() {
     const el = sectionRef.current;
     if (!el) return;
 
+    let wheelDeltaAccum = 0;
+    let wheelResetTimer: ReturnType<typeof setTimeout> | null = null;
+
     const onWheel = (e: WheelEvent) => {
       // If the window is scrolled down towards the footer:
       if (window.scrollY > 20) {
@@ -179,19 +182,27 @@ export default function PortfolioPage() {
         return;
       }
 
-      // When at the top of the page (window.scrollY <= 20):
-      // Prevent accidental micro-scrolls from scrolling window
-      if (Math.abs(e.deltaY) < 18) {
+      // Accumulate small trackpad deltas cleanly so gentle gestures feel responsive
+      wheelDeltaAccum += e.deltaY;
+      if (wheelResetTimer) clearTimeout(wheelResetTimer);
+      wheelResetTimer = setTimeout(() => {
+        wheelDeltaAccum = 0;
+      }, 160);
+
+      if (Math.abs(wheelDeltaAccum) < 16) {
         e.preventDefault();
         return;
       }
+
+      const directionDelta = wheelDeltaAccum;
+      wheelDeltaAccum = 0;
 
       if (isTransitioningRef.current) {
         e.preventDefault();
         return;
       }
 
-      if (e.deltaY > 0) {
+      if (directionDelta > 0) {
         // Scrolling DOWN
         if (activeIndexRef.current < projectsLengthRef.current - 1) {
           e.preventDefault();
@@ -201,11 +212,11 @@ export default function PortfolioPage() {
           setActiveIndex((prev) => prev + 1);
           setTimeout(() => {
             isTransitioningRef.current = false;
-          }, 550);
+          }, 420);
         } else {
           // On last project, allow scrolling down to footer
         }
-      } else if (e.deltaY < 0) {
+      } else if (directionDelta < 0) {
         // Scrolling UP
         if (activeIndexRef.current > 0) {
           e.preventDefault();
@@ -215,7 +226,7 @@ export default function PortfolioPage() {
           setActiveIndex((prev) => prev - 1);
           setTimeout(() => {
             isTransitioningRef.current = false;
-          }, 550);
+          }, 420);
         }
       }
     };
@@ -268,6 +279,7 @@ export default function PortfolioPage() {
     el.addEventListener("touchend", onTouchEnd, { passive: true });
 
     return () => {
+      if (wheelResetTimer) clearTimeout(wheelResetTimer);
       el.removeEventListener("wheel", onWheel);
       el.removeEventListener("touchstart", onTouchStart);
       el.removeEventListener("touchend", onTouchEnd);
@@ -436,7 +448,7 @@ export default function PortfolioPage() {
                     initial={false}
                     animate="center"
                     exit="exit"
-                    className="portfolio-page-card relative w-full rounded-[30px] sm:rounded-[36px] lg:rounded-[40px] bg-gradient-to-br from-[#090514] via-[#0E071F] to-[#180A2E] text-white border border-[#3E255B]/60 shadow-[0_25px_60px_rgba(15,7,30,0.35)] overflow-hidden p-7 sm:p-9 md:p-11 lg:p-13 h-auto min-h-[480px] lg:min-h-[540px] flex flex-col justify-between min-w-0 break-words"
+                    className="portfolio-page-card relative w-full rounded-[24px] sm:rounded-[36px] lg:rounded-[40px] bg-gradient-to-br from-[#090514] via-[#0E071F] to-[#180A2E] text-white border border-[#3E255B]/60 shadow-[0_25px_60px_rgba(15,7,30,0.35)] overflow-hidden p-5 sm:p-9 md:p-11 lg:p-13 h-auto min-h-[380px] sm:min-h-[480px] lg:min-h-[540px] flex flex-col justify-between min-w-0 break-words"
                   >
                     {/* Background Photography with enhanced visibility */}
                     {activeProject.image && (

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, memo, type MouseEvent } from "react";
 import { useLocation } from "react-router-dom";
-import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
+import { motion, AnimatePresence, useScroll, useTransform, useSpring } from "framer-motion";
 import {
   Sparkles,
   Maximize2,
@@ -966,12 +966,17 @@ export default function Hero() {
     return () => clearInterval(timer);
   }, []);
 
-  // Scroll parallax: cube glides down side as user scrolls down on desktop
+  // Scroll parallax: cube glides down side smoothly as user scrolls down on desktop
   const { scrollY } = useScroll();
-  const parallaxCubeY = useTransform(scrollY, [0, 750], [0, 480]);
-  const parallaxCubeX = useTransform(scrollY, [0, 750], [0, -45]);
-  const parallaxCubeRotate = useTransform(scrollY, [0, 750], [0, 30]);
-  const parallaxCubeScale = useTransform(scrollY, [0, 750], [1, 0.90]);
+  const smoothScrollY = useSpring(scrollY, {
+    stiffness: 150,
+    damping: 26,
+    mass: 0.35,
+  });
+  const parallaxCubeY = useTransform(smoothScrollY, [0, 750], [0, 480]);
+  const parallaxCubeX = useTransform(smoothScrollY, [0, 750], [0, -45]);
+  const parallaxCubeRotate = useTransform(smoothScrollY, [0, 750], [0, 30]);
+  const parallaxCubeScale = useTransform(smoothScrollY, [0, 750], [1, 0.90]);
 
   return (
     <section
@@ -1061,7 +1066,7 @@ export default function Hero() {
                   }
                 : undefined
             }
-            className="hero-cube-wrap w-full max-w-[340px] xs:max-w-[380px] sm:max-w-[440px] md:max-w-[480px] lg:max-w-[440px] xl:max-w-[530px] 2xl:max-w-[660px] flex flex-col items-center justify-center origin-center will-change-transform"
+            className="hero-cube-wrap w-full max-w-[340px] xs:max-w-[380px] sm:max-w-[440px] md:max-w-[480px] lg:max-w-[440px] xl:max-w-[530px] 2xl:max-w-[660px] max-h-[245px] xs:max-h-[275px] sm:max-h-[325px] md:max-h-[365px] lg:max-h-none flex flex-col items-center justify-center origin-center will-change-transform"
           >
             {/* Inner Scale Wrapper that guarantees perfect vertical fit without conflicting with Framer Motion */}
             <div

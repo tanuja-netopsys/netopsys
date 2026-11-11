@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { Link, useSearchParams, useParams } from "react-router-dom";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, useSpring } from "framer-motion";
 import {
   ArrowLeft,
   TrendingUp,
@@ -312,45 +312,57 @@ export default function PortfolioDetailPage() {
   const [isDesktop, setIsDesktop] = useState(
     typeof window !== "undefined" ? window.innerWidth >= 1024 : true
   );
+  const [isSmallMobile, setIsSmallMobile] = useState(
+    typeof window !== "undefined" ? window.innerWidth < 640 : false
+  );
 
   useEffect(() => {
     const handleResize = () => {
       setIsDesktop(window.innerWidth >= 1024);
+      setIsSmallMobile(window.innerWidth < 640);
     };
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Scroll animation driven by actual scroll distance
+  // Scroll animation driven smoothly by actual scroll distance
   const heroRef = useRef<HTMLDivElement>(null);
   const { scrollY } = useScroll();
+  const smoothScrollY = useSpring(scrollY, {
+    stiffness: 140,
+    damping: 26,
+    mass: 0.35,
+  });
 
   const imageWidth = useTransform(
-    scrollY,
+    smoothScrollY,
     [0, 280],
     [isDesktop ? "100%" : "100%", isDesktop ? "54%" : "100%"]
   );
 
   const imageHeight = useTransform(
-    scrollY,
+    smoothScrollY,
     [0, 280],
-    [isDesktop ? "660px" : "380px", isDesktop ? "480px" : "320px"]
+    [
+      isDesktop ? "660px" : isSmallMobile ? "220px" : "320px",
+      isDesktop ? "480px" : isSmallMobile ? "220px" : "300px",
+    ]
   );
 
   const textOpacity = useTransform(
-    scrollY,
+    smoothScrollY,
     [50, 250],
     [isDesktop ? 0 : 1, 1]
   );
 
   const textX = useTransform(
-    scrollY,
+    smoothScrollY,
     [50, 250],
     [isDesktop ? -30 : 0, 0]
   );
 
-  const textPointerEvents = useTransform(scrollY, (v) =>
+  const textPointerEvents = useTransform(smoothScrollY, (v) =>
     !isDesktop || v > 100 ? "auto" : "none"
   );
 
@@ -389,7 +401,7 @@ export default function PortfolioDetailPage() {
             - On scroll: Contracts ONLY horizontally to the side (54% width) & smoothly adjusts height to 480px.
             - Stays pinned at top-28 until reveal is complete, then bottom content scrolls up directly.
         ========================================================================= */}
-        <div ref={heroRef} className="relative w-full min-h-[500px] h-auto lg:h-[930px] pt-20 sm:pt-24 lg:pt-26 portfoliodetail-hero-wrap">
+        <div ref={heroRef} className="relative w-full min-h-[360px] sm:min-h-[460px] h-auto lg:h-[930px] pt-20 sm:pt-24 lg:pt-26 portfoliodetail-hero-wrap">
           <div
             className="relative lg:sticky top-0 lg:top-24 xl:top-28 w-full flex flex-col justify-start overflow-visible pt-1 portfoliodetail-pinned-wrap"
             style={{

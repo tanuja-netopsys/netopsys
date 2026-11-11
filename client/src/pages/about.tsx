@@ -76,12 +76,77 @@ export default function AboutPage() {
               </p>
             </div>
 
-            {/* Exact Composition from Image 2 */}
+            {/* Mobile (< 768px): Readable Native HTML Hero Copy & Metric Cards */}
+            <div className="md:hidden w-full text-left space-y-5 mb-2">
+              <div>
+                <h1 className="about-page-title text-3xl xs:text-4xl font-light tracking-[-0.035em] leading-[1.06] text-[#141010] mb-3">
+                  Pioneering{" "}
+                  <span className="text-[#693092] font-normal">Digital Excellence</span>
+                </h1>
+                <p className="text-[#554E62] text-sm leading-relaxed font-normal">
+                  Netopsys is more than just a technology partner — we&apos;re the
+                  catalyst that transforms your business vision into digital reality.
+                  With over 15 years of combined expertise, we&apos;ve been
+                  Singapore&apos;s trusted choice for enterprises seeking to
+                  revolutionise their operations through cutting-edge AI, robust IT
+                  infrastructure, and innovative software development.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
+                {[
+                  {
+                    stat: "150+",
+                    title: "Projects Delivered",
+                    desc: "Successfully delivered for our clients",
+                    accent: "#693092",
+                  },
+                  {
+                    stat: "15+",
+                    title: "Years experience",
+                    desc: "Decades of combined global expertise",
+                    accent: "#C92A82",
+                  },
+                  {
+                    stat: "60+",
+                    title: "Technologies",
+                    desc: "Across AI, cloud, networking, and security",
+                    accent: "#FBAE42",
+                  },
+                  {
+                    stat: "100%",
+                    title: "Enterprise Grade",
+                    desc: "Security and compliance built in by default",
+                    accent: "#2E1E57",
+                  },
+                ].map((item) => (
+                  <div
+                    key={item.title}
+                    className="bg-white rounded-2xl p-4 border border-[#693092]/10 shadow-xs flex flex-col justify-between min-w-0"
+                  >
+                    <span
+                      className="text-2xl font-light tracking-tight leading-none mb-1.5"
+                      style={{ color: item.accent }}
+                    >
+                      {item.stat}
+                    </span>
+                    <h3 className="text-sm font-semibold text-[#141010] leading-snug mb-1">
+                      {item.title}
+                    </h3>
+                    <p className="text-xs text-[#6B6377] leading-relaxed">
+                      {item.desc}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Tablet & Desktop (768px+): Exact Semicircular Arch Infographic SVG */}
             <motion.div
               initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.55 }}
-              className="about-page-hero-svg-wrap w-full flex justify-start items-center select-none"
+              className="about-page-hero-svg-wrap hidden md:flex w-full justify-start items-center select-none"
             >
               {/* 
                 Unified SVG matching Image 2 (media_1793605533565_baa831b8.jpg)

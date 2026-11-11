@@ -3,11 +3,13 @@ const nodemailer = require("nodemailer");
 const prisma = require("../config/prisma");
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY || "";
-const EMAIL_FROM = process.env.EMAIL_FROM || "Netopsys AI <helpdesk@netopsys.net>";
+const DEFAULT_SENDER_EMAIL = process.env.SMTP_FROM || process.env.SMTP_USER || "noreply@netopsys.in";
+const EMAIL_FROM = process.env.EMAIL_FROM || `Netopsys AI <${DEFAULT_SENDER_EMAIL}>`;
+const CONTACT_RECEIVER_EMAIL = process.env.CONTACT_RECEIVER_EMAIL || "connectme@netopsys.in";
 const FRONTEND_URL = (process.env.FRONTEND_URL || "http://localhost:5173").replace(/\/+$/, "");
 const BACKEND_URL = (process.env.BACKEND_URL || `http://localhost:${process.env.PORT || 5000}`).replace(/\/+$/, "");
 
-// Optional direct SMTP configuration for helpdesk@netopsys.net
+// Direct SMTP configuration (STARTTLS on Port 587 or SSL on Port 465)
 const SMTP_HOST = process.env.SMTP_HOST || "";
 const SMTP_PORT = parseInt(process.env.SMTP_PORT || "587", 10);
 const SMTP_USER = process.env.SMTP_USER || "";
@@ -21,12 +23,13 @@ if (SMTP_HOST && SMTP_USER && SMTP_PASS) {
       host: SMTP_HOST,
       port: SMTP_PORT,
       secure: SMTP_SECURE,
+      requireTLS: !SMTP_SECURE && SMTP_PORT === 587,
       auth: {
         user: SMTP_USER,
         pass: SMTP_PASS,
       },
     });
-    console.log(`📧 SMTP Transporter initialized for ${SMTP_USER} via ${SMTP_HOST}:${SMTP_PORT}`);
+    console.log(`📧 SMTP Transporter initialized for ${SMTP_USER} via ${SMTP_HOST}:${SMTP_PORT} (${SMTP_SECURE ? "SSL" : "STARTTLS"})`);
   } catch (err) {
     console.error("Failed to initialize SMTP Transporter:", err.message);
   }
@@ -37,7 +40,7 @@ if (SMTP_HOST && SMTP_USER && SMTP_PASS) {
  * If no valid credentials are present, logs safely to console and records in DB.
  */
 async function sendRawEmail({ to, subject, html, replyTo }) {
-  const replyToAddress = replyTo || process.env.SMTP_FROM || "helpdesk@netopsys.net";
+  const replyToAddress = replyTo || DEFAULT_SENDER_EMAIL;
   const recipientList = Array.isArray(to) ? to : [to];
 
   // 1. Prioritize direct SMTP if configured
@@ -54,7 +57,7 @@ async function sendRawEmail({ to, subject, html, replyTo }) {
         html,
         replyTo: replyToAddress,
       });
-      console.log(`✅ [LIVE SMTP EMAIL DELIVERED] to ${recipientList.join(", ")} (ID: ${info.messageId})`);
+      console.log(`✅ [LIVE SMTP EMAIL DELIVERED] from ${fromAddress} to ${recipientList.join(", ")} (ID: ${info.messageId})`);
       return { success: true, id: info.messageId };
     } catch (err) {
       console.error(`❌ SMTP dispatch failed to ${recipientList.join(", ")}:`, err.message);
@@ -510,7 +513,7 @@ async function sendBlogPublishedNotification(blog) {
               to: sub.email,
               subject: `New from Netopsys: ${blog.title}`,
               html,
-              replyTo: process.env.SMTP_FROM || "helpdesk@netopsys.net",
+              replyTo: DEFAULT_SENDER_EMAIL,
             });
 
             await recordNotificationLog({
@@ -634,7 +637,7 @@ async function sendJobPublishedNotification(job) {
               to: sub.email,
               subject: `We're Hiring: ${job.title} at Netopsys`,
               html,
-              replyTo: process.env.SMTP_FROM || "helpdesk@netopsys.net",
+              replyTo: DEFAULT_SENDER_EMAIL,
             });
 
             await recordNotificationLog({
@@ -704,12 +707,12 @@ function getPasswordResetOtpHtml({ name, otp }) {
       </div>
 
       <div class="security-note">
-        <strong>Security Notice:</strong> If you did not request a password reset, please ignore this email or contact <a href="mailto:helpdesk@netopsys.net" style="color: #5E2282;">helpdesk@netopsys.net</a>. Never share this code with anyone.
+        <strong>Security Notice:</strong> If you did not request a password reset, please ignore this email or contact <a href="mailto:${CONTACT_RECEIVER_EMAIL}" style="color: #5E2282;">${CONTACT_RECEIVER_EMAIL}</a>. Never share this code with anyone.
       </div>
     </div>
     <div class="footer">
       <p>&copy; ${new Date().getFullYear()} Netopsys. All rights reserved.</p>
-      <p>Sent from helpdesk@netopsys.net</p>
+      <p>Sent from ${DEFAULT_SENDER_EMAIL}</p>
     </div>
   </div>
 </body>
@@ -727,7 +730,7 @@ async function sendPasswordResetOtpEmail({ email, name, otp }) {
       to: email,
       subject: `${otp} is your Netopsys password reset verification code`,
       html,
-      replyTo: "helpdesk@netopsys.net",
+      replyTo: DEFAULT_SENDER_EMAIL,
     });
 
     await recordNotificationLog({
@@ -808,7 +811,7 @@ async function sendEmailVerificationOtpEmail({ email, name, otp }) {
       to: email,
       subject: `${otp} is your Netopsys email verification code`,
       html,
-      replyTo: process.env.SMTP_FROM || "helpdesk@netopsys.net",
+      replyTo: DEFAULT_SENDER_EMAIL,
     });
 
     await recordNotificationLog({
@@ -827,6 +830,128 @@ async function sendEmailVerificationOtpEmail({ email, name, otp }) {
   }
 }
 
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+/**
+ * HTML Template: Website Contact / Let's Connect Enquiry Notification
+ */
+function getContactEnquiryHtml({ name, email, phone, company, service, message, submissionId }) {
+  const submittedAt = new Date().toLocaleString("en-IN", {
+    timeZone: "Asia/Kolkata",
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #FAF7FC; margin: 0; padding: 24px; color: #141010; }
+    .container { max-width: 620px; margin: 0 auto; background: #ffffff; border: 1px solid #ECE4F2; border-radius: 22px; overflow: hidden; box-shadow: 0 4px 24px rgba(105, 48, 146, 0.06); }
+    .header { background: linear-gradient(135deg, #1C0F2B 0%, #693092 100%); padding: 32px; color: #ffffff; }
+    .badge { display: inline-block; background: rgba(255, 255, 255, 0.16); color: #ffffff; padding: 4px 12px; border-radius: 999px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; }
+    .header h1 { margin: 0; font-size: 22px; font-weight: 700; letter-spacing: -0.01em; }
+    .header p { margin: 6px 0 0; color: #EEDBFA; font-size: 13.5px; }
+    .body { padding: 30px 32px; font-size: 14.5px; line-height: 1.6; color: #4A4458; }
+    .details-table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+    .details-table td { padding: 11px 12px; border-bottom: 1px solid #F0E6F4; vertical-align: top; }
+    .details-table td.label { width: 150px; font-weight: 600; color: #693092; font-size: 12.5px; text-transform: uppercase; letter-spacing: 0.04em; }
+    .details-table td.value { color: #141010; font-weight: 500; }
+    .msg-box { background: #FAF5FD; border-left: 4px solid #693092; padding: 14px 18px; border-radius: 8px; margin-top: 18px; color: #141010; white-space: pre-wrap; }
+    .footer { padding: 20px 32px; background: #FAF7FC; border-top: 1px solid #ECE4F2; font-size: 12px; color: #8C849B; text-align: center; line-height: 1.5; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <span class="badge">New Website Enquiry</span>
+      <h1>Let&apos;s Connect Submission</h1>
+      <p>Received on ${escapeHtml(submittedAt)} IST${submissionId ? ` · Ref #${escapeHtml(submissionId)}` : ""}</p>
+    </div>
+    <div class="body">
+      <p>A visitor submitted an enquiry on the Netopsys website. Details are below:</p>
+      <table class="details-table">
+        <tr>
+          <td class="label">Full Name</td>
+          <td class="value">${escapeHtml(name)}</td>
+        </tr>
+        <tr>
+          <td class="label">Email</td>
+          <td class="value"><a href="mailto:${escapeHtml(email)}" style="color: #693092;">${escapeHtml(email)}</a></td>
+        </tr>
+        <tr>
+          <td class="label">Phone</td>
+          <td class="value">${escapeHtml(phone || "Not provided")}</td>
+        </tr>
+        <tr>
+          <td class="label">Company</td>
+          <td class="value">${escapeHtml(company || "Not provided")}</td>
+        </tr>
+        <tr>
+          <td class="label">Service</td>
+          <td class="value">${escapeHtml(service || "General Enquiry")}</td>
+        </tr>
+      </table>
+      <div style="margin-top: 18px;">
+        <div style="font-weight: 600; color: #693092; font-size: 12.5px; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px;">Message</div>
+        <div class="msg-box">${escapeHtml(message || "No additional message provided.")}</div>
+      </div>
+    </div>
+    <div class="footer">
+      <p>Sent from ${escapeHtml(DEFAULT_SENDER_EMAIL)} to ${escapeHtml(CONTACT_RECEIVER_EMAIL)}</p>
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
+/**
+ * Send Website Contact / Enquiry Form Submission to connectme@netopsys.in
+ */
+async function sendContactEnquiryEmail({ name, email, phone, company, service, message, submissionId }) {
+  try {
+    const html = getContactEnquiryHtml({
+      name,
+      email,
+      phone,
+      company,
+      service,
+      message,
+      submissionId,
+    });
+    const subjectService = service ? ` - ${service}` : "";
+    const result = await sendRawEmail({
+      to: CONTACT_RECEIVER_EMAIL,
+      subject: `New Website Enquiry from ${name}${subjectService}`,
+      html,
+      replyTo: email,
+    });
+
+    await recordNotificationLog({
+      type: "contact_enquiry",
+      contentId: String(submissionId || Date.now()),
+      contentTitle: `Website Enquiry: ${service || "General"} (${name})`,
+      recipientEmail: CONTACT_RECEIVER_EMAIL,
+      status: result.success ? "sent" : "failed",
+      errorMessage: result.error,
+    });
+
+    return result;
+  } catch (err) {
+    console.error("sendContactEnquiryEmail error:", err.message);
+    return { success: false, error: err.message };
+  }
+}
+
 module.exports = {
   sendRawEmail,
   sendBlogWelcomeEmail,
@@ -835,6 +960,7 @@ module.exports = {
   sendJobPublishedNotification,
   sendPasswordResetOtpEmail,
   sendEmailVerificationOtpEmail,
+  sendContactEnquiryEmail,
   recordNotificationLog,
   hasAlreadyReceivedNotification,
 };

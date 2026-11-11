@@ -78,6 +78,50 @@ export default function Navbar({
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
   const dropdownTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const headerRef = useRef<HTMLElement | null>(null);
+  const dropdownContainerRef = useRef<HTMLDivElement | null>(null);
+
+  // Close mobile drawer automatically on route changes
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+    setIsDropdownOpen(false);
+  }, [location.pathname, location.hash]);
+
+  // Close mobile drawer / user dropdown on Escape key or outside tap/click
+  useEffect(() => {
+    if (!isMobileMenuOpen && !isDropdownOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setIsMobileMenuOpen(false);
+        setIsDropdownOpen(false);
+      }
+    };
+
+    const handlePointerDown = (e: MouseEvent | TouchEvent) => {
+      const target = e.target as Node | null;
+      if (!target) return;
+      if (isMobileMenuOpen && headerRef.current && !headerRef.current.contains(target)) {
+        setIsMobileMenuOpen(false);
+      }
+      if (
+        isDropdownOpen &&
+        dropdownContainerRef.current &&
+        !dropdownContainerRef.current.contains(target)
+      ) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("touchstart", handlePointerDown, { passive: true });
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("touchstart", handlePointerDown);
+    };
+  }, [isMobileMenuOpen, isDropdownOpen]);
 
   useEffect(() => {
     const handleUserChange = () => {
@@ -212,7 +256,7 @@ export default function Navbar({
 
   return (
     <>
-      <header className="nav-header-wrap fixed top-4 sm:top-5 md:top-5.5 xl:top-6 left-0 right-0 z-50 flex justify-center px-3 sm:px-4 pointer-events-none select-none">
+      <header ref={headerRef} className="nav-header-wrap fixed top-4 sm:top-5 md:top-5.5 xl:top-6 left-0 right-0 z-50 flex justify-center px-3 sm:px-4 pointer-events-none select-none">
         {/* Floating Dark Pill Navbar */}
         <nav className="nav-pill-wrap pointer-events-auto bg-[#0B0716] rounded-full px-5 sm:px-6 md:px-7 lg:px-8 py-2 sm:py-2 md:py-2.5 flex items-center justify-between gap-4 sm:gap-6 md:gap-7 lg:gap-8 shadow-2xl shadow-black/30 border border-white/[0.06] transition-all duration-300">
           {/* Brand Logo */}
@@ -232,7 +276,7 @@ export default function Navbar({
           </a>
 
           {/* Desktop Navigation Links */}
-          <div className="nav-links-wrap hidden md:flex items-center md:gap-5 lg:gap-7 xl:gap-10">
+          <div className="nav-links-wrap hidden md:flex items-center md:gap-3.5 lg:gap-7 xl:gap-10">
             {navLinks.map((link) => {
               const isActive = currentTab === link;
               return (
@@ -257,6 +301,7 @@ export default function Navbar({
             {/* User Profile Button (visible when logged in) OR Log in Button (Careers page when logged out) */}
             {currentUser ? (
               <div
+                ref={dropdownContainerRef}
                 className="relative"
                 onMouseEnter={handleDropdownMouseEnter}
                 onMouseLeave={handleDropdownMouseLeave}
@@ -346,9 +391,12 @@ export default function Navbar({
 
           {/* Mobile Hamburger Button */}
           <button
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden text-white/90 hover:text-white p-1 rounded-full cursor-pointer"
-            aria-label="Toggle menu"
+            type="button"
+            onClick={() => setIsMobileMenuOpen((prev) => !prev)}
+            className="md:hidden text-white/90 hover:text-white w-10 h-10 -mr-1.5 inline-flex items-center justify-center rounded-full hover:bg-white/10 active:bg-white/15 transition-colors cursor-pointer"
+            aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={isMobileMenuOpen}
+            aria-controls="mobile-nav-drawer"
           >
             {isMobileMenuOpen ? <X className="w-5 h-5 sm:w-6 sm:h-6" /> : <Menu className="w-5 h-5 sm:w-6 sm:h-6" />}
           </button>
@@ -356,16 +404,30 @@ export default function Navbar({
 
         {/* Mobile Drawer Dropdown */}
         {isMobileMenuOpen && (
-          <div className="pointer-events-auto absolute top-14 sm:top-16 left-4 right-4 bg-[#0B0716] rounded-2xl p-5 shadow-2xl border border-white/10 flex flex-col gap-3 animate-in fade-in duration-200">
-            {navLinks.map((link) => (
-              <button
-                key={link}
-                onClick={() => handleLinkClick(link)}
-                className="text-left text-sm text-white/90 hover:text-white font-medium py-1.5 px-2 rounded-lg hover:bg-white/5 transition-colors"
-              >
-                {link}
-              </button>
-            ))}
+          <div
+            id="mobile-nav-drawer"
+            className="md:hidden pointer-events-auto absolute top-14 sm:top-16 left-3 right-3 sm:left-4 sm:right-4 bg-[#0B0716] rounded-2xl p-4 sm:p-5 shadow-2xl border border-white/10 flex flex-col gap-1.5 max-h-[calc(100dvh-5.5rem)] overflow-y-auto animate-in fade-in duration-200"
+          >
+            {navLinks.map((link) => {
+              const isActive = currentTab === link;
+              return (
+                <button
+                  key={link}
+                  type="button"
+                  onClick={() => handleLinkClick(link)}
+                  className={`text-left text-sm font-medium min-h-[44px] py-2.5 px-3 rounded-xl flex items-center justify-between transition-colors cursor-pointer ${
+                    isActive
+                      ? "bg-white/10 text-white"
+                      : "text-white/85 hover:text-white hover:bg-white/5"
+                  }`}
+                >
+                  <span>{link}</span>
+                  {isActive && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#FBAE42]" />
+                  )}
+                </button>
+              );
+            })}
 
             {/* Mobile User Actions / Careers Login */}
             {currentUser ? (
@@ -414,10 +476,11 @@ export default function Navbar({
 
             {/* Mobile Let's Connect CTA - Hidden when logged in, visible when logged out */}
             {!currentUser && (
-              <div className="pt-2 border-t border-white/10">
+              <div className="pt-2.5 mt-1 border-t border-white/10">
                 <button
+                  type="button"
                   onClick={handleGetStartedClick}
-                  className="w-full hover-brand-gradient bg-[#FBAE42] text-[#141010] text-sm font-semibold py-2.5 rounded-full shadow-md cursor-pointer inline-flex items-center justify-center"
+                  className="w-full hover-brand-gradient bg-[#FBAE42] text-[#141010] text-sm font-semibold min-h-[44px] py-2.5 rounded-full shadow-md cursor-pointer inline-flex items-center justify-center"
                 >
                   Let's Connect
                 </button>

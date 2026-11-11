@@ -43,7 +43,7 @@ export default function BackToHeroButton() {
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.6, y: 20 }}
           transition={{ duration: 0.25, ease: "easeOut" }}
-          className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 z-50 select-none"
+          className="fixed bottom-4 right-4 sm:bottom-8 sm:right-8 z-50 select-none"
         >
           <button
             type="button"

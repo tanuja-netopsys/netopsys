@@ -312,14 +312,14 @@ export default function Careers() {
                         className="w-full bg-white/[0.05] rounded-xl p-3.5 text-xs sm:text-sm text-white placeholder-slate-400 border border-white/10 focus:border-[#FBAE42] focus:outline-none resize-none"
                       />
 
-                      <div className="pt-2 flex items-center justify-between">
+                      <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <span className="text-xs text-slate-400">
                           Selected Role: <span className="text-[#FBAE42]">{formData.role || "General Application"}</span>
                         </span>
                         <button
                           type="submit"
                           disabled={isSubmitting}
-                          className="hover-brand-gradient inline-flex items-center gap-2 bg-[#FBAE42] text-[#141010] font-semibold text-xs sm:text-sm px-6 py-2.5 rounded-full shadow-md cursor-pointer disabled:opacity-70"
+                          className="hover-brand-gradient w-full sm:w-auto min-h-[44px] inline-flex items-center justify-center gap-2 bg-[#FBAE42] text-[#141010] font-semibold text-xs sm:text-sm px-6 py-2.5 rounded-full shadow-md cursor-pointer disabled:opacity-70"
                         >
                           {isSubmitting ? (
                             <>

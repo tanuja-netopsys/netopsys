@@ -1,5 +1,6 @@
 const prisma = require("../config/prisma");
 const { verifyRecaptchaV3Token } = require("../utils/recaptchaVerifier");
+const { sendContactEnquiryEmail } = require("../services/emailService");
 
 /**
  * Handle Contact Us Form Submission with Google reCAPTCHA v3 Verification
@@ -94,10 +95,26 @@ async function submitContactForm(req, res) {
       // Fallback: If DB had transient issue, submission is still verified and acknowledged
     }
 
+    // 4. Send enquiry notification email from noreply@netopsys.in to connectme@netopsys.in
+    const emailResult = await sendContactEnquiryEmail({
+      name,
+      email: email.trim(),
+      phone: phone ? String(phone).trim() : "",
+      company: company ? String(company).trim() : "",
+      service: service ? String(service).trim() : "",
+      message: message ? String(message).trim() : "",
+      submissionId: savedSubmission?.id || Date.now(),
+    });
+
+    if (!emailResult?.success) {
+      console.error("Contact enquiry email dispatch failed:", emailResult?.error);
+    }
+
     return res.status(200).json({
       success: true,
       message: "Your message has been verified and sent successfully! Our team will get back to you shortly.",
       submissionId: savedSubmission?.id || Date.now(),
+      emailDelivered: Boolean(emailResult?.success),
     });
   } catch (err) {
     console.error("Contact Form Submission Error:", err);

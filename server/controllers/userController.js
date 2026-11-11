@@ -504,3 +504,91 @@ exports.saveUserProfile = async (req, res) => {
   }
 };
 
+/**
+ * Permanently delete a registered user and their associated candidate records
+ */
+exports.deleteUser = async (req, res) => {
+  try {
+    if (!req.user || String(req.user.role || "").trim().toLowerCase() === "candidate") {
+      return res.status(403).json({
+        success: false,
+        message: "Access forbidden. Administrator privilege required.",
+      });
+    }
+
+    const rawId = req.params.id;
+    const numericId = parseInt(String(rawId).replace("usr-", ""), 10);
+
+    if (isNaN(numericId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid user ID provided.",
+      });
+    }
+
+    const existingUser = await prisma.user.findUnique({
+      where: { id: numericId },
+    });
+
+    if (!existingUser) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found in database.",
+      });
+    }
+
+    await prisma.$transaction(async (tx) => {
+      const applications = await tx.job_applications.findMany({
+        where: { user_id: numericId },
+        select: { id: true },
+      });
+      const applicationIds = applications.map((a) => a.id);
+
+      const sessions = await tx.mcq_sessions.findMany({
+        where: { user_id: numericId },
+        select: { id: true },
+      });
+      const sessionIds = sessions.map((s) => s.id);
+
+      if (sessionIds.length > 0) {
+        await tx.mcq_answers.deleteMany({ where: { session_id: { in: sessionIds } } });
+        await tx.mcq_questions.deleteMany({ where: { session_id: { in: sessionIds } } });
+        await tx.mcq_warning_events.deleteMany({ where: { session_id: { in: sessionIds } } });
+      }
+
+      if (applicationIds.length > 0) {
+        await tx.application_answers.deleteMany({
+          where: { application_id: { in: applicationIds } },
+        });
+        await tx.application_questions.deleteMany({
+          where: { application_id: { in: applicationIds } },
+        });
+        await tx.admin_notifications.deleteMany({
+          where: { application_id: { in: applicationIds } },
+        });
+      }
+
+      await tx.interview_bookings.deleteMany({ where: { user_id: numericId } });
+      await tx.mcq_sessions.deleteMany({ where: { user_id: numericId } });
+      await tx.job_applications.deleteMany({ where: { user_id: numericId } });
+      await tx.user_certifications.deleteMany({ where: { user_id: numericId } });
+      await tx.user_work_experience.deleteMany({ where: { user_id: numericId } });
+      await tx.user_profiles.deleteMany({ where: { user_id: numericId } });
+      await tx.user.delete({ where: { id: numericId } });
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "User deleted successfully.",
+      deletedUserId: existingUser.id,
+    });
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to delete user from database.",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
+  }
+};
+

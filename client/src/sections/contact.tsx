@@ -528,17 +528,23 @@ export default function Contact() {
     }
   }, [isModalOpen]);
 
-  // Scroll animation setup for card fan & separation effect
+  // Scroll animation setup for card fan & separation effect (3-col desktop lg+ only)
   const sectionRef = useRef<HTMLElement>(null);
-  const [isDesktop, setIsDesktop] = useState(true);
+  const [isDesktop, setIsDesktop] = useState(
+    typeof window !== "undefined" ? window.innerWidth >= 1024 : true
+  );
+  const [isTabletOrUp, setIsTabletOrUp] = useState(
+    typeof window !== "undefined" ? window.innerWidth >= 768 : true
+  );
 
   useEffect(() => {
-    const checkDesktop = () => {
-      setIsDesktop(window.innerWidth >= 768);
+    const checkViewport = () => {
+      setIsDesktop(window.innerWidth >= 1024);
+      setIsTabletOrUp(window.innerWidth >= 768);
     };
-    checkDesktop();
-    window.addEventListener("resize", checkDesktop);
-    return () => window.removeEventListener("resize", checkDesktop);
+    checkViewport();
+    window.addEventListener("resize", checkViewport);
+    return () => window.removeEventListener("resize", checkViewport);
   }, []);
 
   // Track scroll position: starts fanned when section enters viewport,
@@ -567,17 +573,17 @@ export default function Contact() {
   });
   const leftCardY = useTransform(smoothProgress, (raw) => {
     const v = clamp01(raw);
-    return (1 - v) * 52;
+    return isTabletOrUp ? (1 - v) * 52 : 0;
   });
 
   // Middle Card (Singapore): elevated on top in the center, straight
   const midCardY = useTransform(smoothProgress, (raw) => {
     const v = clamp01(raw);
-    return (1 - v) * -18;
+    return isTabletOrUp ? (1 - v) * -18 : 0;
   });
   const midCardScale = useTransform(smoothProgress, (raw) => {
     const v = clamp01(raw);
-    return 1 + (1 - v) * 0.03;
+    return isTabletOrUp ? 1 + (1 - v) * 0.03 : 1;
   });
 
   // Right Card (United States): starts shifted behind the middle card, tilted clockwise and down
@@ -591,7 +597,7 @@ export default function Contact() {
   });
   const rightCardY = useTransform(smoothProgress, (raw) => {
     const v = clamp01(raw);
-    return (1 - v) * 52;
+    return isTabletOrUp ? (1 - v) * 52 : 0;
   });
 
   const handleSubmit = async (e: FormEvent) => {

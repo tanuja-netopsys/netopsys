@@ -129,6 +129,14 @@ export default function TeamsAdminPage() {
     });
   };
 
+  const readFileAsDataUrl = (file: File): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (event) => resolve(String(event.target?.result || ""));
+      reader.onerror = () => reject(new Error("Failed to read image file"));
+      reader.readAsDataURL(file);
+    });
+
   const uploadImageFile = async (file: File) => {
     setErrorMessage("");
     setIsUploadingImage(true);
@@ -144,21 +152,38 @@ export default function TeamsAdminPage() {
         method: "POST",
         body: formData,
       });
-      const data = await res.json();
+
+      const rawText = await res.text();
+      let data: { url?: string; message?: string } = {};
+      if (rawText) {
+        try {
+          data = JSON.parse(rawText);
+        } catch {
+          data = {};
+        }
+      }
+
       if (res.ok && data.url) {
         URL.revokeObjectURL(objectUrl);
         setFormImage(data.url);
       } else {
-        throw new Error(data.message || "Upload failed");
+        throw new Error(
+          data.message ||
+            (res.status >= 500
+              ? "Upload server temporarily unavailable."
+              : `Upload failed (${res.status})`)
+        );
       }
     } catch (err) {
-      console.warn("Upload failed, falling back to base64 encoding:", err);
-      const reader = new FileReader();
-      reader.onload = (event) => {
+      console.warn("Upload endpoint unavailable, using inline image fallback:", err);
+      try {
+        const dataUrl = await readFileAsDataUrl(file);
         URL.revokeObjectURL(objectUrl);
-        setFormImage(event.target?.result as string);
-      };
-      reader.readAsDataURL(file);
+        setFormImage(dataUrl);
+      } catch (readErr) {
+        console.error("Failed to read fallback image:", readErr);
+        setErrorMessage("Unable to process image file. Please try again.");
+      }
     } finally {
       setIsUploadingImage(false);
     }

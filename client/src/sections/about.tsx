@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { motion, useScroll, useTransform, useInView } from "framer-motion";
+import { motion, useScroll, useTransform, useSpring, useInView } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 
 // Animated counter component: counts up from 1 to target value when scrolled into view
@@ -105,8 +105,14 @@ export default function About() {
     offset: ["start end", "end start"],
   });
 
-  const contentY = useTransform(scrollYProgress, [0.02, 0.25], [36, 0]);
-  const contentOpacity = useTransform(scrollYProgress, [0.02, 0.20], [0.35, 1]);
+  const smoothScrollProgress = useSpring(scrollYProgress, {
+    stiffness: 130,
+    damping: 26,
+    restDelta: 0.001,
+  });
+
+  const contentY = useTransform(smoothScrollProgress, [0.02, 0.25], [36, 0]);
+  const contentOpacity = useTransform(smoothScrollProgress, [0.02, 0.20], [0.35, 1]);
 
   return (
     <section

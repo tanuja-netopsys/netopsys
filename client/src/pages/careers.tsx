@@ -351,8 +351,8 @@ export default function CareersPage() {
                         onSubmit={handleJobNotifySubmit}
                         className="relative flex items-center bg-[#FAF8FC] border border-[#EADBFA] rounded-full p-1.5 focus-within:border-[#693092] focus-within:bg-white transition-all shadow-xs"
                       >
-                        <div className="pl-3.5 pr-2 text-[#8E869B] shrink-0">
-                          <Mail className="w-5 h-5 stroke-[1.8]" />
+                        <div className="pl-2.5 sm:pl-3.5 pr-1.5 sm:pr-2 text-[#8E869B] shrink-0">
+                          <Mail className="w-4 h-4 sm:w-5 sm:h-5 stroke-[1.8]" />
                         </div>
                         <input
                           type="email"
@@ -365,7 +365,7 @@ export default function CareersPage() {
                         <button
                           type="submit"
                           disabled={isSubmittingNotify}
-                          className="hover-brand-gradient bg-[#693092] disabled:opacity-60 text-white text-xs sm:text-sm font-semibold px-4 sm:px-6 py-2.5 rounded-full shrink-0 shadow-xs transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap"
+                          className="hover-brand-gradient bg-[#693092] disabled:opacity-60 text-white text-xs sm:text-sm font-semibold px-3.5 sm:px-6 min-h-[40px] py-2 rounded-full shrink-0 shadow-xs transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap"
                         >
                           {isSubmittingNotify && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                           <span>Notify Me</span>
@@ -412,16 +412,16 @@ export default function CareersPage() {
                     </div>
 
                     {/* Right Column: Action Buttons */}
-                    <div className="careers-role-actions flex items-center gap-3 sm:gap-3.5 shrink-0">
+                    <div className="careers-role-actions grid grid-cols-2 sm:flex items-center gap-2.5 sm:gap-3.5 w-full sm:w-auto shrink-0">
                       <button
                         onClick={() => navigate(`/jobdescription?id=${role.id}`, { state: { job: role } })}
-                        className="careers-role-btn-outline bg-white border border-[#DDD6E5] hover:border-[#693092] text-[#141010] hover:text-[#693092] font-semibold text-xs sm:text-sm rounded-full px-6 py-2.5 transition-all cursor-pointer whitespace-nowrap shadow-xs"
+                        className="careers-role-btn-outline bg-white border border-[#DDD6E5] hover:border-[#693092] text-[#141010] hover:text-[#693092] font-semibold text-xs sm:text-sm rounded-full px-3.5 sm:px-6 py-2.5 transition-all cursor-pointer whitespace-nowrap shadow-xs text-center"
                       >
                         View Details
                       </button>
                       <button
                         onClick={() => handleApplyClick(role)}
-                        className="careers-role-btn-primary hover-brand-gradient bg-[#693092] hover:bg-[#58247c] text-white font-semibold text-xs sm:text-sm rounded-full px-6 py-2.5 flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap shadow-sm"
+                        className="careers-role-btn-primary hover-brand-gradient bg-[#693092] hover:bg-[#58247c] text-white font-semibold text-xs sm:text-sm rounded-full px-3.5 sm:px-6 py-2.5 flex items-center justify-center gap-1.5 transition-all cursor-pointer whitespace-nowrap shadow-sm"
                       >
                         <span>Apply Now</span>
                         <ArrowUpRight className="w-4 h-4 stroke-[2.2]" />
@@ -451,7 +451,7 @@ export default function CareersPage() {
                         onSubmit={handleJobNotifySubmit}
                         className="relative flex items-center bg-[#FAF8FC] border border-[#EADBFA] rounded-full p-1.5 focus-within:border-[#693092] focus-within:bg-white transition-all shadow-xs overflow-visible"
                       >
-                        <div className="pl-3.5 pr-2 text-[#8E869B] shrink-0">
+                        <div className="pl-2.5 sm:pl-3.5 pr-1.5 sm:pr-2 text-[#8E869B] shrink-0">
                           <Mail className="w-4 h-4 stroke-[1.8]" />
                         </div>
                         <input
@@ -470,7 +470,7 @@ export default function CareersPage() {
                             className={`relative transition-all duration-300 font-semibold text-xs sm:text-sm rounded-full shrink-0 shadow-xs cursor-pointer flex items-center justify-center gap-1.5 whitespace-nowrap overflow-visible ${
                               isPaperRocketFlying
                                 ? "w-10 h-10 p-0 bg-transparent shadow-none"
-                                : "hover-brand-gradient bg-[#693092] text-white px-4 sm:px-5 py-2.5 disabled:opacity-60"
+                                : "hover-brand-gradient bg-[#693092] text-white px-3.5 sm:px-5 min-h-[40px] py-2 disabled:opacity-60"
                             }`}
                           >
                             {isPaperRocketFlying ? (
