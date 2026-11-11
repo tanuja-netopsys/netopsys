@@ -4,6 +4,7 @@ import { Send, Mail, Loader2, Check } from "lucide-react";
 import netopsysLogo from "../assets/netopsys-logo.png";
 import { toast } from "./toast.tsx";
 import FallingToolsPhysics from "./FallingToolsPhysics.tsx";
+import { openCookiePreferences } from "../utils/cookie-consent.ts";
 
 export default function Footer() {
   const navigate = useNavigate();
@@ -74,6 +75,32 @@ export default function Footer() {
     if (targetId === "portfolio-page" || targetId === "portfolio") {
       if (location.pathname !== "/portfolio") {
         navigate("/portfolio");
+      }
+      window.scrollTo({ top: 0, behavior: "instant" });
+      return;
+    }
+    if (targetId.startsWith("services/") || targetId === "services") {
+      if (targetId === "services") {
+        if (location.pathname !== "/services") {
+          navigate("/services");
+        }
+      } else {
+        navigate(`/${targetId}`);
+      }
+      window.scrollTo({ top: 0, behavior: "instant" });
+      return;
+    }
+    if (
+      targetId === "privacy-policy" ||
+      targetId === "privacypolicy" ||
+      targetId === "terms-conditions" ||
+      targetId === "terms-and-conditions" ||
+      targetId === "terms&conditions" ||
+      targetId === "cookie-policy" ||
+      targetId === "cookiepolicy"
+    ) {
+      if (location.pathname !== `/${targetId}`) {
+        navigate(`/${targetId}`);
       }
       window.scrollTo({ top: 0, behavior: "instant" });
       return;
@@ -183,38 +210,38 @@ export default function Footer() {
               <ul className="space-y-2.5">
                 <li>
                   <a
-                    href="#services"
-                    onClick={(e) => handleSmoothScroll(e, "services")}
+                    href="/services/custom-software-development"
+                    onClick={(e) => handleSmoothScroll(e, "services/custom-software-development")}
                     className="text-[#9B94AA] hover:text-white text-xs sm:text-[13.5px] md:text-[14px] transition-colors block cursor-pointer pointer-events-auto"
                   >
-                    Machine Learning
+                    Custom Software Development
                   </a>
                 </li>
                 <li>
                   <a
-                    href="#services"
-                    onClick={(e) => handleSmoothScroll(e, "services")}
+                    href="/services/web-and-mobile-applications"
+                    onClick={(e) => handleSmoothScroll(e, "services/web-and-mobile-applications")}
                     className="text-[#9B94AA] hover:text-white text-xs sm:text-[13.5px] md:text-[14px] transition-colors block cursor-pointer pointer-events-auto"
                   >
-                    NLP Solutions
+                    Web & Mobile Applications
                   </a>
                 </li>
                 <li>
                   <a
-                    href="#services"
-                    onClick={(e) => handleSmoothScroll(e, "services")}
+                    href="/services/cloud-solutions"
+                    onClick={(e) => handleSmoothScroll(e, "services/cloud-solutions")}
                     className="text-[#9B94AA] hover:text-white text-xs sm:text-[13.5px] md:text-[14px] transition-colors block cursor-pointer pointer-events-auto"
                   >
-                    Computer Vision
+                    Cloud Solutions
                   </a>
                 </li>
                 <li>
                   <a
-                    href="#services"
-                    onClick={(e) => handleSmoothScroll(e, "services")}
+                    href="/services/security"
+                    onClick={(e) => handleSmoothScroll(e, "services/security")}
                     className="text-[#9B94AA] hover:text-white text-xs sm:text-[13.5px] md:text-[14px] transition-colors block cursor-pointer pointer-events-auto"
                   >
-                    AI Automation
+                    Security
                   </a>
                 </li>
               </ul>
@@ -246,11 +273,11 @@ export default function Footer() {
                 </li>
                 <li>
                   <a
-                    href="#about"
-                    onClick={(e) => handleSmoothScroll(e, "about")}
+                    href="#team"
+                    onClick={(e) => handleSmoothScroll(e, "team")}
                     className="text-[#9B94AA] hover:text-white text-xs sm:text-[13.5px] md:text-[14px] transition-colors block cursor-pointer pointer-events-auto"
                   >
-                    Technologies
+                    Team
                   </a>
                 </li>
                 <li>
@@ -265,38 +292,50 @@ export default function Footer() {
               </ul>
             </div>
 
-            {/* Column 4: Resources */}
+            {/* Column 4: Legal */}
             <div>
               <h4 className="text-white font-medium text-sm sm:text-[15px] tracking-tight mb-4">
-                Resources
+                Legal
               </h4>
               <ul className="space-y-2.5">
                 <li>
                   <a
-                    href="#portfolio"
-                    onClick={(e) => handleSmoothScroll(e, "portfolio")}
+                    href="/privacy-policy"
+                    onClick={(e) => handleSmoothScroll(e, "privacy-policy")}
                     className="text-[#9B94AA] hover:text-white text-xs sm:text-[13.5px] md:text-[14px] transition-colors block cursor-pointer pointer-events-auto"
                   >
-                    AI Assessment Platform
+                    Privacy Policy
                   </a>
                 </li>
                 <li>
                   <a
-                    href="#portfolio"
-                    onClick={(e) => handleSmoothScroll(e, "portfolio")}
+                    href="/terms-conditions"
+                    onClick={(e) => handleSmoothScroll(e, "terms-conditions")}
                     className="text-[#9B94AA] hover:text-white text-xs sm:text-[13.5px] md:text-[14px] transition-colors block cursor-pointer pointer-events-auto"
                   >
-                    ERP Solutions
+                    Terms &amp; Conditions
                   </a>
                 </li>
                 <li>
                   <a
-                    href="#portfolio"
-                    onClick={(e) => handleSmoothScroll(e, "portfolio")}
+                    href="/cookie-policy"
+                    onClick={(e) => handleSmoothScroll(e, "cookie-policy")}
                     className="text-[#9B94AA] hover:text-white text-xs sm:text-[13.5px] md:text-[14px] transition-colors block cursor-pointer pointer-events-auto"
                   >
-                    Recruitment Platform
+                    Cookie Policy
                   </a>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      openCookiePreferences();
+                    }}
+                    className="text-[#9B94AA] hover:text-white text-xs sm:text-[13.5px] md:text-[14px] transition-colors block cursor-pointer pointer-events-auto text-left"
+                  >
+                    Cookie Settings
+                  </button>
                 </li>
               </ul>
             </div>
@@ -440,7 +479,7 @@ export default function Footer() {
           <p className="mt-1 text-[#666173] text-[11.5px] sm:text-[12.5px]">
             All company names, product names, and logos are trademarks of their respective owners.
           </p>
-          <div className="mt-2.5 flex items-center justify-center gap-6 text-xs text-[#9B94AA]">
+          <div className="mt-2.5 flex flex-wrap items-center justify-center gap-x-6 gap-y-1 text-xs text-[#9B94AA]">
             <a
               href="/privacy-policy"
               onClick={(e) => {
@@ -463,8 +502,25 @@ export default function Footer() {
             >
               Terms &amp; Conditions
             </a>
+            <a
+              href="/cookie-policy"
+              onClick={(e) => {
+                e.preventDefault();
+                navigate("/cookie-policy");
+                window.scrollTo({ top: 0, behavior: "instant" });
+              }}
+              className="hover:text-white transition-colors underline cursor-pointer"
+            >
+              Cookie Policy
+            </a>
+            <button
+              type="button"
+              onClick={() => openCookiePreferences()}
+              className="hover:text-white transition-colors underline cursor-pointer bg-transparent border-0 p-0 text-xs text-[#9B94AA]"
+            >
+              Cookie Settings
+            </button>
           </div>
-
         </div>
       </div>
     </footer>

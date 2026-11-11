@@ -401,11 +401,11 @@ export default function PortfolioDetailPage() {
               <div className="mb-3.5 sm:mb-4 lg:mb-5 portfoliodetail-back-wrap">
                 <Link
                   to="/portfolio"
-                  className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full bg-white border border-[#693092]/20 hover:border-[#693092]/40 text-[#693092] text-xs sm:text-[13px] font-semibold tracking-wide shadow-sm hover:shadow-md transition-all duration-200 select-none cursor-pointer w-fit group"
+                  className="inline-flex items-center gap-2 text-xs sm:text-[13px] font-semibold text-[#6C6377] hover:text-[#693092] transition-colors cursor-pointer select-none w-fit"
                   aria-label="Back to Projects"
                 >
-                  <ArrowLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform group-hover:-translate-x-1 stroke-[2.5]" />
-                  <span>Back to Projects</span>
+                  <ArrowLeft className="w-3.5 h-3.5 stroke-[2.2]" />
+                  <span>Back to Portfolio</span>
                 </Link>
               </div>
 

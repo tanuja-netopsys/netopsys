@@ -88,7 +88,7 @@ export default function AboutPage() {
                 ViewBox 0 0 900 435 with exact pixel coordinates 
               */}
               <svg
-                viewBox="0 0 900 435"
+                viewBox="0 0 900 475"
                 className="about-page-hero-svg w-full h-auto overflow-visible select-none"
                 aria-label="Pioneering Digital Excellence - Key Metrics and Capabilities Infographic"
               >
@@ -126,7 +126,7 @@ export default function AboutPage() {
                       100% { transform: translateY(0) scale(1); opacity: 1; }
                     }
                     @keyframes drawLine {
-                      0% { stroke-dashoffset: 650; opacity: 0; }
+                      0% { stroke-dashoffset: 750; opacity: 0; }
                       5% { opacity: 1; }
                       100% { stroke-dashoffset: 0; opacity: 1; }
                     }
@@ -148,7 +148,7 @@ export default function AboutPage() {
                       animation-fill-mode: both;
                     }
                     .arch-line {
-                      stroke-dasharray: 650;
+                      stroke-dasharray: 750;
                       animation-fill-mode: both;
                     }
 
@@ -164,21 +164,21 @@ export default function AboutPage() {
                     .num-pink { transform-origin: 655px 186px; animation: textFloat 0.45s ease-out 0.8s both; }
                     .node-pink { transform-origin: 655px 218px; animation: popIn 0.35s ease-out 0.9s both; }
                     .line-pink { animation: drawLine 0.55s ease-out 1.0s both; }
-                    .label-2 { transform-origin: 354px 322px; animation: labelSlide 0.45s ease-out 1.3s both; }
+                    .label-2 { transform-origin: 354px 338px; animation: labelSlide 0.45s ease-out 1.3s both; }
 
                     /* Phase 3: 60+ & Technologies (Yellow) */
                     .arch-yellow { animation: archGrow 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.85s both; }
                     .num-yellow { transform-origin: 740px 205px; animation: textFloat 0.45s ease-out 1.15s both; }
                     .node-yellow { transform-origin: 740px 228px; animation: popIn 0.35s ease-out 1.25s both; }
                     .line-yellow { animation: drawLine 0.55s ease-out 1.35s both; }
-                    .label-3 { transform-origin: 354px 355px; animation: labelSlide 0.45s ease-out 1.65s both; }
+                    .label-3 { transform-origin: 354px 386px; animation: labelSlide 0.45s ease-out 1.65s both; }
 
                     /* Phase 4: 100% & Enterprise Grade (Navy) */
                     .arch-navy { animation: archGrow 0.65s cubic-bezier(0.16, 1, 0.3, 1) 1.2s both; }
                     .num-navy { transform-origin: 830px 217px; animation: textFloat 0.45s ease-out 1.5s both; }
                     .node-navy { transform-origin: 830px 238px; animation: popIn 0.35s ease-out 1.6s both; }
                     .line-navy { animation: drawLine 0.55s ease-out 1.7s both; }
-                    .label-4 { transform-origin: 354px 387px; animation: labelSlide 0.45s ease-out 2.0s both; }
+                    .label-4 { transform-origin: 354px 434px; animation: labelSlide 0.45s ease-out 2.0s both; }
 
                     @media (prefers-reduced-motion: reduce) {
                       .hero-infographic-intro,
@@ -367,9 +367,9 @@ export default function AboutPage() {
                   markerEnd="url(#arrow-left-solid)"
                 />
 
-                {/* Line 2: From 15+ (x=655, y=224) down to y=322, then left to x=368 */}
+                {/* Line 2: From 15+ (x=655, y=224) down to y=338, then left to x=368 */}
                 <path
-                  d="M 655,224 L 655,322 L 368,322"
+                  d="M 655,224 L 655,338 L 368,338"
                   fill="none"
                   stroke="#573E75"
                   strokeWidth="1.8"
@@ -379,9 +379,9 @@ export default function AboutPage() {
                   markerEnd="url(#arrow-left-solid)"
                 />
 
-                {/* Line 3: From 60+ (x=740, y=233) down to y=355, then left to x=368 */}
+                {/* Line 3: From 60+ (x=740, y=233) down to y=386, then left to x=368 */}
                 <path
-                  d="M 740,233 L 740,355 L 368,355"
+                  d="M 740,233 L 740,386 L 368,386"
                   fill="none"
                   stroke="#573E75"
                   strokeWidth="1.8"
@@ -391,9 +391,9 @@ export default function AboutPage() {
                   markerEnd="url(#arrow-left-solid)"
                 />
 
-                {/* Line 4: From 100% (x=830, y=243) down to y=387, then left to x=368 */}
+                {/* Line 4: From 100% (x=830, y=243) down to y=434, then left to x=368 */}
                 <path
-                  d="M 830,243 L 830,387 L 368,387"
+                  d="M 830,243 L 830,434 L 368,434"
                   fill="none"
                   stroke="#573E75"
                   strokeWidth="1.8"
@@ -412,7 +412,7 @@ export default function AboutPage() {
                 <g className="label-1">
                   <text
                     x="354"
-                    y="286"
+                    y="285"
                     textAnchor="end"
                     fontSize="15.5"
                     fill="#141010"
@@ -427,7 +427,7 @@ export default function AboutPage() {
                   </text>
                   <text
                     x="354"
-                    y="299"
+                    y="301"
                     textAnchor="end"
                     fontSize="11"
                     fill="#6B6377"
@@ -442,11 +442,11 @@ export default function AboutPage() {
                   </text>
                 </g>
 
-                {/* Item 2: Years experience (Aligned with y = 322) */}
+                {/* Item 2: Years experience (Aligned with y = 338) */}
                 <g className="label-2">
                   <text
                     x="354"
-                    y="318"
+                    y="333"
                     textAnchor="end"
                     fontSize="15.5"
                     fill="#141010"
@@ -461,7 +461,7 @@ export default function AboutPage() {
                   </text>
                   <text
                     x="354"
-                    y="331"
+                    y="349"
                     textAnchor="end"
                     fontSize="11"
                     fill="#6B6377"
@@ -476,11 +476,11 @@ export default function AboutPage() {
                   </text>
                 </g>
 
-                {/* Item 3: Technologies (Aligned with y = 355) */}
+                {/* Item 3: Technologies (Aligned with y = 386) */}
                 <g className="label-3">
                   <text
                     x="354"
-                    y="351"
+                    y="381"
                     textAnchor="end"
                     fontSize="15.5"
                     fill="#141010"
@@ -495,7 +495,7 @@ export default function AboutPage() {
                   </text>
                   <text
                     x="354"
-                    y="364"
+                    y="397"
                     textAnchor="end"
                     fontSize="11"
                     fill="#6B6377"
@@ -510,11 +510,11 @@ export default function AboutPage() {
                   </text>
                 </g>
 
-                {/* Item 4: Enterprise Grade (Aligned with y = 387) */}
+                {/* Item 4: Enterprise Grade (Aligned with y = 434) */}
                 <g className="label-4">
                   <text
                     x="354"
-                    y="383"
+                    y="429"
                     textAnchor="end"
                     fontSize="15.5"
                     fill="#141010"
@@ -529,7 +529,7 @@ export default function AboutPage() {
                   </text>
                   <text
                     x="354"
-                    y="396"
+                    y="445"
                     textAnchor="end"
                     fontSize="11"
                     fill="#6B6377"
@@ -788,13 +788,13 @@ export default function AboutPage() {
           {/* 4. BOTTOM CTA BANNER: "Ready to get started?"                    */}
           {/* ================================================================ */}
           <div className="w-full mt-10 sm:mt-14 lg:mt-16 mb-10 sm:mb-14">
-            <div className="w-full bg-[#2A1450] rounded-2xl sm:rounded-3xl shadow-xl shadow-[#2A1450]/20 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 px-6 sm:px-10 lg:px-12 py-7 sm:py-9 lg:py-10">
+            <div className="w-full bg-[#2A1450] rounded-2xl sm:rounded-3xl shadow-xl shadow-[#2A1450]/20 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 px-6 sm:px-10 lg:px-14 py-10 sm:py-14 lg:py-16 cta-banner-card">
               {/* Left Texts: Heading and subtitle */}
-              <div className="flex flex-col sm:flex-row sm:items-baseline gap-2 sm:gap-4 md:gap-5">
-                <h3 className="font-light tracking-[-0.035em] text-white text-xl sm:text-2xl md:text-[1.85rem] whitespace-nowrap">
+              <div className="flex flex-col sm:flex-row sm:items-baseline gap-2.5 sm:gap-4 md:gap-6">
+                <h3 className="font-light tracking-[-0.035em] text-white text-2xl sm:text-3xl md:text-[2rem] whitespace-nowrap cta-banner-title">
                   Ready to get started?
                 </h3>
-                <span className="text-white/85 font-normal text-xs sm:text-sm md:text-[15px]">
+                <span className="text-white/85 font-normal text-xs sm:text-sm md:text-[15px] cta-banner-subtitle">
                   Let&apos;s build something great together
                 </span>
               </div>
@@ -803,7 +803,7 @@ export default function AboutPage() {
               <div className="flex-shrink-0">
                 <Link
                   to="/contact"
-                  className="hover-brand-gradient inline-flex items-center justify-center bg-[#FBAE42] text-black hover:text-white font-medium rounded-full shadow-md whitespace-nowrap cursor-pointer transition-colors text-xs sm:text-sm px-6 sm:px-7 py-2.5 sm:py-3"
+                  className="cta-banner-btn hover-brand-gradient inline-flex items-center justify-center bg-[#FBAE42] text-black hover:text-white font-medium rounded-full shadow-md whitespace-nowrap cursor-pointer transition-colors text-xs sm:text-sm px-6 sm:px-7 py-2.5 sm:py-3"
                 >
                   Let's Connect
                 </Link>

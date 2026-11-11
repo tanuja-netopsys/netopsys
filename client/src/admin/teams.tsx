@@ -11,10 +11,12 @@ import {
   Loader2,
   CheckCircle2,
   AlertCircle,
+  Crop,
 } from "lucide-react";
 import netopsysLogo from "../assets/netopsys-ai-logo.png";
 import AdminSidebar from "./sidebar.tsx";
 import { toast } from "../componenets/toast.tsx";
+import ImageCropModal from "../componenets/image-crop-modal.tsx";
 
 export interface AdminTeamMember {
   id: string | number;
@@ -50,6 +52,14 @@ export default function TeamsAdminPage() {
   const [formBio, setFormBio] = useState("");
   const [formImage, setFormImage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+
+  // Image Cropper State
+  const [cropSource, setCropSource] = useState<{
+    src: string;
+    fileName: string;
+    rawFile: File | null;
+  } | null>(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -110,41 +120,82 @@ export default function TeamsAdminPage() {
     setIsModalOpen(true);
   };
 
-  const handleImageFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const closeCropModal = () => {
+    setCropSource((prev) => {
+      if (prev?.src.startsWith("blob:")) {
+        URL.revokeObjectURL(prev.src);
+      }
+      return null;
+    });
+  };
+
+  const uploadImageFile = async (file: File) => {
+    setErrorMessage("");
+    setIsUploadingImage(true);
+
+    // Provide immediate local preview while uploading
+    const objectUrl = URL.createObjectURL(file);
+    setFormImage(objectUrl);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (res.ok && data.url) {
+        URL.revokeObjectURL(objectUrl);
+        setFormImage(data.url);
+      } else {
+        throw new Error(data.message || "Upload failed");
+      }
+    } catch (err) {
+      console.warn("Upload failed, falling back to base64 encoding:", err);
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        URL.revokeObjectURL(objectUrl);
+        setFormImage(event.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
+
+  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 15 * 1024 * 1024) {
-        setErrorMessage("Image file must be less than 15MB");
-        return;
-      }
-      setErrorMessage("");
+    e.target.value = "";
+    if (!file) return;
 
-      // Provide immediate local preview while uploading
-      const objectUrl = URL.createObjectURL(file);
-      setFormImage(objectUrl);
+    if (file.size > 15 * 1024 * 1024) {
+      setErrorMessage("Image file must be less than 15MB");
+      return;
+    }
 
-      // Upload to multer /api/upload endpoint
-      try {
-        const formData = new FormData();
-        formData.append("file", file);
-        const res = await fetch("/api/upload", {
-          method: "POST",
-          body: formData,
-        });
-        const data = await res.json();
-        if (res.ok && data.url) {
-          setFormImage(data.url);
-        } else {
-          throw new Error(data.message || "Upload failed");
-        }
-      } catch (err) {
-        console.warn("Upload failed, falling back to base64 encoding:", err);
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          setFormImage(event.target?.result as string);
-        };
-        reader.readAsDataURL(file);
-      }
+    setErrorMessage("");
+    closeCropModal();
+    setCropSource({
+      src: URL.createObjectURL(file),
+      fileName: file.name || "team-member.jpg",
+      rawFile: file,
+    });
+  };
+
+  const handleCropComplete = async (croppedBlob: Blob, croppedFileName: string) => {
+    const croppedFile = new File([croppedBlob], croppedFileName, {
+      type: croppedBlob.type || "image/jpeg",
+    });
+    closeCropModal();
+    await uploadImageFile(croppedFile);
+  };
+
+  const handleUseOriginalCrop = async () => {
+    const rawFile = cropSource?.rawFile;
+    closeCropModal();
+    if (rawFile) {
+      await uploadImageFile(rawFile);
     }
   };
 
@@ -540,23 +591,45 @@ export default function TeamsAdminPage() {
                       className="w-16 h-16 rounded-xl object-cover border border-black/5 shrink-0 bg-white shadow-2xs"
                     />
                     <div className="min-w-0 flex-1">
-                      <p className="text-xs font-semibold text-[#141010] truncate">Photo Selected</p>
-                      <p className="text-[11px] text-[#716A7E]">Click change or remove to replace</p>
+                      <p className="text-xs font-semibold text-[#141010] truncate">
+                        {isUploadingImage ? "Uploading cropped photo..." : "Photo Selected"}
+                      </p>
+                      <p className="text-[11px] text-[#716A7E]">
+                        Crop, change, or remove photo
+                      </p>
                     </div>
                     <div className="flex items-center gap-1.5 shrink-0 pr-1">
                       <button
                         type="button"
+                        disabled={isUploadingImage}
+                        onClick={() => {
+                          setCropSource({
+                            src: formImage,
+                            fileName: formName.trim() || "team-member.jpg",
+                            rawFile: null,
+                          });
+                        }}
+                        className="inline-flex items-center gap-1 text-xs font-semibold text-[#5D2381] bg-[#F1E4F8]/70 hover:bg-[#F1E4F8] px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
+                        title="Crop photo"
+                      >
+                        <Crop className="w-3.5 h-3.5" />
+                        <span>Crop</span>
+                      </button>
+                      <button
+                        type="button"
+                        disabled={isUploadingImage}
                         onClick={() => fileInputRef.current?.click()}
-                        className="text-xs font-semibold text-[#5D2381] hover:bg-[#F1E4F8] px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer"
+                        className="text-xs font-semibold text-[#5D2381] hover:bg-[#F1E4F8] px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
                       >
                         Change
                       </button>
                       <button
                         type="button"
+                        disabled={isUploadingImage}
                         onClick={() => {
                           setFormImage("");
                         }}
-                        className="text-gray-400 hover:text-red-500 p-1.5 rounded-lg hover:bg-red-50 transition-colors cursor-pointer"
+                        className="text-gray-400 hover:text-red-500 p-1.5 rounded-lg hover:bg-red-50 transition-colors cursor-pointer disabled:opacity-50"
                         title="Remove photo"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -611,7 +684,7 @@ export default function TeamsAdminPage() {
                 </button>
                 <button
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || isUploadingImage}
                   className="hover-brand-gradient bg-[#5D2381] text-white px-5 py-2 rounded-xl text-xs font-semibold shadow-xs cursor-pointer inline-flex items-center gap-2 disabled:opacity-50"
                 >
                   {isSubmitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
@@ -750,6 +823,16 @@ export default function TeamsAdminPage() {
           </div>
         </div>
       )}
+      {/* Interactive Photo Cropper Modal */}
+      <ImageCropModal
+        isOpen={Boolean(cropSource)}
+        imageSrc={cropSource?.src || ""}
+        fileName={cropSource?.fileName}
+        canUseOriginal={Boolean(cropSource?.rawFile)}
+        onUseOriginal={handleUseOriginalCrop}
+        onCropComplete={handleCropComplete}
+        onClose={closeCropModal}
+      />
     </div>
   );
 }

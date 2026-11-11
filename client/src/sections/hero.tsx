@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, memo, type MouseEvent } from "react";
+import { useLocation } from "react-router-dom";
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import {
   Sparkles,
@@ -723,10 +724,174 @@ export const Hero3DGlassCube = memo(function Hero3DGlassCube({
 });
 
 // ============================================================================
-// 4. MAIN HERO SECTION COMPONENT (UI & UX 100% PRESERVED)
+// 4. LAUNCH CELEBRATION FALLING CONFETTI OVERLAY
+// ============================================================================
+const CONFETTI_COLORS = [
+  "#6D12F2",
+  "#BE3093",
+  "#EC4899",
+  "#FFFFFF",
+  "#0B0716",
+  "#38BDF8",
+  "#10B981",
+  "#F43F5E",
+  "#FDE047",
+];
+
+function HeroLaunchConfetti({ onComplete }: { onComplete: () => void }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const onCompleteRef = useRef(onComplete);
+  onCompleteRef.current = onComplete;
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    let width = canvas.parentElement?.clientWidth || window.innerWidth;
+    let height = canvas.parentElement?.clientHeight || window.innerHeight;
+
+    const resize = () => {
+      if (!canvas) return;
+      width = canvas.parentElement?.clientWidth || window.innerWidth;
+      height = canvas.parentElement?.clientHeight || window.innerHeight;
+      canvas.width = Math.floor(width * dpr);
+      canvas.height = Math.floor(height * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+    resize();
+    window.addEventListener("resize", resize);
+
+    const shapes = ["rect", "circle", "diamond"] as const;
+    const spawnConfetti = (idx: number, initialSpread: boolean) => {
+      // Initial wave fills top edge + twin corner bursts; later respawns rain evenly across full width
+      const isLeftCannon = initialSpread && idx < 45;
+      const isRightCannon = initialSpread && idx >= 45 && idx < 90;
+      const x = isLeftCannon
+        ? Math.random() * (width * 0.16)
+        : isRightCannon
+        ? width - Math.random() * (width * 0.16)
+        : Math.random() * width;
+      const y = isLeftCannon || isRightCannon
+        ? Math.random() * (height * 0.14)
+        : initialSpread
+        ? -15 - Math.random() * (height * 0.7)
+        : -16 - Math.random() * 60;
+      const vx = isLeftCannon
+        ? 2.2 + Math.random() * 4.5
+        : isRightCannon
+        ? -(2.2 + Math.random() * 4.5)
+        : (Math.random() - 0.5) * 2.4;
+
+      return {
+        x,
+        y,
+        w: 8 + Math.random() * 7,
+        h: 10 + Math.random() * 8,
+        vx,
+        vy: 2.6 + Math.random() * 3.4,
+        rot: Math.random() * Math.PI * 2,
+        rotSpeed: (Math.random() - 0.5) * 0.16,
+        tilt: Math.random() * Math.PI * 2,
+        tiltSpeed: 0.06 + Math.random() * 0.09,
+        swayPhase: Math.random() * Math.PI * 2,
+        color: CONFETTI_COLORS[idx % CONFETTI_COLORS.length],
+        shape: shapes[idx % shapes.length],
+      };
+    };
+
+    const particles = Array.from({ length: 320 }, (_, idx) => spawnConfetti(idx, true));
+
+    let rafId = 0;
+    const startTime = performance.now();
+    let lastTime = startTime;
+    const respawnUntil = 4200;
+    const totalDuration = 6400;
+
+    const renderFrame = (now: number) => {
+      const elapsed = now - startTime;
+      const dt = Math.min((now - lastTime) / 16.667, 2.5);
+      lastTime = now;
+
+      ctx.clearRect(0, 0, width, height);
+      const fadeAlpha =
+        elapsed > totalDuration - 1500
+          ? Math.max(0, (totalDuration - elapsed) / 1500)
+          : 1;
+
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+        p.x += (p.vx + Math.sin(elapsed * 0.0032 + p.swayPhase) * 0.85) * dt;
+        p.y += p.vy * dt;
+        p.vx *= Math.pow(0.992, dt);
+        p.vy = Math.min(p.vy + 0.03 * dt, 5.8);
+        p.rot += p.rotSpeed * dt;
+        p.tilt += p.tiltSpeed * dt;
+
+        if (p.y > height + 32) {
+          if (elapsed < respawnUntil) {
+            particles[i] = spawnConfetti(i, false);
+          }
+          continue;
+        }
+
+        ctx.save();
+        ctx.globalAlpha = fadeAlpha * 0.96;
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rot);
+        ctx.scale(1, Math.max(0.22, Math.abs(Math.cos(p.tilt))));
+        ctx.fillStyle = p.color;
+
+        if (p.shape === "circle") {
+          ctx.beginPath();
+          ctx.arc(0, 0, p.w * 0.48, 0, Math.PI * 2);
+          ctx.fill();
+        } else if (p.shape === "diamond") {
+          ctx.beginPath();
+          ctx.moveTo(0, -p.h * 0.58);
+          ctx.lineTo(p.w * 0.52, 0);
+          ctx.lineTo(0, p.h * 0.58);
+          ctx.lineTo(-p.w * 0.52, 0);
+          ctx.closePath();
+          ctx.fill();
+        } else {
+          ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h * 0.65);
+        }
+        ctx.restore();
+      }
+
+      if (elapsed < totalDuration) {
+        rafId = requestAnimationFrame(renderFrame);
+      } else {
+        onCompleteRef.current();
+      }
+    };
+
+    rafId = requestAnimationFrame(renderFrame);
+    return () => {
+      cancelAnimationFrame(rafId);
+      window.removeEventListener("resize", resize);
+    };
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-0 w-full h-full z-40"
+    />
+  );
+}
+
+// ============================================================================
+// 5. MAIN HERO SECTION COMPONENT (UI & UX 100% PRESERVED)
 // ============================================================================
 export default function Hero() {
   const heroRef = useRef<HTMLElement>(null);
+  const location = useLocation();
+  const [showLaunchConfetti, setShowLaunchConfetti] = useState(false);
   const [heroTitleIndex, setHeroTitleIndex] = useState(0);
   const [isDesktop, setIsDesktop] = useState(false);
   const [viewportHeight, setViewportHeight] = useState(
@@ -735,6 +900,29 @@ export default function Hero() {
   const [devicePixelRatio, setDevicePixelRatio] = useState(
     typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1
   );
+
+  // Trigger full hero confetti shower when arriving from LaunchingPage Launch button
+  useEffect(() => {
+    const state = location.state as { celebrateLaunch?: boolean } | null;
+    let fromStorage = false;
+    try {
+      fromStorage = sessionStorage.getItem("netopsys_launch_confetti") === "1";
+    } catch {}
+
+    if (state?.celebrateLaunch || fromStorage) {
+      setShowLaunchConfetti(true);
+      // Clear after StrictMode initial double-mount completes so page refreshes stay clean
+      const cleanupTimer = window.setTimeout(() => {
+        try {
+          sessionStorage.removeItem("netopsys_launch_confetti");
+        } catch {}
+        if (state?.celebrateLaunch) {
+          window.history.replaceState({}, document.title);
+        }
+      }, 600);
+      return () => window.clearTimeout(cleanupTimer);
+    }
+  }, [location.state]);
 
   // Track window resize for desktop-only scroll parallax and height-aware display scaling
   useEffect(() => {
@@ -791,6 +979,9 @@ export default function Hero() {
       id="home"
       className="hero-section-wrap relative lg:sticky lg:top-0 w-full min-h-[100dvh] lg:min-h-[100dvh] flex items-center bg-[#FBAE42] px-4 sm:px-6 md:px-8 lg:px-8 xl:px-10 2xl:px-14 min-[1680px]:px-20 pt-24 sm:pt-28 md:pt-32 lg:pt-14 xl:pt-10 pb-12 sm:pb-16 lg:pb-10 overflow-x-clip select-none z-0"
     >
+      {showLaunchConfetti && (
+        <HeroLaunchConfetti onComplete={() => setShowLaunchConfetti(false)} />
+      )}
       {/* 2-Column Responsive Layout - Fluid Scaling Across All Breakpoints */}
       <div className="w-full max-w-[2100px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-6 xl:gap-8 2xl:gap-10 min-[1680px]:gap-16 items-center justify-between">
         {/* Left Column: Fluid Responsive Typography & Adaptive Spacing */}

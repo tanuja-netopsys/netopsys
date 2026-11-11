@@ -349,11 +349,11 @@ export default function Services() {
     startX = Math.min(380, Math.max(240, Math.round(windowWidth * 0.22)));
   } else if (is125Screen) {
     // 125% Windows Scaling (1536x864, height ~700-800px)
-    cardHeight = Math.min(420, Math.max(350, Math.round(windowHeight * 0.47)));
-    cardWidth = Math.min(340, Math.max(270, Math.round(cardHeight * 0.76)));
+    cardHeight = Math.min(435, Math.max(385, Math.round(windowHeight * 0.51)));
+    cardWidth = Math.min(355, Math.max(300, Math.round(cardHeight * 0.78)));
     radius = Math.min(620, Math.max(500, Math.round(windowWidth * 0.36)));
     perspective = Math.min(1350, Math.max(1050, Math.round(radius * 2.1)));
-    cubeSize = Math.min(230, Math.max(160, Math.round(cardHeight * 0.50)));
+    cubeSize = Math.min(230, Math.max(160, Math.round(cardHeight * 0.48)));
     startX = Math.min(320, Math.max(210, Math.round(windowWidth * 0.20)));
   } else {
     // 150%, 175% and 200% Windows Scaling (1280x720 / 1097x617 / 960x540, height ~420-640px)
@@ -439,7 +439,7 @@ export default function Services() {
           <div className="relative w-full max-w-[2100px] mx-auto px-4 sm:px-6 md:px-8 lg:px-10 xl:px-14 min-[1680px]:px-18 z-10 flex-shrink-0 pointer-events-none">
             {/* Top Eyebrow Button */}
             <div className={is100Screen ? "mb-2.5" : is125Screen ? "mb-1.5" : "mb-1"}>
-              <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-0.5 sm:py-1 rounded-full bg-white border border-[#693092]/20 hover:border-[#693092]/40 text-[#693092] text-xs min-[1680px]:text-[13px] font-semibold tracking-wide shadow-xs hover:shadow-md transition-all duration-200 select-none cursor-default pointer-events-auto">
+              <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-0.5 sm:py-1 rounded-full bg-white border border-[#693092]/20 text-[#693092] text-xs min-[1680px]:text-[13px] font-semibold tracking-wide shadow-xs select-none cursor-default pointer-events-auto">
                 <span>Services</span>
                 <div className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-[#693092] text-white flex items-center justify-center">
                   <ArrowRight className="w-2 sm:w-2.5 h-2 sm:h-2.5 stroke-[2.5]" />
@@ -808,7 +808,7 @@ export default function Services() {
                         is100Screen
                           ? "rounded-[30px] p-5.5 sm:p-6"
                           : is125Screen
-                          ? "rounded-[24px] p-4.5 sm:p-5"
+                          ? "rounded-[24px] p-4"
                           : isMobile
                           ? "rounded-[20px] p-3.5"
                           : is150Screen
@@ -845,7 +845,7 @@ export default function Services() {
                           height: is100Screen
                             ? "175px"
                             : is125Screen
-                            ? "135px"
+                            ? "118px"
                             : isTablet
                             ? "120px"
                             : isMobile
@@ -898,7 +898,7 @@ export default function Services() {
                               fontSize: is100Screen
                                 ? "22px"
                                 : is125Screen
-                                ? "18px"
+                                ? "17.5px"
                                 : isMobile
                                 ? "15.5px"
                                 : "16.5px",
@@ -915,7 +915,7 @@ export default function Services() {
                               fontSize: is100Screen
                                 ? "14px"
                                 : is125Screen
-                                ? "12.5px"
+                                ? "12px"
                                 : isMobile
                                 ? "11.5px"
                                 : "12px",
@@ -926,21 +926,21 @@ export default function Services() {
                         </div>
 
                         {/* Tag Pills - Flexible wrapping pills with clear text */}
-                        <div className={`flex flex-wrap ${is100Screen ? "gap-2 mb-3" : is125Screen ? "gap-1 mb-2" : is150Screen ? "gap-1 mb-1" : "gap-1 mb-1.5"}`}>
-                          {(is150Screen || isMobile ? service.tags.slice(0, 2) : service.tags).map((tag) => (
+                        <div className={`flex flex-wrap ${is100Screen ? "gap-2 mb-3" : is125Screen ? "gap-1 mb-1.5" : is150Screen ? "gap-1 mb-1" : "gap-1 mb-1.5"}`}>
+                          {(is125Screen || is150Screen || isMobile ? service.tags.slice(0, 2) : service.tags).map((tag) => (
                             <span
                               key={tag}
                               className="rounded-full border border-white/20 bg-white/10 hover:bg-white/15 text-white font-medium tracking-wide transition-colors truncate backdrop-blur-sm"
                               style={{
-                                fontSize: is100Screen ? "12px" : is125Screen ? "11px" : "10px",
-                                padding: is100Screen ? "4px 12px" : is125Screen ? "2px 9px" : is150Screen ? "1.5px 7.5px" : "2px 8.5px",
-                                maxWidth: is150Screen ? "130px" : undefined,
+                                fontSize: is100Screen ? "12px" : is125Screen ? "10.5px" : "10px",
+                                padding: is100Screen ? "4px 12px" : is125Screen ? "2px 8px" : is150Screen ? "1.5px 7.5px" : "2px 8.5px",
+                                maxWidth: is150Screen ? "130px" : is125Screen ? "145px" : undefined,
                               }}
                             >
                               {tag}
                             </span>
                           ))}
-                          {(is150Screen || isMobile) && service.tags.length > 2 && (
+                          {(is125Screen || is150Screen || isMobile) && service.tags.length > 2 && (
                             <span
                               className="rounded-full border border-white/15 bg-white/5 text-white/70 font-mono tracking-wide"
                               style={{ fontSize: "10px", padding: "2px 6px" }}
@@ -1019,13 +1019,13 @@ export default function Services() {
           followed by scrolling into the next section.
       ========================================================================= */}
       <div className="relative w-full max-w-[2100px] mx-auto px-4 sm:px-6 md:px-8 lg:px-10 xl:px-14 2xl:px-18 py-14 sm:py-20 lg:py-24 z-20">
-        <div className="w-full bg-[#2A1450] rounded-2xl sm:rounded-3xl px-6 sm:px-10 lg:px-14 py-10 sm:py-14 lg:py-16 shadow-xl shadow-[#2A1450]/20 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div className="w-full bg-[#2A1450] rounded-2xl sm:rounded-3xl px-6 sm:px-10 lg:px-14 py-10 sm:py-14 lg:py-16 shadow-xl shadow-[#2A1450]/20 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 cta-banner-card">
           {/* Left Texts: Heading and subtitle */}
           <div className="flex flex-col sm:flex-row sm:items-baseline gap-2.5 sm:gap-4 md:gap-6">
-            <h3 className="text-2xl sm:text-3xl md:text-[2rem] font-normal text-white tracking-tight whitespace-nowrap">
+            <h3 className="text-2xl sm:text-3xl md:text-[2rem] font-normal text-white tracking-tight whitespace-nowrap cta-banner-title">
               Ready to get started?
             </h3>
-            <span className="text-white/85 text-xs sm:text-sm md:text-[15px] font-normal">
+            <span className="text-white/85 text-xs sm:text-sm md:text-[15px] font-normal cta-banner-subtitle">
               Let&apos;s build something great together
             </span>
           </div>
@@ -1034,7 +1034,7 @@ export default function Services() {
           <div className="flex-shrink-0">
             <a
               href="#contact"
-              className="hover-brand-gradient inline-flex items-center justify-center bg-[#FBAE42] text-black hover:text-white font-medium text-xs sm:text-sm md:text-[15px] px-7 sm:px-8 py-3 sm:py-3.5 rounded-full shadow-md whitespace-nowrap cursor-pointer transition-colors"
+              className="cta-banner-btn hover-brand-gradient inline-flex items-center justify-center bg-[#FBAE42] text-black hover:text-white font-medium text-xs sm:text-sm md:text-[15px] px-7 sm:px-8 py-3 sm:py-3.5 rounded-full shadow-md whitespace-nowrap cursor-pointer transition-colors"
             >
               Let's Connect
             </a>

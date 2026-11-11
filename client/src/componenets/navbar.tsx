@@ -212,9 +212,9 @@ export default function Navbar({
 
   return (
     <>
-      <header className="nav-header-wrap fixed top-2.5 sm:top-3 md:top-3 xl:top-3.5 left-0 right-0 z-50 flex justify-center px-3 sm:px-4 pointer-events-none select-none">
+      <header className="nav-header-wrap fixed top-4 sm:top-5 md:top-5.5 xl:top-6 left-0 right-0 z-50 flex justify-center px-3 sm:px-4 pointer-events-none select-none">
         {/* Floating Dark Pill Navbar */}
-        <nav className="nav-pill-wrap pointer-events-auto bg-[#0B0716] rounded-full px-4 sm:px-5 md:px-5 lg:px-5.5 xl:px-6 py-1.5 sm:py-2 md:py-2 lg:py-2 xl:py-2 flex items-center justify-between gap-3 sm:gap-4 md:gap-4 lg:gap-5.5 xl:gap-6 shadow-2xl shadow-black/30 border border-white/[0.06] transition-all duration-300">
+        <nav className="nav-pill-wrap pointer-events-auto bg-[#0B0716] rounded-full px-5 sm:px-6 md:px-7 lg:px-8 py-2 sm:py-2 md:py-2.5 flex items-center justify-between gap-4 sm:gap-6 md:gap-7 lg:gap-8 shadow-2xl shadow-black/30 border border-white/[0.06] transition-all duration-300">
           {/* Brand Logo */}
           <a
             href="/"
@@ -232,7 +232,7 @@ export default function Navbar({
           </a>
 
           {/* Desktop Navigation Links */}
-          <div className="nav-links-wrap hidden md:flex items-center md:gap-2.5 lg:gap-3.5 xl:gap-5">
+          <div className="nav-links-wrap hidden md:flex items-center md:gap-5 lg:gap-7 xl:gap-10">
             {navLinks.map((link) => {
               const isActive = currentTab === link;
               return (
@@ -324,7 +324,7 @@ export default function Navbar({
               <button
                 type="button"
                 onClick={() => setIsLoginModalOpen(true)}
-                className="hover-brand-gradient bg-white/10 hover:bg-white/20 text-white whitespace-nowrap text-xs md:text-[12px] lg:text-[12.5px] font-medium px-3.5 sm:px-4 py-1 sm:py-1.5 rounded-full border border-white/15 transition-all cursor-pointer inline-flex items-center gap-1.5 shadow-sm"
+                className="nav-login-btn hover-brand-gradient bg-white/10 hover:bg-white/20 text-white whitespace-nowrap text-xs md:text-[12px] lg:text-[12.5px] font-medium px-3.5 sm:px-4 py-1 sm:py-1.5 rounded-full border border-white/15 transition-all cursor-pointer inline-flex items-center justify-center gap-1.5 shadow-sm"
                 style={{ fontFamily: "'Onest', sans-serif" }}
               >
                 <LogIn className="w-3.5 h-3.5 text-[#FBAE42]" />

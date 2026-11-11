@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, type FormEvent } from "react";
+import { Link } from "react-router-dom";
 import { motion, AnimatePresence, useScroll, useTransform, useSpring } from "framer-motion";
 import { ArrowRight, X, ChevronDown, CheckCircle2, Sparkles, AlertCircle } from "lucide-react";
-import ReCAPTCHA from "react-google-recaptcha";
+import { preloadRecaptcha, executeRecaptcha } from "../utils/recaptcha.ts";
 import { toast } from "../componenets/toast.tsx";
 
 // ============================================================================
@@ -517,13 +518,15 @@ export default function Contact() {
 
   const [submissionStage, setSubmissionStage] = useState<"form" | "delivering" | "success">("form");
   const [isServiceSelectOpen, setIsServiceSelectOpen] = useState(false);
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [captchaError, setCaptchaError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const recaptchaRef = useRef<ReCAPTCHA>(null);
 
-  const recaptchaSiteKey =
-    import.meta.env.VITE_RECAPTCHA_SITE_KEY || "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI";
+  // Preload Google reCAPTCHA v3 when the contact modal opens
+  useEffect(() => {
+    if (isModalOpen) {
+      preloadRecaptcha();
+    }
+  }, [isModalOpen]);
 
   // Scroll animation setup for card fan & separation effect
   const sectionRef = useRef<HTMLElement>(null);
@@ -601,15 +604,11 @@ export default function Contact() {
       return;
     }
 
-    if (!captchaToken) {
-      setCaptchaError("Please verify that you are not a robot.");
-      toast.warning("Please verify that you are not a robot.", { title: "Verification Needed" });
-      return;
-    }
-
     setIsSubmitting(true);
 
     try {
+      const captchaToken = await executeRecaptcha("contact_form_submit");
+
       const response = await fetch("/api/contact/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -644,11 +643,9 @@ export default function Contact() {
       });
     } catch (err: unknown) {
       const error = err as Error;
-      const msg = error.message || "Verification failed. Please check the reCAPTCHA box again.";
+      const msg = error.message || "Security verification failed. Please try again.";
       setCaptchaError(msg);
       toast.error(msg, { title: "Submission Failed" });
-      recaptchaRef.current?.reset();
-      setCaptchaToken(null);
     } finally {
       setIsSubmitting(false);
     }
@@ -663,9 +660,7 @@ export default function Contact() {
       service: "",
       message: "",
     });
-    setCaptchaToken(null);
     setCaptchaError("");
-    recaptchaRef.current?.reset();
     setSubmissionStage("form");
     setIsModalOpen(false);
     setIsServiceSelectOpen(false);
@@ -687,7 +682,7 @@ export default function Contact() {
         <div className="contact-header max-w-3xl mb-8 sm:mb-10 lg:mb-8 xl:mb-10 text-left">
           {/* Eyebrow Badge: Button Design matching remaining sections */}
           <div className="contact-eyebrow-wrap mb-3 sm:mb-4 lg:mb-3 xl:mb-3.5">
-            <div className="contact-eyebrow-text inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white border border-[#693092]/20 hover:border-[#693092]/40 text-[#693092] text-xs sm:text-[13px] font-semibold tracking-wide shadow-sm hover:shadow-md transition-all duration-200 select-none cursor-default">
+            <div className="contact-eyebrow-text inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white border border-[#693092]/20 text-[#693092] text-xs sm:text-[13px] font-semibold tracking-wide shadow-sm select-none cursor-default">
               <span>Global Presence</span>
               <div className="w-4 h-4 rounded-full bg-[#693092] text-white flex items-center justify-center">
                 <ArrowRight className="w-2.5 h-2.5 stroke-[2.5]" />
@@ -770,13 +765,12 @@ export default function Contact() {
 
         {/* Centered CTA Button: "Let's Connect" */}
         <div className="contact-cta flex justify-center mt-5 sm:mt-6 lg:mt-7 xl:mt-8">
-          <button
-            type="button"
-            onClick={() => setIsModalOpen(true)}
+          <Link
+            to="/contact"
             className="contact-cta-btn hover-brand-gradient inline-flex items-center justify-center bg-[#652297] text-white font-medium text-xs sm:text-sm md:text-base px-8 sm:px-10 py-3.5 sm:py-4 rounded-full shadow-md cursor-pointer"
           >
             Let's Connect
-          </button>
+          </Link>
         </div>
       </div>
 
@@ -1063,33 +1057,13 @@ export default function Contact() {
                       />
                     </div>
 
-                    {/* Google reCAPTCHA v2 Checkbox */}
-                    <div className="flex flex-col items-center justify-center pt-2 pb-1">
-                      <div className="overflow-x-auto max-w-full">
-                        <ReCAPTCHA
-                          ref={recaptchaRef}
-                          sitekey={recaptchaSiteKey}
-                          onChange={(token) => {
-                            setCaptchaToken(token);
-                            if (token) setCaptchaError("");
-                          }}
-                          onExpired={() => {
-                            setCaptchaToken(null);
-                            setCaptchaError("reCAPTCHA verification expired. Please check the box again.");
-                          }}
-                          onErrored={() => {
-                            setCaptchaToken(null);
-                            setCaptchaError("Unable to connect to reCAPTCHA service. Please retry.");
-                          }}
-                        />
+                    {/* Google reCAPTCHA v3 Error Display */}
+                    {captchaError && (
+                      <div className="mt-1 text-xs text-red-600 font-medium flex items-center justify-center gap-1.5 text-center">
+                        <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                        <span>{captchaError}</span>
                       </div>
-                      {captchaError && (
-                        <div className="mt-2 text-xs text-red-600 font-medium flex items-center gap-1.5 text-center">
-                          <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                          <span>{captchaError}</span>
-                        </div>
-                      )}
-                    </div>
+                    )}
 
                     {/* Submit Button */}
                     <div className="pt-2">
@@ -1100,6 +1074,27 @@ export default function Contact() {
                       >
                         <span>{isSubmitting ? "Verifying..." : "Submit"}</span>
                       </button>
+                      <p className="mt-2.5 text-[11px] leading-relaxed text-[#5F5A64] text-center">
+                        This site is protected by reCAPTCHA and the Google{" "}
+                        <a
+                          href="https://policies.google.com/privacy"
+                          target="_blank"
+                          rel="noreferrer"
+                          className="underline hover:text-[#652297]"
+                        >
+                          Privacy Policy
+                        </a>{" "}
+                        and{" "}
+                        <a
+                          href="https://policies.google.com/terms"
+                          target="_blank"
+                          rel="noreferrer"
+                          className="underline hover:text-[#652297]"
+                        >
+                          Terms of Service
+                        </a>{" "}
+                        apply.
+                      </p>
                     </div>
                   </motion.form>
                 )}

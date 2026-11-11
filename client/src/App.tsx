@@ -36,10 +36,14 @@ import SuperAdminLoginPage from "./pages/superadmin-login.tsx";
 import LoginPage from "./pages/login.tsx";
 import ProfilePage from "./pages/profile.tsx";
 import ContactPage from "./pages/contact.tsx";
+import LaunchingPage from "./pages/launchingpage.tsx";
 import TermsAndConditionsPage from "./pages/terms&conditions.tsx";
 import PrivacyPolicyPage from "./pages/privacypolicy.tsx";
+import CookiePolicyPage from "./pages/cookie-policy.tsx";
 import NotFoundPage from "./pages/not-found.tsx";
 import ProtectedRoute from "./componenets/ProtectedRoute.tsx";
+import CookieConsent from "./componenets/cookie-consent.tsx";
+import { preloadRecaptcha } from "./utils/recaptcha.ts";
 
 
 function RouteThemeSync() {
@@ -53,6 +57,13 @@ function RouteThemeSync() {
       const bg = isDark ? "#08050E" : is404 ? "#FBF7F0" : "#F5EEF8";
       document.documentElement.style.backgroundColor = bg;
       document.body.style.backgroundColor = bg;
+
+      const isAdminRoute = p.startsWith("/admin") || p.startsWith("/superadmin");
+      const isLaunchingRoute = p.startsWith("/launching");
+      document.body.classList.toggle("hide-recaptcha-badge", isAdminRoute || isLaunchingRoute);
+      if (!isAdminRoute && !isLaunchingRoute) {
+        preloadRecaptcha();
+      }
     } catch {}
   }, [location.pathname]);
 
@@ -128,8 +139,10 @@ export default function App() {
       <RouteThemeSync />
       <ScrollToHashElement />
       <ToastContainer />
+      <CookieConsent />
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/launchingpage" element={<LaunchingPage />} />
         <Route path="/services" element={<ServicesPage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/contact" element={<ContactPage />} />
@@ -172,6 +185,9 @@ export default function App() {
         <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
         <Route path="/privacypolicy" element={<PrivacyPolicyPage />} />
         <Route path="/privacy" element={<PrivacyPolicyPage />} />
+        <Route path="/cookie-policy" element={<CookiePolicyPage />} />
+        <Route path="/cookiepolicy" element={<CookiePolicyPage />} />
+        <Route path="/cookies" element={<CookiePolicyPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/careers/login" element={<LoginPage />} />
         <Route path="/profile" element={<ProfilePage />} />

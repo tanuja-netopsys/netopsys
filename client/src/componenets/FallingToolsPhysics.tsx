@@ -181,10 +181,15 @@ export default function FallingToolsPhysics({ children }: FallingToolsPhysicsPro
 
     const activeBodies: ActiveToolBody[] = [];
 
-    // Interactive Mouse & Touch Dragging
+    // Interactive Mouse & Touch Dragging + Cursor Scatter
+    const syncMouseScale = (targetMouse: Matter.Mouse) => {
+      const scaleX = canvas.clientWidth && canvas.width ? canvas.clientWidth / canvas.width : 1 / dpr;
+      const scaleY = canvas.clientHeight && canvas.height ? canvas.clientHeight / canvas.height : 1 / dpr;
+      Mouse.setScale(targetMouse, { x: scaleX, y: scaleY });
+    };
+
     const mouse = Mouse.create(canvas);
-    // Correct mouse position for High DPI and Windows Display Scaling
-    Mouse.setScale(mouse, { x: 1 / dpr, y: 1 / dpr });
+    syncMouseScale(mouse);
 
     // Remove wheel event listeners so page scrolling is never blocked
     canvas.removeEventListener("wheel", (mouse as any).mousewheel);
@@ -203,6 +208,8 @@ export default function FallingToolsPhysics({ children }: FallingToolsPhysicsPro
     Composite.add(engine.world, mouseConstraint);
 
     let isDragging = false;
+    let lastPointerX: number | null = null;
+    let lastPointerY: number | null = null;
 
     // Fast distance hit-test to check if cursor/touch is directly over an active physics tool
     const isPointOverTool = (clientX: number, clientY: number) => {
@@ -216,7 +223,7 @@ export default function FallingToolsPhysics({ children }: FallingToolsPhysicsPro
         const b = activeBodies[i].body;
         const dx = x - b.position.x;
         const dy = y - b.position.y;
-        const hitRadius = activeBodies[i].radius + 6;
+        const hitRadius = activeBodies[i].radius + 8;
         if (dx * dx + dy * dy <= hitRadius * hitRadius) {
           return true;
         }
@@ -224,9 +231,18 @@ export default function FallingToolsPhysics({ children }: FallingToolsPhysicsPro
       return false;
     };
 
+    const isInteractiveElement = (clientX: number, clientY: number) => {
+      const target = document.elementFromPoint(clientX, clientY);
+      if (!target) return false;
+      if (target === canvas) return false;
+      return Boolean(
+        target.closest("a, button, input, textarea, select, form, label, [role='button']")
+      );
+    };
+
     Matter.Events.on(mouseConstraint, "startdrag", () => {
       isDragging = true;
-      canvas.style.zIndex = "30";
+      canvas.style.zIndex = "40";
       canvas.style.pointerEvents = "auto";
       canvas.style.cursor = "grabbing";
     });
@@ -243,26 +259,101 @@ export default function FallingToolsPhysics({ children }: FallingToolsPhysicsPro
       }, 40);
     });
 
+    const onPointerDownCapture = (e: PointerEvent) => {
+      if (e.pointerType === "touch") return;
+      if (isInteractiveElement(e.clientX, e.clientY)) return;
+
+      if (isPointOverTool(e.clientX, e.clientY)) {
+        syncMouseScale(mouse);
+        canvas.style.zIndex = "40";
+        canvas.style.pointerEvents = "auto";
+        canvas.style.cursor = "grabbing";
+
+        // If pointerdown started before pointermove lifted the canvas above footer wrapper, forward mousedown to Matter.Mouse
+        if (e.target !== canvas && (mouse as any).mousedown) {
+          (mouse as any).mousedown({
+            pageX: e.pageX,
+            pageY: e.pageY,
+            button: e.button,
+            preventDefault: () => {},
+          });
+        }
+      }
+    };
+
     const onPointerMove = (e: PointerEvent) => {
       if (isDragging) return;
 
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      if (x < 0 || y < 0 || x > rect.width || y > rect.height) {
+        lastPointerX = null;
+        lastPointerY = null;
+        if (canvas.style.pointerEvents !== "none") {
+          canvas.style.zIndex = "10";
+          canvas.style.pointerEvents = "none";
+          canvas.style.cursor = "default";
+        }
+        return;
+      }
+
       // Always prioritize navigation links, inputs, and buttons so user can click & type seamlessly
-      const target = document.elementFromPoint(e.clientX, e.clientY);
-      if (
-        target &&
-        (target.closest("a, button, input, textarea, form, label") ||
-          target.tagName === "INPUT" ||
-          target.tagName === "BUTTON" ||
-          target.tagName === "A")
-      ) {
+      if (isInteractiveElement(e.clientX, e.clientY)) {
+        lastPointerX = null;
+        lastPointerY = null;
         canvas.style.zIndex = "10";
         canvas.style.pointerEvents = "none";
         canvas.style.cursor = "default";
         return;
       }
 
+      // Apply responsive cursor-hover scatter & spin whenever moving the cursor across tools (without holding)
+      if (lastPointerX !== null && lastPointerY !== null) {
+        const vxCursor = x - lastPointerX;
+        const vyCursor = y - lastPointerY;
+        const speed = Math.hypot(vxCursor, vyCursor);
+
+        if (speed >= 0.4) {
+          const clampedVx = Math.max(-20, Math.min(20, vxCursor));
+          const clampedVy = Math.max(-20, Math.min(20, vyCursor));
+
+          for (let i = 0; i < activeBodies.length; i++) {
+            const item = activeBodies[i];
+            const b = item.body;
+            const dx = b.position.x - x;
+            const dy = b.position.y - y;
+            const interactRadius = item.radius + 34;
+            const distSq = dx * dx + dy * dy;
+
+            if (distSq <= interactRadius * interactRadius) {
+              const dist = Math.sqrt(distSq);
+              const nx = dist > 0.01 ? dx / dist : clampedVx >= 0 ? 1 : -1;
+              const ny = dist > 0.01 ? dy / dist : -1;
+              const falloff = Math.max(0.25, 1 - dist / interactRadius);
+
+              const pushX = nx * (3.2 * falloff) + clampedVx * 0.55 * falloff;
+              const pushY = ny * (3.2 * falloff) + clampedVy * 0.55 * falloff - 2.2 * falloff;
+
+              Body.setVelocity(b, {
+                x: Math.max(-18, Math.min(18, b.velocity.x + pushX)),
+                y: Math.max(-18, Math.min(18, b.velocity.y + pushY)),
+              });
+              Body.setAngularVelocity(
+                b,
+                Math.max(-0.25, Math.min(0.25, b.angularVelocity + (clampedVx * 0.008 + nx * 0.04) * falloff))
+              );
+            }
+          }
+        }
+      }
+      lastPointerX = x;
+      lastPointerY = y;
+
       if (isPointOverTool(e.clientX, e.clientY)) {
-        canvas.style.zIndex = "25";
+        syncMouseScale(mouse);
+        canvas.style.zIndex = "40";
         canvas.style.pointerEvents = "auto";
         canvas.style.cursor = "grab";
       } else {
@@ -273,6 +364,8 @@ export default function FallingToolsPhysics({ children }: FallingToolsPhysicsPro
     };
 
     const onPointerLeave = () => {
+      lastPointerX = null;
+      lastPointerY = null;
       if (!isDragging && canvas) {
         canvas.style.zIndex = "10";
         canvas.style.pointerEvents = "none";
@@ -280,10 +373,9 @@ export default function FallingToolsPhysics({ children }: FallingToolsPhysicsPro
       }
     };
 
-    container.addEventListener("pointermove", onPointerMove);
-    canvas.addEventListener("pointermove", onPointerMove);
+    container.addEventListener("pointerdown", onPointerDownCapture, { capture: true });
+    window.addEventListener("pointermove", onPointerMove, { passive: true });
     container.addEventListener("pointerleave", onPointerLeave);
-    canvas.addEventListener("pointerleave", onPointerLeave);
 
     // Responsive touch interaction: allows dragging physics tools while preserving native page touch & typing
     const onTouchStart = (e: TouchEvent) => {
@@ -291,20 +383,14 @@ export default function FallingToolsPhysics({ children }: FallingToolsPhysicsPro
       const touch = e.touches[0];
 
       // Never block touches on navigation links, inputs, or buttons
-      const target = document.elementFromPoint(touch.clientX, touch.clientY);
-      if (
-        target &&
-        (target.closest("a, button, input, textarea, form, label") ||
-          target.tagName === "INPUT" ||
-          target.tagName === "BUTTON" ||
-          target.tagName === "A")
-      ) {
+      if (isInteractiveElement(touch.clientX, touch.clientY)) {
         return;
       }
 
       if (isPointOverTool(touch.clientX, touch.clientY)) {
         isDragging = true;
-        canvas.style.zIndex = "25";
+        syncMouseScale(mouse);
+        canvas.style.zIndex = "40";
         canvas.style.pointerEvents = "auto";
 
         const rect = canvas.getBoundingClientRect();
@@ -513,18 +599,19 @@ export default function FallingToolsPhysics({ children }: FallingToolsPhysicsPro
         if (isDisposed || !container || !canvas) return;
         width = container.clientWidth;
         height = container.clientHeight;
+        const nextDpr = Math.min(window.devicePixelRatio || 1, 2);
 
-        canvas.width = Math.round(width * dpr);
-        canvas.height = Math.round(height * dpr);
+        canvas.width = Math.round(width * nextDpr);
+        canvas.height = Math.round(height * nextDpr);
         canvas.style.width = `${width}px`;
         canvas.style.height = `${height}px`;
 
         if (ctx) {
           ctx.setTransform(1, 0, 0, 1, 0, 0);
-          ctx.scale(dpr, dpr);
+          ctx.scale(nextDpr, nextDpr);
         }
 
-        Mouse.setScale(mouse, { x: 1 / dpr, y: 1 / dpr });
+        syncMouseScale(mouse);
 
         Body.setPosition(floor, {
           x: width / 2,
@@ -554,10 +641,9 @@ export default function FallingToolsPhysics({ children }: FallingToolsPhysicsPro
       if (resizeTimer) window.clearTimeout(resizeTimer);
       observer.disconnect();
       window.removeEventListener("resize", handleResize);
-      container.removeEventListener("pointermove", onPointerMove);
-      canvas.removeEventListener("pointermove", onPointerMove);
+      container.removeEventListener("pointerdown", onPointerDownCapture, { capture: true });
+      window.removeEventListener("pointermove", onPointerMove);
       container.removeEventListener("pointerleave", onPointerLeave);
-      canvas.removeEventListener("pointerleave", onPointerLeave);
       container.removeEventListener("touchstart", onTouchStart);
       window.removeEventListener("touchmove", onTouchMove);
       window.removeEventListener("touchend", onTouchEnd);
@@ -574,13 +660,13 @@ export default function FallingToolsPhysics({ children }: FallingToolsPhysicsPro
       className="relative w-full overflow-hidden pb-2"
     >
       {/* Footer Content: Top 5-columns navigation + Giant NETOPSYS AI text */}
-      <div className="w-full relative z-30 pointer-events-auto">{children}</div>
+      <div className="w-full relative z-20 pointer-events-none">{children}</div>
 
       {/* Foreground Canvas: Falling & Stacked 2D Physics Tools */}
       <canvas
         ref={canvasRef}
         aria-hidden="true"
-        className="absolute inset-0 w-full h-full z-10 transition-[z-index] duration-75"
+        className="absolute inset-0 w-full h-full z-10"
         style={{ pointerEvents: "none" }}
       />
     </div>

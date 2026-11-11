@@ -101,7 +101,7 @@ export default function Portfolio() {
           <div className="portfolio-header max-w-3xl">
             {/* Eyebrow Badge: Button Design matching remaining sections */}
             <div className="portfolio-eyebrow-wrap mb-1 sm:mb-1.5">
-              <div className="portfolio-eyebrow-text inline-flex items-center gap-2 sm:gap-2.5 px-3.5 sm:px-4 py-0.5 sm:py-1 rounded-full bg-white border border-[#693092]/20 hover:border-[#693092]/40 text-[#693092] text-xs sm:text-[13px] font-semibold tracking-wide shadow-xs hover:shadow-md transition-all duration-200 select-none cursor-default">
+              <div className="portfolio-eyebrow-text inline-flex items-center gap-2 sm:gap-2.5 px-3.5 sm:px-4 py-0.5 sm:py-1 rounded-full bg-white border border-[#693092]/20 text-[#693092] text-xs sm:text-[13px] font-semibold tracking-wide shadow-xs select-none cursor-default">
                 <span>Portfolio</span>
                 <div className="w-3.5 sm:w-4 h-3.5 sm:h-4 rounded-full bg-[#693092] text-white flex items-center justify-center">
                   <ArrowRight className="w-2 sm:w-2.5 h-2 sm:h-2.5 stroke-[2.5]" />
@@ -257,7 +257,7 @@ export default function Portfolio() {
         <div className="portfolio-know-more-wrap flex items-center justify-center mt-5 sm:mt-6 lg:mt-7 xl:mt-8">
           <Link
             to="/portfolio"
-            className="hover-brand-gradient inline-flex items-center justify-center bg-[#0B0716] text-white font-semibold text-xs sm:text-sm px-8 sm:px-9 py-2.5 sm:py-3 rounded-full shadow-md whitespace-nowrap cursor-pointer transition-all duration-200 active:scale-95"
+            className="portfolio-cta-btn hover-brand-gradient inline-flex items-center justify-center bg-[#0B0716] text-white font-semibold text-xs sm:text-sm px-8 sm:px-9 py-2.5 sm:py-3 rounded-full shadow-md whitespace-nowrap cursor-pointer transition-all duration-200 active:scale-95"
             style={{ fontFamily: "'Onest', sans-serif" }}
           >
             View All

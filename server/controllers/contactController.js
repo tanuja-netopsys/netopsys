@@ -1,12 +1,21 @@
 const prisma = require("../config/prisma");
+const { verifyRecaptchaV3Token } = require("../utils/recaptchaVerifier");
 
 /**
- * Handle Contact Us Form Submission with Google reCAPTCHA v2 Verification
+ * Handle Contact Us Form Submission with Google reCAPTCHA v3 Verification
  * POST /api/contact or POST /api/contact/submit
  */
 async function submitContactForm(req, res) {
   try {
-    const { fullName, firstName, lastName, email, phone, company, service, message, captchaToken } = req.body;
+    const { fullName, firstName, lastName, email, phone, company, service, message, captchaToken, website } = req.body;
+
+    // 0. Honeypot spam protection check (must stay empty for real users)
+    if (website && typeof website === "string" && website.trim().length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Spam submission detected.",
+      });
+    }
 
     // 1. Validate required fields
     const name = (fullName || `${firstName || ""} ${lastName || ""}`).trim();
@@ -17,77 +26,35 @@ async function submitContactForm(req, res) {
       });
     }
 
-    if (!email || !email.trim()) {
+    if (!email || !email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
       return res.status(400).json({
         success: false,
-        message: "Email address is required.",
+        message: "Valid email address is required.",
       });
     }
 
-    // 2. Reject if reCAPTCHA token is missing
-    if (!captchaToken || typeof captchaToken !== "string" || !captchaToken.trim()) {
-      return res.status(400).json({
+    // 2. Verify reCAPTCHA v3 token (success, action, score >= threshold, hostname)
+    const forwardedIp = req.headers["x-forwarded-for"];
+    const clientIp =
+      (typeof forwardedIp === "string" && forwardedIp.split(",")[0].trim()) ||
+      req.ip ||
+      req.socket?.remoteAddress;
+
+    const verification = await verifyRecaptchaV3Token({
+      token: captchaToken,
+      remoteIp: clientIp,
+      expectedAction: "contact_form_submit",
+    });
+
+    if (!verification.ok) {
+      return res.status(verification.status).json({
         success: false,
-        message: "CAPTCHA verification is required. Please check the 'I'm not a robot' box.",
+        message: verification.message,
+        errorCodes: verification.errorCodes,
       });
     }
 
-    // 3. Verify token with Google's siteverify API
-    const secretKey = process.env.RECAPTCHA_SECRET_KEY;
-    if (!secretKey) {
-      console.error("RECAPTCHA_SECRET_KEY is missing in environment variables.");
-      return res.status(500).json({
-        success: false,
-        message: "reCAPTCHA server configuration is missing. Please contact administrator.",
-      });
-    }
-
-    const verificationUrl = "https://www.google.com/recaptcha/api/siteverify";
-    const postParams = new URLSearchParams();
-    postParams.append("secret", secretKey);
-    postParams.append("response", captchaToken.trim());
-    if (req.ip) {
-      postParams.append("remoteip", req.ip);
-    }
-
-    let verifyData;
-    try {
-      const verifyResponse = await fetch(verificationUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: postParams.toString(),
-      });
-      verifyData = await verifyResponse.json();
-    } catch (netErr) {
-      console.error("Error communicating with Google reCAPTCHA server:", netErr);
-      return res.status(503).json({
-        success: false,
-        message: "Unable to verify CAPTCHA with Google servers. Please check your network connection and try again.",
-      });
-    }
-
-    // 4. Reject if verification failed, token expired, invalid or duplicate
-    if (!verifyData || !verifyData.success) {
-      console.warn("reCAPTCHA verification failed:", verifyData);
-      const errorCodes = verifyData && verifyData["error-codes"] ? verifyData["error-codes"] : [];
-      
-      let clientMsg = "reCAPTCHA verification failed. Please check the box again.";
-      if (errorCodes.includes("timeout-or-duplicate")) {
-        clientMsg = "reCAPTCHA verification expired or was already used. Please check the box again.";
-      } else if (errorCodes.includes("invalid-input-response")) {
-        clientMsg = "Invalid reCAPTCHA token provided. Please complete the verification again.";
-      }
-
-      return res.status(400).json({
-        success: false,
-        message: clientMsg,
-        errorCodes,
-      });
-    }
-
-    // 5. reCAPTCHA successfully verified! Save contact submission to database
+    // 3. reCAPTCHA v3 successfully verified! Save contact submission to database
     let savedSubmission = null;
     const nameParts = name.split(" ");
     const parsedFirstName = nameParts[0] || name;

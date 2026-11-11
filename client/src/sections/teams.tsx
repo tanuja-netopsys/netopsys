@@ -9,24 +9,8 @@ export interface TeamMember {
   department?: string;
   bio?: string;
   status?: string;
-  heightClass?: string;
-  offsetClass?: string;
-  sizeTier?: "tall" | "mid" | "short";
   uniqueKey?: string;
 }
-
-const HEIGHT_CLASSES = [
-  "h-[340px] sm:h-[370px]",
-  "h-[310px] sm:h-[340px]",
-  "h-[360px] sm:h-[390px]",
-  "h-[330px] sm:h-[360px]",
-  "h-[370px] sm:h-[400px]",
-  "h-[340px] sm:h-[370px]",
-  "h-[350px] sm:h-[380px]",
-];
-
-const OFFSET_CLASSES = ["", "mt-4 sm:mt-6", "", "mt-2 sm:mt-4", "", "mt-4 sm:mt-6", ""];
-const SIZE_TIERS: ("tall" | "mid" | "short")[] = ["mid", "short", "tall", "short", "tall", "mid", "mid"];
 
 export default function Teams() {
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
@@ -68,9 +52,6 @@ export default function Teams() {
       teamMembers.forEach((m, i) => {
         result.push({
           ...m,
-          heightClass: HEIGHT_CLASSES[i % HEIGHT_CLASSES.length],
-          offsetClass: OFFSET_CLASSES[i % OFFSET_CLASSES.length],
-          sizeTier: SIZE_TIERS[i % SIZE_TIERS.length],
           uniqueKey: `${m.id}-set${r}-${i}`,
         });
       });
@@ -129,7 +110,7 @@ export default function Teams() {
         <div className="teams-header max-w-3xl text-left mb-6 sm:mb-8 lg:mb-6 xl:mb-8">
           {/* Eyebrow Badge: Button Design */}
           <div className="teams-eyebrow-wrap mb-2.5 sm:mb-3.5 lg:mb-2 xl:mb-3">
-            <div className="teams-eyebrow-text inline-flex items-center gap-2 sm:gap-2.5 px-3.5 sm:px-4 py-1 sm:py-1.5 rounded-full bg-white/[0.08] border border-white/20 hover:border-white/40 text-xs sm:text-[13px] text-white/90 font-medium shadow-sm transition-all duration-200 select-none cursor-default">
+            <div className="teams-eyebrow-text inline-flex items-center gap-2 sm:gap-2.5 px-3.5 sm:px-4 py-1 sm:py-1.5 rounded-full bg-white/[0.08] border border-white/20 text-xs sm:text-[13px] text-white/90 font-medium shadow-sm select-none cursor-default">
               <span>Our Team</span>
               <div className="w-3.5 sm:w-4 h-3.5 sm:h-4 rounded-full bg-white text-[#0B0716] flex items-center justify-center">
                 <ArrowRight className="w-2 sm:w-2.5 h-2 sm:h-2.5 stroke-[2.5]" />
@@ -165,17 +146,15 @@ export default function Teams() {
             {displayMembers.map((member) => (
               <div
                 key={member.uniqueKey}
-                className={`teams-card group flex-shrink-0 w-[220px] sm:w-[250px] lg:w-[260px] xl:w-[280px] 2xl:w-[290px] flex flex-col justify-between h-auto min-w-0 break-words transition-transform duration-300 ${member.offsetClass} card-${member.sizeTier || "mid"} ${member.offsetClass ? "card-offset" : ""}`}
+                className="teams-card group flex-shrink-0 w-[220px] sm:w-[250px] lg:w-[260px] xl:w-[280px] 2xl:w-[290px] flex flex-col justify-between h-auto min-w-0 break-words transition-transform duration-300"
               >
-                {/* Photo Container with Organic Editorial Staggered Height */}
-                <div
-                  className={`teams-card-img-wrap relative w-full ${member.heightClass} rounded-2xl sm:rounded-[22px] overflow-hidden bg-[#161224] border border-white/[0.08] shadow-xl group-hover:border-white/25 group-hover:shadow-2xl group-hover:shadow-purple-950/30 transition-all duration-500`}
-                >
+                {/* Uniform Portrait Photo Container */}
+                <div className="teams-card-img-wrap relative w-full h-[310px] sm:h-[360px] rounded-2xl sm:rounded-[22px] overflow-hidden bg-[#161224] border border-white/[0.08] shadow-xl group-hover:border-white/25 group-hover:shadow-2xl group-hover:shadow-purple-950/30 transition-all duration-500">
                   {/* Team Portrait Photo */}
                   <img
                     src={member.image || "/teams/member-1.jpg"}
                     alt={member.name}
-                    className="w-full h-full object-cover select-none filter contrast-[1.08] saturate-[0.7] group-hover:saturate-100 group-hover:scale-105 transition-all duration-700 pointer-events-none"
+                    className="w-full h-full object-cover object-top select-none filter contrast-[1.08] saturate-[0.7] group-hover:saturate-100 group-hover:scale-105 transition-all duration-700 pointer-events-none"
                     loading="lazy"
                   />
 

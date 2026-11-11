@@ -252,7 +252,7 @@ export default function NotFoundPage({ forceOffline, onRetry }: NotFoundPageProp
                   type="button"
                   onClick={handleRetryConnection}
                   disabled={isRetrying}
-                  className="hover-brand-gradient inline-flex items-center gap-2 bg-[#693092] text-white px-7 py-2.5 sm:py-3 rounded-full text-sm font-semibold shadow-md hover:shadow-lg transition-all cursor-pointer active:scale-95 disabled:opacity-60"
+                  className="site-cta-btn hover-brand-gradient inline-flex items-center gap-2 bg-[#693092] text-white px-7 py-2.5 sm:py-3 rounded-full text-sm font-semibold shadow-md hover:shadow-lg transition-all cursor-pointer active:scale-95 disabled:opacity-60"
                 >
                   <RefreshCw
                     className={`w-4 h-4 ${isRetrying ? "animate-spin" : ""}`}
@@ -263,7 +263,7 @@ export default function NotFoundPage({ forceOffline, onRetry }: NotFoundPageProp
                 <button
                   type="button"
                   onClick={() => navigate("/")}
-                  className="inline-flex items-center gap-2 bg-white/95 hover:bg-white border border-[#E9DFEE] text-[#141010] hover:text-[#693092] px-6 py-2.5 sm:py-3 rounded-full text-sm font-semibold shadow-2xs hover:shadow-xs transition-all cursor-pointer"
+                  className="site-cta-btn inline-flex items-center gap-2 bg-white/95 hover:bg-white border border-[#E9DFEE] text-[#141010] hover:text-[#693092] px-6 py-2.5 sm:py-3 rounded-full text-sm font-semibold shadow-2xs hover:shadow-xs transition-all cursor-pointer"
                 >
                   <Home className="w-4 h-4 text-[#693092]" />
                   <span>Back to Home</span>
@@ -273,7 +273,7 @@ export default function NotFoundPage({ forceOffline, onRetry }: NotFoundPageProp
               <button
                 type="button"
                 onClick={() => navigate("/")}
-                className="hover-brand-gradient inline-flex items-center gap-2 bg-[#693092] text-white px-7 py-2.5 sm:py-3 rounded-full text-sm sm:text-[15px] font-semibold shadow-md hover:shadow-lg transition-all cursor-pointer active:scale-95"
+                className="site-cta-btn hover-brand-gradient inline-flex items-center gap-2 bg-[#693092] text-white px-7 py-2.5 sm:py-3 rounded-full text-sm sm:text-[15px] font-semibold shadow-md hover:shadow-lg transition-all cursor-pointer active:scale-95"
               >
                 <span>Back to Home</span>
               </button>

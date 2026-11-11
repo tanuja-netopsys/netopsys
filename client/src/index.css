@@ -404,18 +404,9 @@ img, svg, video, canvas {
     aspect-ratio: 16 / 8.8 !important;
   }
 
-  /* Teams Section Card Dimensions */
+  /* Teams Section Card Dimensions (Uniform Frame Size) */
   .teams-card-img-wrap {
     height: clamp(210px, 30vh, 310px) !important;
-  }
-  .teams-card.card-tall .teams-card-img-wrap {
-    height: clamp(230px, 33vh, 340px) !important;
-  }
-  .teams-card.card-mid .teams-card-img-wrap {
-    height: clamp(210px, 30vh, 310px) !important;
-  }
-  .teams-card.card-short .teams-card-img-wrap {
-    height: clamp(190px, 27vh, 280px) !important;
   }
 
   /* Contact Section Card Dimensions */
@@ -637,18 +628,6 @@ img, svg, video, canvas {
 
   .teams-card-img-wrap {
     height: clamp(150px, 22vh, 185px) !important;
-  }
-
-  .teams-card.card-tall .teams-card-img-wrap {
-    height: clamp(165px, 24vh, 200px) !important;
-  }
-
-  .teams-card.card-mid .teams-card-img-wrap {
-    height: clamp(150px, 22vh, 185px) !important;
-  }
-
-  .teams-card.card-short .teams-card-img-wrap {
-    height: clamp(135px, 20vh, 170px) !important;
   }
 
   .teams-card-info {
@@ -901,19 +880,7 @@ img, svg, video, canvas {
 }
 
 .teams-card-img-wrap {
-  height: clamp(230px, 34vh, 390px) !important;
-}
-
-.teams-card.card-tall .teams-card-img-wrap {
-  height: clamp(250px, 37vh, 415px) !important;
-}
-
-.teams-card.card-mid .teams-card-img-wrap {
-  height: clamp(230px, 34vh, 390px) !important;
-}
-
-.teams-card.card-short .teams-card-img-wrap {
-  height: clamp(210px, 31vh, 365px) !important;
+  height: clamp(235px, 35vh, 360px) !important;
 }
 
 .teams-card-name {
@@ -990,21 +957,39 @@ img, svg, video, canvas {
 
 /* 7. FLOATING NAVBAR RESPONSIVE FLUID SYSTEM */
 .nav-header-wrap {
-  top: clamp(0.45rem, 0.9vh, 1.25rem) !important;
+  top: clamp(1rem, 2.2vh, 1.85rem) !important;
 }
 
 .nav-pill-wrap {
-  padding: clamp(0.45rem, 0.7vh, 0.75rem) clamp(0.85rem, 1.2vw, 1.85rem) !important;
-  gap: clamp(0.65rem, 1.1vw, 1.75rem) !important;
+  width: min(94%, clamp(720px, 68vw, 1100px)) !important;
+  padding: clamp(0.55rem, 0.8vh, 0.85rem) clamp(1.25rem, 2vw, 2.5rem) !important;
+  gap: clamp(1rem, 2vw, 3rem) !important;
   max-width: min(100%, calc(100vw - 1.25rem)) !important;
+}
+
+@media (min-width: 768px) {
+  .nav-pill-wrap {
+    justify-content: space-between !important;
+    gap: clamp(1rem, 1.8vw, 2.5rem) !important;
+  }
+
+  .nav-links-wrap {
+    flex: 0 1 auto !important;
+    justify-content: center !important;
+    gap: clamp(1.35rem, 2.5vw, 3rem) !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .nav-pill-wrap {
+    width: min(94%, 560px) !important;
+    padding: clamp(0.5rem, 0.7vh, 0.75rem) clamp(1rem, 3vw, 1.5rem) !important;
+    gap: 1rem !important;
+  }
 }
 
 .nav-logo-img {
   height: clamp(1.35rem, 1.1rem + 0.35vw, 1.875rem) !important;
-}
-
-.nav-links-wrap {
-  gap: clamp(0.65rem, 1.1vw, 1.75rem) !important;
 }
 
 .nav-link-item {
@@ -1013,7 +998,18 @@ img, svg, video, canvas {
 
 .nav-cta-btn {
   font-size: clamp(0.78rem, 0.72rem + 0.16vw, 0.9rem) !important;
-  padding: clamp(0.4rem, 0.65vh, 0.6rem) clamp(0.85rem, 1.1vw, 1.35rem) !important;
+  padding: clamp(0.45rem, 0.68vh, 0.65rem) clamp(0.95rem, 1.25vw, 1.5rem) !important;
+}
+
+/* 100% Display Scale ONLY: increased height for Log in and Let's Connect buttons in navbar */
+@media screen and (min-width: 1024px) and (max-resolution: 1.14dppx) and (min-height: 740px),
+       screen and (min-width: 1024px) and (-webkit-max-device-pixel-ratio: 1.14) and (min-height: 740px) {
+  .nav-login-btn,
+  .nav-cta-btn {
+    min-height: 42px !important;
+    padding-top: 0.6rem !important;
+    padding-bottom: 0.6rem !important;
+  }
 }
 
 /* ==========================================================================
@@ -1092,45 +1088,43 @@ img, svg, video, canvas {
   color: #FFFFFF !important;
 }
 
-/* 100% Scale on Desktop: unified height and padding */
+/* Desktop (768px - 1023px): matches Services Section sm/md padding & typography */
 @media screen and (min-width: 768px) {
   .cta-banner-card {
-    padding: clamp(1.4rem, 2vh, 1.85rem) clamp(1.75rem, 2.5vw, 3.5rem) !important;
-    min-height: 104px !important;
-    max-height: 104px !important;
+    padding: 3.5rem 2.5rem !important;
+    min-height: auto !important;
+    max-height: none !important;
   }
   .cta-banner-title {
-    font-size: clamp(1.5rem, 1.1rem + 0.8vw, 1.95rem) !important;
+    font-size: clamp(1.5rem, 1.15rem + 0.9vw, 2rem) !important;
   }
   .cta-banner-subtitle {
-    font-size: clamp(0.85rem, 0.78rem + 0.18vw, 0.95rem) !important;
+    font-size: 0.9375rem !important;
   }
   .cta-banner-btn {
-    padding: 0.75rem 1.85rem !important;
-    font-size: 0.875rem !important;
-    min-height: 44px !important;
+    padding-left: 2rem !important;
+    padding-right: 2rem !important;
+    font-size: 0.9375rem !important;
   }
 }
 
-/* 150% Scale on Desktop: unified height and padding specifically tailored for 150% */
-@media screen and (min-width: 1024px) and (min-resolution: 135dpi) and (max-resolution: 160dpi),
-       screen and (min-width: 1024px) and (-webkit-min-device-pixel-ratio: 1.35) and (-webkit-max-device-pixel-ratio: 1.65),
-       screen and (min-width: 1024px) and (max-height: 720px) {
+/* Desktop (1024px+ - All Scales 100%, 125%, 150%, 175%, 200%): exact Services Section py-16 px-14 */
+@media screen and (min-width: 1024px) {
   .cta-banner-card {
-    padding: 1.15rem clamp(1.5rem, 2vw, 2.75rem) !important;
-    min-height: 86px !important;
-    max-height: 86px !important;
+    padding: 4rem 3.5rem !important;
+    min-height: auto !important;
+    max-height: none !important;
   }
   .cta-banner-title {
-    font-size: 1.4rem !important;
+    font-size: 2rem !important;
   }
   .cta-banner-subtitle {
-    font-size: 0.825rem !important;
+    font-size: 0.9375rem !important;
   }
   .cta-banner-btn {
-    padding: 0.55rem 1.45rem !important;
-    font-size: 0.8125rem !important;
-    min-height: 38px !important;
+    padding-left: 2rem !important;
+    padding-right: 2rem !important;
+    font-size: 0.9375rem !important;
   }
 }
 
@@ -1139,13 +1133,13 @@ img, svg, video, canvas {
   .cta-banner-card {
     flex-direction: column !important;
     align-items: flex-start !important;
-    padding: 1.5rem 1.25rem !important;
+    padding: 2.5rem 1.5rem !important;
     min-height: auto !important;
     max-height: none !important;
-    gap: 1.25rem !important;
+    gap: 1.5rem !important;
   }
   .cta-banner-title {
-    font-size: 1.35rem !important;
+    font-size: 1.5rem !important;
     white-space: normal !important;
   }
   .cta-banner-subtitle {
@@ -1153,7 +1147,9 @@ img, svg, video, canvas {
     white-space: normal !important;
   }
   .cta-banner-btn {
-    width: 100% !important;
+    width: auto !important;
+    padding-left: 1.75rem !important;
+    padding-right: 1.75rem !important;
     text-align: center !important;
     justify-content: center !important;
   }
@@ -1291,14 +1287,14 @@ img, svg, video, canvas {
        screen and (min-width: 1024px) and (-webkit-min-device-pixel-ratio: 1.35) and (-webkit-max-device-pixel-ratio: 1.62),
        screen and (min-width: 1024px) and (max-height: 720px) {
 
-  /* Main container & Breadcrumb clearance below floating Navbar */
+  /* Main container & Breadcrumb clearance below floating Navbar (matches About page at 150% scale) */
   .portfolio-page-main {
-    padding-top: clamp(4.5rem, 7vh, 5.25rem) !important;
+    padding-top: 7.5rem !important;
     padding-bottom: 1.5rem !important;
   }
 
   .portfolio-page-breadcrumb {
-    margin-bottom: clamp(0.35rem, 0.8vh, 0.65rem) !important;
+    margin-bottom: 2.25rem !important;
   }
 
   /* Grid layout alignment */
@@ -1313,7 +1309,7 @@ img, svg, video, canvas {
   }
 
   .portfolio-page-title {
-    font-size: clamp(2.15rem, 1.5rem + 1.2vw, 2.65rem) !important;
+    font-size: clamp(2.49rem, calc(4.222vw - 0.32rem), 5.15rem) !important;
     line-height: 1.05 !important;
     margin-bottom: 0.45rem !important;
   }
@@ -1414,14 +1410,14 @@ img, svg, video, canvas {
        screen and (min-width: 1024px) and (-webkit-min-device-pixel-ratio: 1.35) and (-webkit-max-device-pixel-ratio: 1.62),
        screen and (min-width: 1024px) and (max-height: 720px) {
 
-  /* Main container clearance below floating Navbar */
+  /* Main container & Breadcrumb clearance below floating Navbar (matches About page at 150% scale) */
   .blogs-page-main {
-    padding-top: clamp(3.75rem, 6vh, 4.35rem) !important;
+    padding-top: 7.5rem !important;
     padding-bottom: 2rem !important;
   }
 
   .blogs-page-breadcrumb {
-    margin-bottom: clamp(0.25rem, 0.6vh, 0.45rem) !important;
+    margin-bottom: 2.25rem !important;
   }
 
   .blogs-page-header {
@@ -1430,7 +1426,7 @@ img, svg, video, canvas {
 
   /* Display Title & Subtitle */
   .blogs-page-title {
-    font-size: clamp(2.15rem, 1.5rem + 1.2vw, 2.75rem) !important;
+    font-size: clamp(2.49rem, calc(4.222vw - 0.32rem), 5.15rem) !important;
     line-height: 1.05 !important;
     margin-bottom: 0.35rem !important;
   }
@@ -1497,14 +1493,14 @@ img, svg, video, canvas {
        screen and (min-width: 1024px) and (-webkit-min-device-pixel-ratio: 1.35) and (-webkit-max-device-pixel-ratio: 1.62),
        screen and (min-width: 1024px) and (max-height: 720px) {
 
-  /* Main container clearance below floating Navbar */
+  /* Main container & Breadcrumb clearance below floating Navbar (matches About page at 150% scale) */
   .careers-page-main {
-    padding-top: clamp(3.75rem, 6vh, 4.35rem) !important;
+    padding-top: 7.5rem !important;
     padding-bottom: 2rem !important;
   }
 
   .careers-page-breadcrumb {
-    margin-bottom: clamp(0.25rem, 0.6vh, 0.45rem) !important;
+    margin-bottom: 2.25rem !important;
   }
 
   .careers-page-header {
@@ -1513,7 +1509,7 @@ img, svg, video, canvas {
 
   /* Display Title & Subtitle */
   .careers-page-title {
-    font-size: clamp(2.15rem, 1.5rem + 1.2vw, 2.75rem) !important;
+    font-size: clamp(2.49rem, calc(4.222vw - 0.32rem), 5.15rem) !important;
     line-height: 1.05 !important;
     margin-bottom: 0.35rem !important;
   }
@@ -1635,7 +1631,7 @@ img, svg, video, canvas {
 
   /* Display Job Title */
   .jobdesc-page-title {
-    font-size: clamp(2.15rem, 1.5rem + 1.2vw, 2.75rem) !important;
+    font-size: clamp(2.49rem, calc(4.222vw - 0.32rem), 5.15rem) !important;
     line-height: 1.05 !important;
     margin-bottom: 0.35rem !important;
   }
@@ -1765,7 +1761,7 @@ img, svg, video, canvas {
 
   /* Job Title & Summary */
   .apply-page-banner-title {
-    font-size: clamp(1.85rem, 1.35rem + 1vw, 2.35rem) !important;
+    font-size: clamp(2.49rem, calc(4.222vw - 0.32rem), 5.15rem) !important;
     line-height: 1.05 !important;
     margin-bottom: 0.25rem !important;
   }
@@ -1866,14 +1862,14 @@ img, svg, video, canvas {
        screen and (min-width: 1024px) and (-webkit-min-device-pixel-ratio: 1.35) and (-webkit-max-device-pixel-ratio: 1.62),
        screen and (min-width: 1024px) and (max-height: 720px) {
 
-  /* Main container clearance below floating Navbar */
+  /* Main container & Back button clearance below floating Navbar (matches About page at 150% scale) */
   .blogdetail-page-main {
-    padding-top: clamp(3.75rem, 6vh, 4.35rem) !important;
+    padding-top: 7.5rem !important;
     padding-bottom: 2rem !important;
   }
 
   .blogdetail-back-wrap {
-    margin-bottom: clamp(0.35rem, 0.8vh, 0.65rem) !important;
+    margin-bottom: 2.25rem !important;
   }
 
   /* Top Hero Card */
@@ -1892,7 +1888,7 @@ img, svg, video, canvas {
 
   /* Hero Display Title & Excerpt */
   .blogdetail-hero-title {
-    font-size: clamp(1.75rem, 1.25rem + 1vw, 2.25rem) !important;
+    font-size: clamp(2.49rem, calc(4.222vw - 0.32rem), 5.15rem) !important;
     line-height: 1.05 !important;
     margin-bottom: clamp(0.25rem, 0.6vh, 0.45rem) !important;
   }
@@ -2010,14 +2006,14 @@ img, svg, video, canvas {
        screen and (min-width: 1024px) and (-webkit-min-device-pixel-ratio: 1.35) and (-webkit-max-device-pixel-ratio: 1.62),
        screen and (min-width: 1024px) and (max-height: 720px) {
 
-  /* Main container clearance below floating Navbar */
+  /* Main container & Breadcrumb clearance below floating Navbar (matches About page at 150% scale) */
   .services-page-main {
-    padding-top: clamp(3.75rem, 6vh, 4.35rem) !important;
+    padding-top: 7.5rem !important;
     padding-bottom: 2.5rem !important;
   }
 
   .services-page-breadcrumb {
-    margin-bottom: clamp(0.25rem, 0.6vh, 0.45rem) !important;
+    margin-bottom: 2.25rem !important;
   }
 
   .services-page-header {
@@ -2026,7 +2022,7 @@ img, svg, video, canvas {
 
   /* Display Title & Subtitle */
   .services-page-title {
-    font-size: clamp(2.15rem, 1.5rem + 1.2vw, 2.75rem) !important;
+    font-size: clamp(2.49rem, calc(4.222vw - 0.32rem), 5.15rem) !important;
     line-height: 1.05 !important;
     margin-bottom: 0.35rem !important;
   }
@@ -2089,18 +2085,18 @@ img, svg, video, canvas {
        screen and (min-width: 1024px) and (-webkit-min-device-pixel-ratio: 1.35) and (-webkit-max-device-pixel-ratio: 1.62),
        screen and (min-width: 1024px) and (max-height: 720px) {
 
-  /* Pinned Hero Section Container & Clearance */
+  /* Pinned Hero Section Container & Back button clearance (matches About page at 150% scale) */
   .servicedetail-hero-wrap {
-    padding-top: clamp(3.75rem, 6vh, 4.35rem) !important;
+    padding-top: 7.5rem !important;
     height: 780px !important;
   }
 
   .servicedetail-pinned-wrap {
-    top: clamp(3.75rem, 6vh, 4.35rem) !important;
+    top: 7.5rem !important;
   }
 
   .servicedetail-back-wrap {
-    margin-bottom: clamp(0.35rem, 0.8vh, 0.65rem) !important;
+    margin-bottom: 2.25rem !important;
   }
 
   /* Hero Row & Content */
@@ -2109,7 +2105,7 @@ img, svg, video, canvas {
   }
 
   .servicedetail-hero-title {
-    font-size: clamp(1.85rem, 1.25rem + 1vw, 2.35rem) !important;
+    font-size: clamp(2.49rem, calc(4.222vw - 0.32rem), 5.15rem) !important;
     line-height: 1.05 !important;
   }
 
@@ -2182,18 +2178,18 @@ img, svg, video, canvas {
        screen and (min-width: 1024px) and (-webkit-min-device-pixel-ratio: 1.35) and (-webkit-max-device-pixel-ratio: 1.62),
        screen and (min-width: 1024px) and (max-height: 720px) {
 
-  /* Pinned Hero Section Container & Clearance */
+  /* Pinned Hero Section Container & Back button clearance (matches About page at 150% scale) */
   .portfoliodetail-hero-wrap {
-    padding-top: clamp(3.75rem, 6vh, 4.35rem) !important;
+    padding-top: 7.5rem !important;
     height: 780px !important;
   }
 
   .portfoliodetail-pinned-wrap {
-    top: clamp(3.75rem, 6vh, 4.35rem) !important;
+    top: 7.5rem !important;
   }
 
   .portfoliodetail-back-wrap {
-    margin-bottom: clamp(0.35rem, 0.8vh, 0.65rem) !important;
+    margin-bottom: 2.25rem !important;
   }
 
   /* Hero Row & Content */
@@ -2202,7 +2198,7 @@ img, svg, video, canvas {
   }
 
   .portfoliodetail-hero-title {
-    font-size: clamp(1.85rem, 1.25rem + 1vw, 2.35rem) !important;
+    font-size: clamp(2.49rem, calc(4.222vw - 0.32rem), 5.15rem) !important;
     line-height: 1.05 !important;
   }
 
@@ -2320,7 +2316,7 @@ img, svg, video, canvas {
   }
 
   .legal-page-title {
-    font-size: clamp(2rem, 1.4rem + 1.2vw, 2.5rem) !important;
+    font-size: clamp(2.49rem, calc(4.222vw - 0.32rem), 5.15rem) !important;
     line-height: 1.08 !important;
     margin-bottom: 0.35rem !important;
   }
@@ -2403,7 +2399,7 @@ img, svg, video, canvas {
   }
 
   .profile-page-title {
-    font-size: clamp(1.75rem, 1.25rem + 1vw, 2.15rem) !important;
+    font-size: clamp(2.49rem, calc(4.222vw - 0.32rem), 5.15rem) !important;
     line-height: 1.05 !important;
   }
 
@@ -2508,6 +2504,541 @@ img, svg, video, canvas {
     padding: 0.15rem 0.55rem !important;
     font-size: 0.68rem !important;
   }
+}
+
+/* ==========================================================================
+   17. MASTER CTA BUTTON HEIGHT SYNCHRONIZATION SYSTEM
+   Matches all primary CTA buttons' height to the navbar buttons (.nav-login-btn,
+   .nav-cta-btn) across all display scales.
+   ========================================================================== */
+
+/* Base / Mobile (<768px) */
+.hero-btn,
+.about-btn,
+.portfolio-cta-btn,
+.careers-apply-btn,
+.contact-cta-btn,
+.cta-banner-btn,
+.site-cta-btn,
+.careers-role-btn-outline,
+.careers-role-btn-primary {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+/* Tablet & Non-100%/150% Desktop Scales (e.g., 125%, 175%, 200%) */
+@media screen and (min-width: 768px) {
+  .hero-btn,
+  .about-btn,
+  .portfolio-cta-btn,
+  .careers-apply-btn,
+  .contact-cta-btn,
+  .cta-banner-btn,
+  .site-cta-btn,
+  .careers-role-btn-outline,
+  .careers-role-btn-primary {
+    height: 36px !important;
+    min-height: 36px !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+}
+
+/* 100% Display Scale ONLY: exact 42px matching .nav-login-btn and .nav-cta-btn */
+@media screen and (min-width: 1024px) and (max-resolution: 1.14dppx) and (min-height: 740px),
+       screen and (min-width: 1024px) and (-webkit-max-device-pixel-ratio: 1.14) and (min-height: 740px) {
+  .nav-login-btn,
+  .nav-cta-btn,
+  .hero-btn,
+  .about-btn,
+  .portfolio-cta-btn,
+  .careers-apply-btn,
+  .contact-cta-btn,
+  .cta-banner-btn,
+  .site-cta-btn,
+  .careers-role-btn-outline,
+  .careers-role-btn-primary {
+    height: 42px !important;
+    min-height: 42px !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+}
+
+/* 150% Display Scale ONLY: exact 35px matching navbar buttons in 150% scale */
+@media screen and (min-width: 1024px) and (min-resolution: 135dpi) and (max-resolution: 160dpi),
+       screen and (min-width: 1024px) and (-webkit-min-device-pixel-ratio: 1.35) and (-webkit-max-device-pixel-ratio: 1.65),
+       screen and (min-width: 1024px) and (max-height: 720px) {
+  .hero-btn,
+  .about-btn,
+  .portfolio-cta-btn,
+  .careers-apply-btn,
+  .contact-cta-btn,
+  .cta-banner-btn,
+  .site-cta-btn,
+  .careers-role-btn-outline,
+  .careers-role-btn-primary {
+    height: 35px !important;
+    min-height: 35px !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+}
+
+/* ==========================================================================
+   18. PORTFOLIO SECTION CALIBRATION FOR 125% DISPLAY SCALE ONLY
+   (120 DPI / devicePixelRatio: 1.25 - min-resolution: 115dpi, max-resolution: 134dpi)
+   Clears floating navbar cleanly and fits cards + "View All" button inside 100dvh.
+   Does NOT affect 100%, 150%, 175%, 200%, tablet, or mobile scales.
+   ========================================================================== */
+@media screen and (min-width: 1024px) and (min-resolution: 115dpi) and (max-resolution: 134dpi),
+       screen and (min-width: 1024px) and (-webkit-min-device-pixel-ratio: 1.15) and (-webkit-max-device-pixel-ratio: 1.34) {
+  .portfolio-section-wrap {
+    padding-top: clamp(4.75rem, 9vh, 5.5rem) !important;
+    padding-bottom: clamp(1.5rem, 3vh, 2.5rem) !important;
+  }
+
+  .portfolio-content-wrap {
+    margin-top: auto !important;
+    margin-bottom: auto !important;
+  }
+
+  .portfolio-header {
+    margin-bottom: clamp(0.6rem, 1.2vh, 1rem) !important;
+  }
+
+  .portfolio-eyebrow-wrap {
+    margin-bottom: 0.3rem !important;
+  }
+
+  .portfolio-title {
+    font-size: clamp(2.5rem, 1.6rem + 2vw, 3.6rem) !important;
+    line-height: 1.05 !important;
+    margin-bottom: 0.3rem !important;
+  }
+
+  .portfolio-desc {
+    margin-top: 0.2rem !important;
+    font-size: clamp(0.84rem, 0.78rem + 0.14vw, 0.94rem) !important;
+    line-height: 1.45 !important;
+  }
+
+  .portfolio-card {
+    padding: clamp(0.85rem, 1.2vh, 1.15rem) !important;
+    border-radius: 1.1rem !important;
+  }
+
+  .portfolio-card-img-wrap {
+    width: 100% !important;
+    aspect-ratio: auto !important;
+    height: clamp(165px, 23vh, 200px) !important;
+    max-height: none !important;
+  }
+
+  .portfolio-card-badge-row {
+    margin-top: clamp(0.55rem, 0.9vh, 0.75rem) !important;
+    margin-bottom: clamp(0.3rem, 0.55vh, 0.45rem) !important;
+  }
+
+  .portfolio-card-title {
+    font-size: clamp(0.98rem, 0.88rem + 0.24vw, 1.18rem) !important;
+    line-height: 1.28 !important;
+    margin-bottom: 0.35rem !important;
+  }
+
+  .portfolio-card-desc {
+    font-size: clamp(0.8rem, 0.74rem + 0.12vw, 0.9rem) !important;
+    line-height: 1.42 !important;
+    margin-bottom: clamp(0.55rem, 0.9vh, 0.8rem) !important;
+  }
+
+  .portfolio-card-cta {
+    margin-top: auto !important;
+    padding-top: 0.2rem !important;
+  }
+
+  .portfolio-know-more-wrap {
+    margin-top: clamp(1rem, 2vh, 1.5rem) !important;
+  }
+}
+
+/* ==========================================================================
+   19. SERVICE DETAIL PAGE CALIBRATION FOR 125% DISPLAY SCALE ONLY
+   (120 DPI / devicePixelRatio: 1.25 - min-resolution: 115dpi, max-resolution: 134dpi)
+   Fits the full hero image cleanly inside 100dvh without bottom clipping.
+   Does NOT affect 100%, 150%, 175%, 200%, tablet, or mobile scales.
+   ========================================================================== */
+@media screen and (min-width: 1024px) and (min-resolution: 115dpi) and (max-resolution: 134dpi),
+       screen and (min-width: 1024px) and (-webkit-min-device-pixel-ratio: 1.15) and (-webkit-max-device-pixel-ratio: 1.34) {
+  .servicedetail-hero-wrap {
+    padding-top: 6.5rem !important;
+    height: 940px !important;
+  }
+
+  .servicedetail-pinned-wrap {
+    top: 6.5rem !important;
+  }
+
+  .servicedetail-back-wrap {
+    margin-bottom: 1.25rem !important;
+  }
+
+  .servicedetail-hero-title {
+    font-size: clamp(2.5rem, 1.5rem + 2vw, 3.6rem) !important;
+    line-height: 1.06 !important;
+  }
+
+  .servicedetail-hero-desc {
+    font-size: 0.95rem !important;
+    line-height: 1.55 !important;
+    margin-top: 0.85rem !important;
+  }
+
+  .servicedetail-hero-img {
+    max-height: clamp(380px, calc(100dvh - 190px), 540px) !important;
+  }
+
+  /* Portfolio Detail Page Hero Image & Scroll Reveal Text fit inside 100dvh at 125% Scale ONLY */
+  .portfoliodetail-hero-wrap {
+    padding-top: 6.5rem !important;
+    height: 940px !important;
+  }
+
+  .portfoliodetail-pinned-wrap {
+    top: 6.5rem !important;
+  }
+
+  .portfoliodetail-back-wrap {
+    margin-bottom: 1.25rem !important;
+  }
+
+  .portfoliodetail-hero-title {
+    font-size: clamp(2.45rem, 1.4rem + 1.9vw, 3.45rem) !important;
+    line-height: 1.06 !important;
+  }
+
+  .portfoliodetail-hero-desc {
+    font-size: 0.95rem !important;
+    line-height: 1.55 !important;
+    margin-top: 0.85rem !important;
+    margin-bottom: 1rem !important;
+  }
+
+  .portfoliodetail-hero-img {
+    max-height: clamp(380px, calc(100dvh - 190px), 540px) !important;
+  }
+
+  /* Portfolio Page Showcase Card & Stepper fit inside 100dvh at 125% Scale ONLY */
+  .portfolio-page-main {
+    padding-top: 6rem !important;
+    padding-bottom: 1.5rem !important;
+  }
+
+  .portfolio-page-breadcrumb {
+    margin-bottom: 1rem !important;
+  }
+
+  .portfolio-page-left-col {
+    padding-top: 0 !important;
+  }
+
+  .portfolio-page-title {
+    margin-bottom: 0.75rem !important;
+  }
+
+  .portfolio-page-desc {
+    margin-bottom: 1.35rem !important;
+  }
+
+  .portfolio-page-step-line {
+    min-height: 1.75rem !important;
+  }
+
+  .portfolio-page-step-content {
+    padding-bottom: 1rem !important;
+  }
+
+  .portfolio-page-card-wrap {
+    margin-top: clamp(0.75rem, 1.5vh, 1.25rem) !important;
+  }
+
+  .portfolio-page-card {
+    min-height: clamp(380px, 50vh, 450px) !important;
+    max-height: calc(100dvh - 170px) !important;
+    padding: clamp(1.5rem, 2.5vh, 2rem) clamp(1.75rem, 2.5vw, 2.5rem) !important;
+  }
+
+  .portfolio-page-card-top {
+    margin-bottom: 1rem !important;
+  }
+
+  .portfolio-page-card-icon {
+    width: 2.75rem !important;
+    height: 2.75rem !important;
+    margin-bottom: 0.75rem !important;
+  }
+
+  .portfolio-page-card-mid {
+    margin-bottom: 1rem !important;
+  }
+
+  .portfolio-page-card-title {
+    font-size: clamp(1.65rem, 1.25rem + 0.9vw, 2.25rem) !important;
+    margin-bottom: 0.65rem !important;
+  }
+
+  .portfolio-page-card-desc {
+    margin-bottom: 0.75rem !important;
+  }
+
+  .portfolio-page-card-cta {
+    padding-top: 0.25rem !important;
+  }
+}
+
+/* Keep the official floating reCAPTCHA v3 badge visible and hover-stable above BackToHeroButton */
+.grecaptcha-badge {
+  visibility: visible !important;
+  bottom: 84px !important;
+  right: 0px !important;
+  z-index: 40 !important;
+  transform: translateX(186px) !important;
+  transition: transform 0.25s ease !important;
+  will-change: transform;
+}
+
+.grecaptcha-badge:hover,
+.grecaptcha-badge:focus-within {
+  transform: translateX(0px) !important;
+}
+
+@media (min-width: 640px) {
+  .grecaptcha-badge {
+    bottom: 92px !important;
+  }
+}
+
+/* Hide badge inside admin portals */
+body.hide-recaptcha-badge .grecaptcha-badge {
+  visibility: hidden !important;
+}
+
+/* ==========================================================================
+   20. LAUNCHING PAGE CALIBRATION FOR 125% DISPLAY SCALE ONLY
+   (120 DPI / devicePixelRatio: 1.25 - min-resolution: 115dpi, max-resolution: 134dpi)
+   Fits logo, timer, Launch CTA, and orbiting 3D cube cleanly within 100dvh.
+   Does NOT affect 100%, 150%, 175%, 200%, tablet, or mobile scales.
+   ========================================================================== */
+@media screen and (min-width: 1024px) and (min-resolution: 115dpi) and (max-resolution: 134dpi),
+       screen and (min-width: 1024px) and (-webkit-min-device-pixel-ratio: 1.15) and (-webkit-max-device-pixel-ratio: 1.34) {
+  .launching-header {
+    padding-top: 1.35rem !important;
+  }
+
+  .launching-logo {
+    width: clamp(175px, 15vw, 215px) !important;
+  }
+
+  .launching-main {
+    padding-top: 1rem !important;
+    padding-bottom: 1rem !important;
+  }
+
+  .launching-badge {
+    margin-bottom: 1.15rem !important;
+  }
+
+  .launching-title {
+    font-size: clamp(2.75rem, 2rem + 1.8vw, 3.75rem) !important;
+    margin-bottom: 0.9rem !important;
+  }
+
+  .launching-desc {
+    font-size: 1rem !important;
+    margin-bottom: 1.5rem !important;
+  }
+
+  .launching-divider {
+    margin-bottom: 1rem !important;
+  }
+
+  .launching-timer-box {
+    width: 138px !important;
+    padding-top: 0.95rem !important;
+    padding-bottom: 0.95rem !important;
+  }
+
+  .launching-timer-num {
+    font-size: 2.35rem !important;
+  }
+
+  .launching-cta-wrap {
+    margin-top: 1.15rem !important;
+  }
+
+  .launching-cta-btn {
+    padding: 0.7rem 2.25rem !important;
+    font-size: 0.9rem !important;
+  }
+
+  .launching-cube-col {
+    padding-top: 0.75rem !important;
+    padding-bottom: 0.75rem !important;
+  }
+
+  .launching-orbit-stage {
+    transform: scale(0.9) !important;
+  }
+
+  .launching-spacer {
+    height: 0.75rem !important;
+  }
+}
+
+/* ==========================================================================
+   21. LAUNCHING PAGE CALIBRATION FOR 150% DISPLAY SCALE ONLY
+   (144 DPI / devicePixelRatio: 1.5 - min-resolution: 135dpi, max-resolution: 158dpi)
+   Fits logo, timer, Launch CTA, and orbiting 3D cube cleanly within 100dvh.
+   Does NOT affect 100%, 125%, 175%, 200%, tablet, or mobile scales.
+   ========================================================================== */
+@media screen and (min-width: 1024px) and (min-resolution: 135dpi) and (max-resolution: 158dpi),
+       screen and (min-width: 1024px) and (-webkit-min-device-pixel-ratio: 1.35) and (-webkit-max-device-pixel-ratio: 1.62),
+       screen and (min-width: 1024px) and (max-height: 700px) {
+  .launching-header {
+    max-width: 1050px !important;
+    padding-top: 1rem !important;
+  }
+
+  .launching-logo {
+    width: clamp(155px, 13.5vw, 190px) !important;
+  }
+
+  .launching-main {
+    max-width: 1050px !important;
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+  }
+
+  .launching-grid {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 2rem !important;
+  }
+
+  .launching-left-col {
+    flex: 0 1 auto !important;
+    max-width: 500px !important;
+  }
+
+  .launching-badge {
+    padding: 0.28rem 0.85rem !important;
+    margin-bottom: 0.85rem !important;
+  }
+
+  .launching-title {
+    font-size: clamp(2.25rem, 1.5rem + 1.6vw, 3.15rem) !important;
+    margin-bottom: 0.65rem !important;
+  }
+
+  .launching-desc {
+    font-size: 0.88rem !important;
+    line-height: 1.48 !important;
+    margin-bottom: 1.15rem !important;
+  }
+
+  .launching-divider {
+    margin-bottom: 0.75rem !important;
+  }
+
+  .launching-divider span {
+    font-size: 0.62rem !important;
+  }
+
+  .launching-timer-box {
+    width: 118px !important;
+    padding: 0.75rem !important;
+    border-radius: 1rem !important;
+  }
+
+  .launching-timer-num {
+    font-size: 1.95rem !important;
+  }
+
+  .launching-timer-label {
+    margin-top: 0.4rem !important;
+    font-size: 0.6rem !important;
+  }
+
+  .launching-cta-wrap {
+    margin-top: 0.85rem !important;
+  }
+
+  .launching-cta-btn {
+    padding: 0.6rem 2rem !important;
+    font-size: 0.84rem !important;
+  }
+
+  .launching-cube-col {
+    flex: 0 0 auto !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+
+  .launching-orbit-stage {
+    transform: scale(0.78) !important;
+    margin: -2rem -1.75rem !important;
+  }
+
+  .launching-spacer {
+    height: 0.5rem !important;
+  }
+}
+
+/* ==========================================================================
+   22. LAUNCHING PAGE 100% DISPLAY SCALE ONLY
+   Keep description copy cleanly on 2 lines without altering 125%, 150%,
+   tablet, or mobile scales.
+   ========================================================================== */
+@media screen and (min-width: 1024px) and (max-resolution: 114dpi),
+       screen and (min-width: 1024px) and (-webkit-max-device-pixel-ratio: 1.14) {
+  .launching-desc {
+    max-width: 640px !important;
+  }
+}
+
+/* Slow autonomous rotation for LaunchingPage outer service orbit only */
+@keyframes launchingOrbitCw {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes launchingOrbitCcw {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(-360deg);
+  }
+}
+
+.launching-orbit-spin {
+  animation: launchingOrbitCw 60s linear infinite;
+  will-change: transform;
+}
+
+.launching-orbit-counter-spin {
+  animation: launchingOrbitCcw 60s linear infinite;
+  will-change: transform;
 }
 
 

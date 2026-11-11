@@ -14,7 +14,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { toast } from "../componenets/toast.tsx";
-import ReCAPTCHA from "react-google-recaptcha";
+import { preloadRecaptcha, executeRecaptcha } from "../utils/recaptcha.ts";
 import Navbar from "../componenets/navbar.tsx";
 import Footer from "../componenets/footer.tsx";
 import BackToHeroButton from "../componenets/back-to-hero.tsx";
@@ -159,19 +159,25 @@ export default function ContactPage() {
 
   const [submissionStage, setSubmissionStage] = useState<"form" | "delivering" | "success">("form");
   const [isServiceSelectOpen, setIsServiceSelectOpen] = useState(false);
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [captchaError, setCaptchaError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const recaptchaRef = useRef<ReCAPTCHA>(null);
-
-  const recaptchaSiteKey =
-    import.meta.env.VITE_RECAPTCHA_SITE_KEY || "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI";
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Map state (defaults to Melbourne matching previous reference screenshot)
   const [activeLocationId, setActiveLocationId] = useState("melbourne");
+  const [isMapLoaded, setIsMapLoaded] = useState(false);
   const currentLocation =
     OFFICE_LOCATIONS.find((loc) => loc.id === activeLocationId) || OFFICE_LOCATIONS[0];
+
+  // Reset map fade when switching office location
+  useEffect(() => {
+    setIsMapLoaded(false);
+  }, [activeLocationId]);
+
+  // Preload Google reCAPTCHA v3 script silently on mount
+  useEffect(() => {
+    preloadRecaptcha();
+  }, []);
 
   // Close dropdown on click outside
   useEffect(() => {
@@ -194,15 +200,12 @@ export default function ContactPage() {
       return;
     }
 
-    if (!captchaToken) {
-      setCaptchaError("Please verify that you are not a robot.");
-      toast.warning("Please verify that you are not a robot.", { title: "Verification Needed" });
-      return;
-    }
-
     setIsSubmitting(true);
 
     try {
+      // Automatically generate invisible reCAPTCHA v3 token on form submission
+      const captchaToken = await executeRecaptcha("contact_form_submit");
+
       const response = await fetch("/api/contact/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -237,11 +240,9 @@ export default function ContactPage() {
       });
     } catch (err: unknown) {
       const error = err as Error;
-      const msg = error.message || "Verification failed. Please check the reCAPTCHA box again.";
+      const msg = error.message || "Security verification failed. Please try again.";
       setCaptchaError(msg);
       toast.error(msg, { title: "Submission Failed" });
-      recaptchaRef.current?.reset();
-      setCaptchaToken(null);
     } finally {
       setIsSubmitting(false);
     }
@@ -256,9 +257,7 @@ export default function ContactPage() {
       service: "",
       message: "",
     });
-    setCaptchaToken(null);
     setCaptchaError("");
-    recaptchaRef.current?.reset();
     setSubmissionStage("form");
     setIsServiceSelectOpen(false);
   };
@@ -285,7 +284,12 @@ export default function ContactPage() {
         />
 
         {/* Main Full-Width Container matching max-w-[2100px] */}
-        <div className="relative w-full max-w-[2100px] mx-auto px-4 sm:px-6 md:px-8 lg:px-10 xl:px-14 2xl:px-18">
+        <motion.div
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+          className="relative w-full max-w-[2100px] mx-auto px-4 sm:px-6 md:px-8 lg:px-10 xl:px-14 2xl:px-18"
+        >
           {/* Breadcrumb Navigation: Home > Contact */}
           <nav aria-label="Breadcrumb" className="mb-6 sm:mb-8">
             <ol className="inline-flex items-center gap-1.5 sm:gap-2 text-xs sm:text-[13.5px] font-medium">
@@ -523,36 +527,16 @@ export default function ContactPage() {
                         </div>
                       </div>
 
-                      {/* Row 5: Google reCAPTCHA v2 Checkbox */}
-                      <div className="pt-2 flex flex-col items-center justify-center">
-                        <div className="overflow-x-auto max-w-full">
-                          <ReCAPTCHA
-                            ref={recaptchaRef}
-                            sitekey={recaptchaSiteKey}
-                            onChange={(token) => {
-                              setCaptchaToken(token);
-                              if (token) setCaptchaError("");
-                            }}
-                            onExpired={() => {
-                              setCaptchaToken(null);
-                              setCaptchaError("reCAPTCHA verification expired. Please check the box again.");
-                            }}
-                            onErrored={() => {
-                              setCaptchaToken(null);
-                              setCaptchaError("Unable to connect to reCAPTCHA service. Please retry.");
-                            }}
-                          />
+                      {/* Security Error Feedback (if any) */}
+                      {captchaError && (
+                        <div className="pt-1 text-xs text-red-600 font-medium flex items-center justify-center gap-1.5 text-center">
+                          <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                          <span>{captchaError}</span>
                         </div>
-                        {captchaError && (
-                          <div className="mt-2 text-xs text-red-600 font-medium flex items-center gap-1.5 text-center">
-                            <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                            <span>{captchaError}</span>
-                          </div>
-                        )}
-                      </div>
+                      )}
 
-                      {/* Row 6: Submit Button */}
-                      <div className="pt-2 flex flex-col gap-4">
+                      {/* Row 5: Submit Button & Google reCAPTCHA v3 Notice */}
+                      <div className="pt-2 flex flex-col gap-2.5">
                         <button
                           type="submit"
                           disabled={isSubmitting}
@@ -560,6 +544,28 @@ export default function ContactPage() {
                         >
                           <span>{isSubmitting ? "Verifying..." : "Submit"}</span>
                         </button>
+
+                        <p className="text-[11px] text-[#7E7A8D] text-center leading-relaxed">
+                          Protected by Google reCAPTCHA v3.{" "}
+                          <a
+                            href="https://policies.google.com/privacy"
+                            target="_blank"
+                            rel="noreferrer"
+                            className="underline hover:text-[#693092]"
+                          >
+                            Privacy
+                          </a>{" "}
+                          &amp;{" "}
+                          <a
+                            href="https://policies.google.com/terms"
+                            target="_blank"
+                            rel="noreferrer"
+                            className="underline hover:text-[#693092]"
+                          >
+                            Terms
+                          </a>
+                          .
+                        </p>
                       </div>
                     </motion.form>
                   )}
@@ -652,10 +658,13 @@ export default function ContactPage() {
                   width="100%"
                   height="100%"
                   style={{ border: 0 }}
-                  loading="lazy"
+                  loading="eager"
+                  onLoad={() => setIsMapLoaded(true)}
                   allowFullScreen={false}
                   referrerPolicy="no-referrer-when-downgrade"
-                  className="w-full h-full object-cover flex-1"
+                  className={`w-full h-full object-cover flex-1 transition-opacity duration-500 ${
+                    isMapLoaded ? "opacity-100" : "opacity-0"
+                  }`}
                 />
 
                 {/* Overlaid Center Purple Pin (Teardrop with center circle) */}
@@ -805,7 +814,7 @@ export default function ContactPage() {
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
       </main>
 
       {/* Footer */}

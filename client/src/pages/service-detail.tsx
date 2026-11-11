@@ -123,15 +123,15 @@ export default function ServiceDetailPage() {
             }}
           >
             <div className="relative w-full max-w-[2100px] mx-auto px-4 sm:px-6 md:px-8 lg:px-10 xl:px-14 2xl:px-18">
-              {/* Back to Services Pill Button */}
+              {/* Back to Services link button */}
               <div className="mb-3.5 sm:mb-4 lg:mb-5 servicedetail-back-wrap">
                 <Link
                   to="/services"
                   onClick={handleBack}
-                  className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full bg-white border border-[#693092]/20 hover:border-[#693092]/40 text-[#693092] text-xs sm:text-[13px] font-semibold tracking-wide shadow-sm hover:shadow-md transition-all duration-200 select-none cursor-pointer w-fit group"
+                  className="inline-flex items-center gap-2 text-xs sm:text-[13px] font-semibold text-[#6C6377] hover:text-[#693092] transition-colors cursor-pointer select-none w-fit"
                   aria-label="Back to Services"
                 >
-                  <ArrowLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform group-hover:-translate-x-1 stroke-[2.5]" />
+                  <ArrowLeft className="w-3.5 h-3.5 stroke-[2.2]" />
                   <span>Back to Services</span>
                 </Link>
               </div>

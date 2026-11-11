@@ -317,13 +317,13 @@ export default function BlogsPage() {
             (Matching exact height, padding, rounded corners, bg color, and hover-brand-gradient from remaining pages)
         =================================================================== */}
         <div className="mt-8 sm:mt-10 lg:mt-14 mb-8 w-full">
-          <div className="w-full bg-[#2A1450] rounded-2xl sm:rounded-3xl px-6 sm:px-10 lg:px-14 py-10 sm:py-14 lg:py-16 shadow-xl shadow-[#2A1450]/20 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div className="w-full bg-[#2A1450] rounded-2xl sm:rounded-3xl px-6 sm:px-10 lg:px-14 py-10 sm:py-14 lg:py-16 shadow-xl shadow-[#2A1450]/20 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 cta-banner-card">
             {/* Left Texts: Heading and subtitle */}
             <div className="flex flex-col sm:flex-row sm:items-baseline gap-2.5 sm:gap-4 md:gap-6">
-              <h3 className="text-2xl sm:text-3xl md:text-[2rem] font-light tracking-[-0.035em] text-white whitespace-nowrap">
+              <h3 className="text-2xl sm:text-3xl md:text-[2rem] font-light tracking-[-0.035em] text-white whitespace-nowrap cta-banner-title">
                 Ready to get started?
               </h3>
-              <span className="text-white/85 text-xs sm:text-sm md:text-[15px] font-normal">
+              <span className="text-white/85 text-xs sm:text-sm md:text-[15px] font-normal cta-banner-subtitle">
                 Let&apos;s build something great together
               </span>
             </div>
@@ -332,7 +332,7 @@ export default function BlogsPage() {
             <div className="flex-shrink-0">
               <Link
                 to="/#contact"
-                className="hover-brand-gradient inline-flex items-center justify-center bg-[#FBAE42] text-black hover:text-white font-medium text-xs sm:text-sm md:text-[15px] px-7 sm:px-8 py-3 sm:py-3.5 rounded-full shadow-md whitespace-nowrap cursor-pointer transition-colors"
+                className="cta-banner-btn hover-brand-gradient inline-flex items-center justify-center bg-[#FBAE42] text-black hover:text-white font-medium text-xs sm:text-sm md:text-[15px] px-7 sm:px-8 py-3 sm:py-3.5 rounded-full shadow-md whitespace-nowrap cursor-pointer transition-colors"
               >
                 Let&apos;s Connect
               </Link>

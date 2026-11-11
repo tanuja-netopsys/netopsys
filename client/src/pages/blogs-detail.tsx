@@ -877,7 +877,7 @@ export default function BlogsDetailPage() {
                   CARD 5: BOTTOM CTA BANNER
               =================================================================== */}
               <div className="mt-8 sm:mt-12 w-full">
-                <div className="w-full bg-[#2A1450] rounded-2xl sm:rounded-3xl px-6 sm:px-10 lg:px-14 py-10 sm:py-14 shadow-xl shadow-[#2A1450]/20 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 cta-banner-card">
+                <div className="w-full bg-[#2A1450] rounded-2xl sm:rounded-3xl px-6 sm:px-10 lg:px-14 py-10 sm:py-14 lg:py-16 shadow-xl shadow-[#2A1450]/20 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 cta-banner-card">
                   <div>
                     <h3 className="text-2xl sm:text-3xl md:text-4xl font-light tracking-[-0.035em] leading-[1.1] text-white mb-2 cta-banner-title">
                       Ready to transform your enterprise workflows?
