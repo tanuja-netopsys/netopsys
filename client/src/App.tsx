@@ -41,7 +41,6 @@ const SuperAdminLoginPage = lazy(() => import("./pages/superadmin-login.tsx"));
 const LoginPage = lazy(() => import("./pages/login.tsx"));
 const ProfilePage = lazy(() => import("./pages/profile.tsx"));
 const ContactPage = lazy(() => import("./pages/contact.tsx"));
-const LaunchingPage = lazy(() => import("./pages/launchingpage.tsx"));
 const TermsAndConditionsPage = lazy(() => import("./pages/terms&conditions.tsx"));
 const PrivacyPolicyPage = lazy(() => import("./pages/privacypolicy.tsx"));
 const CookiePolicyPage = lazy(() => import("./pages/cookie-policy.tsx"));
@@ -150,7 +149,6 @@ export default function App() {
         <Suspense fallback={<div className="min-h-screen w-full" />}>
           <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/launchingpage" element={<LaunchingPage />} />
         <Route path="/services" element={<ServicesPage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/contact" element={<ContactPage />} />

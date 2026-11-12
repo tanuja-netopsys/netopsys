@@ -133,7 +133,8 @@ const GLOBAL_OFFICES: Office[] = [
     flagComponent: IndiaFlag,
     type: "Development Center",
     status: "Operational",
-    addressLines: ["Hyderabad", "Visakhapatnam"],
+    addressLines: ["2nd Floor, Door No. 39-16-36/5, SF-2 Madhavadhara,",
+      "Visakhapatnam, Andhra Pradesh – 530007"],
   },
   {
     id: "singapore",

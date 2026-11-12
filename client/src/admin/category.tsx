@@ -15,27 +15,9 @@ import type { CategoryItem } from "./admin-dashboard.tsx";
 import AdminSidebar from "./sidebar.tsx";
 import { toast } from "../componenets/toast.tsx";
 
-const INITIAL_CATEGORIES: CategoryItem[] = [
-  {
-    id: "cat-1",
-    name: "AI & ML",
-    description: "No description",
-  },
-  {
-    id: "cat-2",
-    name: "ML",
-    description: "No description",
-  },
-  {
-    id: "cat-3",
-    name: "IT Infrastructure",
-    description: "No description",
-  },
-];
-
 export default function CategoryPage() {
 
-  const [categories, setCategories] = useState<CategoryItem[]>(INITIAL_CATEGORIES);
+  const [categories, setCategories] = useState<CategoryItem[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -48,18 +30,18 @@ export default function CategoryPage() {
   // Delete Confirmation Modal State
   const [categoryToDelete, setCategoryToDelete] = useState<CategoryItem | null>(null);
 
-  // Fetch categories from API on mount with fallback
+  // Fetch categories from API on mount
   useEffect(() => {
     let isMounted = true;
     api.categories
       .getAll()
       .then((data) => {
-        if (isMounted && Array.isArray(data) && data.length > 0) {
+        if (isMounted && Array.isArray(data)) {
           setCategories(data);
         }
       })
       .catch(() => {
-        // Fallback to INITIAL_CATEGORIES if backend is not reachable
+        // Keep empty list if backend is not reachable
       });
     return () => {
       isMounted = false;
@@ -104,9 +86,14 @@ export default function CategoryPage() {
     setIsAddModalOpen(false);
     toast.success(`Category "${trimmedName}" created successfully!`, { title: "Category Created" });
 
-    // Call API in background
+    // Call API and sync persisted ID
     try {
-      await api.categories.save(newCategory);
+      const saved = await api.categories.save(newCategory);
+      if (saved && saved.id) {
+        setCategories((prev) =>
+          prev.map((c) => (c.id === newCategory.id ? { ...c, id: String(saved.id) } : c))
+        );
+      }
     } catch {
       // Keep optimistic item in UI
     }

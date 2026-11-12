@@ -657,9 +657,6 @@ export default function Services() {
                 );
               })}
             </div>
-            <p className="text-[11.5px] text-[#554E62] mt-0.5">
-              Swipe or tap a side card
-            </p>
           </div>
         </div>
       ) : (

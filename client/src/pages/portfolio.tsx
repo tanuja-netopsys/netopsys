@@ -282,7 +282,7 @@ export default function PortfolioPage() {
       {/* Main Interactive Portfolio Section with Scroll Interactivity */}
       <main
         ref={sectionRef}
-        className="portfolio-page-main relative flex-1 w-full pt-20 md:pt-30 pb-6 md:pb-18 select-none overflow-hidden"
+        className="portfolio-page-main relative flex-1 w-full pt-24 sm:pt-20 md:pt-30 pb-6 md:pb-18 select-none overflow-hidden"
       >
         {/* Subtle background tech grid */}
         <div

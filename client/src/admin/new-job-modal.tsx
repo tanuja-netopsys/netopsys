@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { X, Save, ChevronDown } from "lucide-react";
+import { api } from "../services/api.ts";
 
 export interface NewJobFormData {
   jobId: string;
@@ -22,16 +23,6 @@ interface NewJobModalProps {
   title?: string;
 }
 
-const DEFAULT_CATEGORIES = [
-  "AI & ML",
-  "Design",
-  "Leadership",
-  "Marketing",
-  "Engineering",
-  "Product",
-  "Operations",
-];
-
 const EMPLOYMENT_TYPES = [
   "Full Time",
   "Part Time",
@@ -46,9 +37,37 @@ function NewJobModalDialog({
   initialData,
   title = "New Job Posting",
 }: Omit<NewJobModalProps, "isOpen">) {
-  const [categories, setCategories] = useState<string[]>(DEFAULT_CATEGORIES);
+  const [categories, setCategories] = useState<string[]>(() =>
+    initialData?.category ? [initialData.category] : []
+  );
   const [isAddingCategory, setIsAddingCategory] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
+
+  useEffect(() => {
+    let isMounted = true;
+    api.categories
+      .getAll()
+      .then((data) => {
+        if (!isMounted || !Array.isArray(data)) return;
+        const names = data
+          .map((item) => item?.name?.trim())
+          .filter((name): name is string => Boolean(name));
+        const uniqueNames = Array.from(
+          new Set(
+            initialData?.category && !names.includes(initialData.category)
+              ? [initialData.category, ...names]
+              : names
+          )
+        );
+        setCategories(uniqueNames);
+      })
+      .catch(() => {
+        // Keep empty (or existing job category) if API is unreachable
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, [initialData?.category]);
 
   const [jobId, setJobId] = useState(initialData?.jobId || "");
   const [jobTitle, setJobTitle] = useState(initialData?.title || "");
@@ -63,12 +82,21 @@ function NewJobModalDialog({
     initialData?.isActive !== undefined ? initialData.isActive : true
   );
 
-  const handleAddCategorySubmit = (e: React.MouseEvent) => {
+  const handleAddCategorySubmit = async (e: React.MouseEvent) => {
     e.preventDefault();
     if (!newCategoryName.trim()) return;
     const trimmed = newCategoryName.trim();
     if (!categories.includes(trimmed)) {
       setCategories((prev) => [trimmed, ...prev]);
+      try {
+        await api.categories.save({
+          id: `cat-${Date.now()}`,
+          name: trimmed,
+          description: "No description",
+        });
+      } catch {
+        // ignore if offline
+      }
     }
     setCategory(trimmed);
     setNewCategoryName("");
@@ -80,7 +108,7 @@ function NewJobModalDialog({
     onSave({
       jobId: jobId.trim() || `NET-JB-${Math.floor(100 + Math.random() * 900)}`,
       title: jobTitle.trim(),
-      category: category || "Engineering",
+      category: category.trim(),
       location: location.trim() || "Hyderabad / Remote",
       employmentType: employmentType || "Full Time",
       experience: experience.trim() || "Entry Level",

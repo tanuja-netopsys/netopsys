@@ -449,14 +449,7 @@ export default function AdminDashboard() {
       description: `${count} active ${count === 1 ? "opening" : "openings"}`,
     }));
 
-    return entries.length > 0
-      ? entries
-      : [
-          { id: "cat-1", name: "AI & ML", description: "3 openings" },
-          { id: "cat-2", name: "Engineering", description: "2 openings" },
-          { id: "cat-3", name: "Design", description: "1 opening" },
-          { id: "cat-4", name: "Marketing", description: "1 opening" },
-        ];
+    return entries;
   }, [jobs]);
 
   // Filtered applications based on search query
@@ -600,16 +593,12 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-              {/* 4 Stat Cards Row - Displaying Real Live Data (Clickable navigation) */}
+              {/* 4 Stat Cards Row - Displaying Real Live Data */}
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-5 mb-6 items-stretch">
                 {/* Stat 1: Active Jobs */}
-                <div
-                  onClick={() => navigate(isSuperAdminRoute ? "/superadmin/job-postings" : "/admin/job-postings")}
-                  className="bg-white rounded-[22px] p-5 sm:p-6 border border-[#ECE4F2] shadow-[0_2px_12px_rgba(0,0,0,0.02)] flex flex-col justify-between cursor-pointer hover:border-[#5D2381]/50 hover:shadow-md transition-all group h-auto min-w-0 break-words"
-                  title="View Job Postings"
-                >
+                <div className="bg-white rounded-[22px] p-5 sm:p-6 border border-[#ECE4F2] shadow-[0_2px_12px_rgba(0,0,0,0.02)] flex flex-col justify-between h-auto min-w-0 break-words">
                   <div className="flex items-center justify-between">
-                    <span className="text-[13px] font-medium text-[#716A7E] group-hover:text-[#5D2381] transition-colors">
+                    <span className="text-[13px] font-medium text-[#716A7E]">
                       Active Jobs
                     </span>
                     <div className="w-9 h-9 rounded-xl bg-[#F6EEFA] flex items-center justify-center text-[#5D2381]">
@@ -627,13 +616,9 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Stat 2: Applications */}
-                <div
-                  onClick={() => navigate(isSuperAdminRoute ? "/superadmin/applications" : "/admin/applications")}
-                  className="bg-white rounded-[22px] p-5 sm:p-6 border border-[#ECE4F2] shadow-[0_2px_12px_rgba(0,0,0,0.02)] flex flex-col justify-between cursor-pointer hover:border-[#5D2381]/50 hover:shadow-md transition-all group h-auto min-w-0 break-words"
-                  title="View Applications"
-                >
+                <div className="bg-white rounded-[22px] p-5 sm:p-6 border border-[#ECE4F2] shadow-[0_2px_12px_rgba(0,0,0,0.02)] flex flex-col justify-between h-auto min-w-0 break-words">
                   <div className="flex items-center justify-between">
-                    <span className="text-[13px] font-medium text-[#716A7E] group-hover:text-[#5D2381] transition-colors">
+                    <span className="text-[13px] font-medium text-[#716A7E]">
                       Applications
                     </span>
                     <div className="w-9 h-9 rounded-xl bg-[#F6EEFA] flex items-center justify-center text-[#5D2381]">
@@ -651,17 +636,9 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Stat 3: Interviews Scheduled */}
-                <div
-                  onClick={() =>
-                    navigate(isSuperAdminRoute ? "/superadmin/interview-slots#generated-sessions" : "/admin/interview-slots#generated-sessions", {
-                      state: { scrollTo: "generated-sessions", focusSessions: true, fromViewAll: true },
-                    })
-                  }
-                  className="bg-white rounded-[22px] p-5 sm:p-6 border border-[#ECE4F2] shadow-[0_2px_12px_rgba(0,0,0,0.02)] flex flex-col justify-between cursor-pointer hover:border-[#5D2381]/50 hover:shadow-md transition-all group h-auto min-w-0 break-words"
-                  title="View Interview Slots"
-                >
+                <div className="bg-white rounded-[22px] p-5 sm:p-6 border border-[#ECE4F2] shadow-[0_2px_12px_rgba(0,0,0,0.02)] flex flex-col justify-between h-auto min-w-0 break-words">
                   <div className="flex items-center justify-between">
-                    <span className="text-[13px] font-medium text-[#716A7E] group-hover:text-[#5D2381] transition-colors">
+                    <span className="text-[13px] font-medium text-[#716A7E]">
                       Interviews Scheduled
                     </span>
                     <div className="w-9 h-9 rounded-xl bg-[#F6EEFA] flex items-center justify-center text-[#5D2381]">
@@ -679,13 +656,9 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Stat 4: Total Users */}
-                <div
-                  onClick={() => navigate(isSuperAdminRoute ? "/superadmin/users" : "/admin/users")}
-                  className="bg-white rounded-[22px] p-5 sm:p-6 border border-[#ECE4F2] shadow-[0_2px_12px_rgba(0,0,0,0.02)] flex flex-col justify-between cursor-pointer hover:border-[#5D2381]/50 hover:shadow-md transition-all group h-auto min-w-0 break-words"
-                  title="View Registered Users"
-                >
+                <div className="bg-white rounded-[22px] p-5 sm:p-6 border border-[#ECE4F2] shadow-[0_2px_12px_rgba(0,0,0,0.02)] flex flex-col justify-between h-auto min-w-0 break-words">
                   <div className="flex items-center justify-between">
-                    <span className="text-[13px] font-medium text-[#716A7E] group-hover:text-[#5D2381] transition-colors">
+                    <span className="text-[13px] font-medium text-[#716A7E]">
                       Total Users
                     </span>
                     <div className="w-9 h-9 rounded-xl bg-[#F6EEFA] flex items-center justify-center text-[#5D2381]">

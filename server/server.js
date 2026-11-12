@@ -21,6 +21,7 @@ const fs = require("fs");
 const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
 const jobRoutes = require("./routes/jobRoutes");
+const categoryRoutes = require("./routes/categoryRoutes");
 const projectRoutes = require("./routes/projectRoutes");
 const teamRoutes = require("./routes/teamRoutes");
 const blogRoutes = require("./routes/blogRoutes");
@@ -295,6 +296,8 @@ app.use(
 app.use("/api/users", userRoutes);
 
 app.use("/api/jobs", jobRoutes);
+
+app.use("/api/categories", categoryRoutes);
 
 app.use("/api/projects", projectRoutes);
 
