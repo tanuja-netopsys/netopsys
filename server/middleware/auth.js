@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const { getSuperAdminConfig } = require("../config/superadmin");
 
 /**
  * Standard JWT Authentication Middleware
@@ -50,11 +51,12 @@ const requireSuperAdmin = (req, res, next) => {
 
   const role = String(req.user.role || "").toUpperCase();
   const email = String(req.user.email || "").toLowerCase();
+  const { email: superAdminEmail } = getSuperAdminConfig();
 
   const isSuper =
     role === "SUPERADMIN" ||
     role === "SUPER_ADMIN" ||
-    email === "superadmin@netopsys.in";
+    email === superAdminEmail;
 
   if (!isSuper) {
     return res.status(403).json({

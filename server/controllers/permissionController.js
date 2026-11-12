@@ -1,5 +1,6 @@
 const prisma = require("../config/prisma");
 const bcrypt = require("bcryptjs");
+const { getSuperAdminConfig } = require("../config/superadmin");
 
 // System-defined admin portal pages / modules
 const ADMIN_PORTAL_PAGES = [
@@ -323,7 +324,7 @@ exports.updatePermissions = async (req, res) => {
     // A. Single Admin dynamic module permissions update
     if (email && permissions) {
       const normalizedEmail = String(email).trim().toLowerCase();
-      if (normalizedEmail === "superadmin@netopsys.in") {
+      if (normalizedEmail === getSuperAdminConfig().email) {
         return res.status(400).json({
           success: false,
           message: "Super Admin permissions are master protected and cannot be revoked.",
@@ -406,9 +407,10 @@ exports.updatePermissions = async (req, res) => {
 
     // C. Batch user permissions
     if (permissionsByUser) {
+      const { email: superAdminEmail } = getSuperAdminConfig();
       for (const [userEmail, perms] of Object.entries(permissionsByUser)) {
         const lower = userEmail.toLowerCase();
-        if (lower === "superadmin@netopsys.in") continue;
+        if (lower === superAdminEmail) continue;
 
         const adminRows = await prisma.$queryRawUnsafe(`SELECT id FROM admins WHERE LOWER(email) = $1 LIMIT 1;`, lower);
         const adminId = adminRows.length > 0 ? adminRows[0].id : null;

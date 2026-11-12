@@ -982,10 +982,87 @@ function DesktopHeroParallaxCube({
   );
 }
 
+function HeroLaunchReveal({ onComplete }: { onComplete: () => void }) {
+  useEffect(() => {
+    const prefersReducedMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReducedMotion) {
+      const quickTimer = window.setTimeout(onComplete, 250);
+      return () => window.clearTimeout(quickTimer);
+    }
+
+    const doneTimer = window.setTimeout(onComplete, 1800);
+    return () => {
+      window.clearTimeout(doneTimer);
+    };
+  }, [onComplete]);
+
+  return (
+    <div
+      className="fixed inset-0 z-[90] pointer-events-none overflow-hidden flex items-center justify-center"
+      aria-hidden="true"
+    >
+      {/* Silky luminous mist veil starting at opacity 1 (matches LaunchingPage) and dissolving to transparent */}
+      <motion.div
+        initial={{ opacity: 1 }}
+        animate={{ opacity: 0 }}
+        transition={{ duration: 1.4, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+        className="absolute inset-0 bg-[#FAF7FC] will-change-[opacity]"
+      />
+
+      {/* Seamless organic aurora-smoke wash */}
+      <motion.div
+        initial={{ opacity: 0.9, scale: 1 }}
+        animate={{ opacity: 0, scale: 1.25 }}
+        transition={{ duration: 1.7, delay: 0.05, ease: [0.22, 1, 0.36, 1] }}
+        className="absolute -inset-[25%] will-change-transform"
+        style={{
+          background:
+            "radial-gradient(ellipse 75% 65% at 50% 48%, rgba(255,255,255,0.92) 0%, rgba(250,247,252,0.75) 35%, rgba(251,174,66,0.18) 58%, rgba(190,48,147,0.14) 74%, rgba(105,48,146,0.10) 88%, transparent 100%)",
+        }}
+      />
+
+      {/* Gentle parting mist curtains */}
+      <motion.div
+        initial={{ x: "0%", opacity: 0.7 }}
+        animate={{ x: "-55%", opacity: 0 }}
+        transition={{ duration: 1.6, delay: 0.05, ease: [0.22, 1, 0.36, 1] }}
+        className="absolute inset-y-0 left-0 w-[65vw] will-change-transform"
+        style={{
+          background:
+            "linear-gradient(90deg, rgba(250,247,252,0.92) 0%, rgba(250,247,252,0.6) 55%, transparent 100%)",
+        }}
+      />
+      <motion.div
+        initial={{ x: "0%", opacity: 0.7 }}
+        animate={{ x: "55%", opacity: 0 }}
+        transition={{ duration: 1.6, delay: 0.05, ease: [0.22, 1, 0.36, 1] }}
+        className="absolute inset-y-0 right-0 w-[65vw] will-change-transform"
+        style={{
+          background:
+            "linear-gradient(270deg, rgba(250,247,252,0.92) 0%, rgba(250,247,252,0.6) 55%, transparent 100%)",
+        }}
+      />
+    </div>
+  );
+}
+
 export default function Hero() {
   const heroRef = useRef<HTMLElement>(null);
   const location = useLocation();
-  const [showLaunchConfetti, setShowLaunchConfetti] = useState(false);
+  const [isLaunchArrival] = useState(() => {
+    const state = location.state as { celebrateLaunch?: boolean } | null;
+    let fromStorage = false;
+    try {
+      fromStorage = sessionStorage.getItem("netopsys_launch_confetti") === "1";
+    } catch {
+      // ignore sessionStorage restrictions
+    }
+    return Boolean(state?.celebrateLaunch || fromStorage);
+  });
+  const [showLaunchConfetti, setShowLaunchConfetti] = useState(isLaunchArrival);
+  const [showLaunchReveal, setShowLaunchReveal] = useState(isLaunchArrival);
   const [heroTitleIndex, setHeroTitleIndex] = useState(0);
   const [isDesktop, setIsDesktop] = useState(false);
   const [viewportHeight, setViewportHeight] = useState(
@@ -995,19 +1072,10 @@ export default function Hero() {
     typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1
   );
 
-  // Trigger full hero confetti shower when arriving from LaunchingPage Launch button
+  // Clear launch celebration flags after StrictMode initial double-mount completes so page refreshes stay clean
   useEffect(() => {
     const state = location.state as { celebrateLaunch?: boolean } | null;
-    let fromStorage = false;
-    try {
-      fromStorage = sessionStorage.getItem("netopsys_launch_confetti") === "1";
-    } catch {
-      // ignore sessionStorage restrictions
-    }
-
-    if (state?.celebrateLaunch || fromStorage) {
-      const showRaf = requestAnimationFrame(() => setShowLaunchConfetti(true));
-      // Clear after StrictMode initial double-mount completes so page refreshes stay clean
+    if (isLaunchArrival) {
       const cleanupTimer = window.setTimeout(() => {
         try {
           sessionStorage.removeItem("netopsys_launch_confetti");
@@ -1019,11 +1087,10 @@ export default function Hero() {
         }
       }, 600);
       return () => {
-        cancelAnimationFrame(showRaf);
         window.clearTimeout(cleanupTimer);
       };
     }
-  }, [location.state]);
+  }, [isLaunchArrival, location.state]);
 
   // Track window resize for desktop-only scroll parallax and height-aware display scaling
   useEffect(() => {
@@ -1104,6 +1171,9 @@ export default function Hero() {
       id="home"
       className="hero-section-wrap relative lg:sticky lg:top-0 w-full min-h-[100dvh] lg:min-h-[100dvh] flex items-center bg-[#FBAE42] px-4 sm:px-6 md:px-8 lg:px-8 xl:px-10 2xl:px-14 min-[1680px]:px-20 pt-24 sm:pt-28 md:pt-32 lg:pt-14 xl:pt-10 pb-12 sm:pb-16 lg:pb-10 overflow-x-clip select-none z-0"
     >
+      {showLaunchReveal && (
+        <HeroLaunchReveal onComplete={() => setShowLaunchReveal(false)} />
+      )}
       {showLaunchConfetti && (
         <HeroLaunchConfetti onComplete={() => setShowLaunchConfetti(false)} />
       )}

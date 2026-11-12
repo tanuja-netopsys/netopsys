@@ -33,6 +33,7 @@ const authMiddleware = require("./middleware/auth");
 const { requireSuperAdmin } = require("./middleware/auth");
 
 const prisma = require("./config/prisma");
+const { syncSuperAdminFromConfig } = require("./config/superadmin");
 
 // ==========================================
 // APPLICATION INITIALIZATION
@@ -471,6 +472,7 @@ app.use((err, req, res, next) => {
 // ==========================================
 
 const server = app.listen(PORT, () => {
+  syncSuperAdminFromConfig();
 
   console.log("==========================================");
 

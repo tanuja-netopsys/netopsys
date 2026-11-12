@@ -61,6 +61,17 @@ exports.subscribeJob = async (req, res) => {
   }
 };
 
+const FRONTEND_URL = (process.env.FRONTEND_URL || "/").replace(/\/+$/, "") || "/";
+
+function escapeHtml(str) {
+  return String(str || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 /**
  * Public: 1-Click Unsubscribe link handler
  * GET /api/subscribers/unsubscribe?type=blog|job&token=...
@@ -73,6 +84,7 @@ exports.unsubscribe = async (req, res) => {
         <div style="font-family: sans-serif; text-align: center; padding: 50px;">
           <h2>Invalid Request</h2>
           <p>Unsubscribe token is missing.</p>
+          <p><a href="${FRONTEND_URL}" style="color: #693092;">Go to Netopsys Homepage</a></p>
         </div>
       `);
     }
@@ -99,8 +111,8 @@ exports.unsubscribe = async (req, res) => {
         <div class="card">
           <div class="icon">&#10003;</div>
           <h2>Successfully Unsubscribed</h2>
-          <p><span class="email">${result.email}</span> has been removed from our ${result.type} list. You will no longer receive updates.</p>
-          <a href="/" class="btn">Return to Netopsys Homepage</a>
+          <p><span class="email">${escapeHtml(result.email)}</span> has been removed from our ${escapeHtml(result.type)} list. You will no longer receive automated updates.</p>
+          <a href="${FRONTEND_URL}" class="btn">Return to Netopsys Homepage</a>
         </div>
       </body>
       </html>
@@ -109,8 +121,8 @@ exports.unsubscribe = async (req, res) => {
     return res.status(400).send(`
       <div style="font-family: sans-serif; text-align: center; padding: 50px;">
         <h2>Unsubscribe Link Expired or Invalid</h2>
-        <p>${error.message}</p>
-        <p><a href="/" style="color: #693092;">Go to Netopsys Homepage</a></p>
+        <p>${escapeHtml(error.message)}</p>
+        <p><a href="${FRONTEND_URL}" style="color: #693092;">Go to Netopsys Homepage</a></p>
       </div>
     `);
   }

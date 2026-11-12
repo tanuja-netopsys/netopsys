@@ -974,7 +974,8 @@ img, svg, video, canvas {
 }
 
 .nav-pill-wrap {
-  width: min(94%, clamp(720px, 68vw, 1100px)) !important;
+  width: fit-content !important;
+  min-width: min(94%, clamp(720px, 68vw, 1100px)) !important;
   padding: clamp(0.55rem, 0.8vh, 0.85rem) clamp(1.25rem, 2vw, 2.5rem) !important;
   gap: clamp(1rem, 2vw, 3rem) !important;
   max-width: min(100%, calc(100vw - 1.25rem)) !important;
@@ -983,34 +984,41 @@ img, svg, video, canvas {
 @media (min-width: 768px) {
   .nav-pill-wrap {
     justify-content: space-between !important;
-    gap: clamp(1rem, 1.8vw, 2.5rem) !important;
+    gap: clamp(0.85rem, 1.8vw, 2.5rem) !important;
   }
 
   .nav-links-wrap {
     flex: 0 1 auto !important;
     justify-content: center !important;
-    gap: clamp(1.35rem, 2.5vw, 3rem) !important;
+    gap: clamp(0.9rem, 2.2vw, 3rem) !important;
   }
 }
 
 @media (min-width: 768px) and (max-width: 1023px) {
   .nav-pill-wrap {
-    width: min(96%, 744px) !important;
-    padding: 0.5rem 1rem !important;
-    gap: 0.75rem !important;
+    width: fit-content !important;
+    min-width: min(96%, 700px) !important;
+    max-width: calc(100vw - 1.25rem) !important;
+    padding: 0.45rem 0.85rem !important;
+    gap: 0.6rem !important;
+  }
+
+  .nav-logo-img {
+    height: 1.25rem !important;
   }
 
   .nav-links-wrap {
-    gap: 0.72rem !important;
+    gap: 0.65rem !important;
   }
 
   .nav-link-item {
-    font-size: 0.78rem !important;
+    font-size: 0.75rem !important;
   }
 
+  .nav-login-btn,
   .nav-cta-btn {
-    font-size: 0.76rem !important;
-    padding: 0.42rem 0.9rem !important;
+    font-size: 0.74rem !important;
+    padding: 0.38rem 0.8rem !important;
   }
 }
 

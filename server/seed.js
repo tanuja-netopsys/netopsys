@@ -1,21 +1,23 @@
 require("dotenv").config();
 const bcrypt = require("bcryptjs");
 const prisma = require("./config/prisma");
+const { getSuperAdminConfig } = require("./config/superadmin");
 
 async function seedSuperAdmins() {
   console.log("==========================================");
   console.log("🚀 Starting Netopsys Database Seeding...");
   console.log("==========================================");
 
-  // Default credentials or from CLI arguments
+  // Default credentials from config/.env or CLI arguments
+  const superAdminConfig = getSuperAdminConfig();
   const customEmail = process.argv[2];
   const customPassword = process.argv[3];
 
   const adminsToSeed = [
     {
-      email: customEmail || "superadmin@netopsys.in",
-      password: customPassword || "SuperAdmin@2026",
-      name: "Netopsys Super Admin",
+      email: customEmail || superAdminConfig.email,
+      password: customPassword || superAdminConfig.password,
+      name: superAdminConfig.name,
       role: "SUPERADMIN",
     },
     {

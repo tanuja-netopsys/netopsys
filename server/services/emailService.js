@@ -7,7 +7,11 @@ const DEFAULT_SENDER_EMAIL = process.env.SMTP_FROM || process.env.SMTP_USER || "
 const EMAIL_FROM = process.env.EMAIL_FROM || `Netopsys AI <${DEFAULT_SENDER_EMAIL}>`;
 const CONTACT_RECEIVER_EMAIL = process.env.CONTACT_RECEIVER_EMAIL || "connectme@netopsys.in";
 const FRONTEND_URL = (process.env.FRONTEND_URL || "http://localhost:5173").replace(/\/+$/, "");
-const BACKEND_URL = (process.env.BACKEND_URL || `http://localhost:${process.env.PORT || 5000}`).replace(/\/+$/, "");
+const BACKEND_URL = (
+  process.env.BACKEND_URL ||
+  process.env.FRONTEND_URL ||
+  `http://localhost:${process.env.PORT || 5000}`
+).replace(/\/+$/, "");
 
 // Direct SMTP configuration (STARTTLS on Port 587 or SSL on Port 465)
 const SMTP_HOST = process.env.SMTP_HOST || "";
@@ -424,6 +428,23 @@ async function sendJobWelcomeEmail(email, unsubscribeToken) {
   }
 }
 
+async function ensureSubscriberUnsubscribeToken(sub, tableName) {
+  if (sub.unsubscribe_token && sub.unsubscribe_token !== "default") {
+    return sub.unsubscribe_token;
+  }
+  const newToken = crypto.randomBytes(24).toString("hex");
+  try {
+    await prisma.$executeRawUnsafe(
+      `UPDATE ${tableName} SET unsubscribe_token = $1, updated_at = NOW() WHERE id = $2`,
+      newToken,
+      sub.id
+    );
+  } catch (err) {
+    console.warn(`Failed to backfill unsubscribe_token on ${tableName}:`, err.message);
+  }
+  return newToken;
+}
+
 /**
  * Background Broadcast: New Blog Published
  * Sends to all active & verified blog subscribers in batches
@@ -437,17 +458,24 @@ async function sendBlogPublishedNotification(blog) {
       // 1. Fetch active & verified subscribers from BOTH blog_subscribers ("Subscribe") and job_subscribers ("Notify Me")
       let blogSubs = [];
       let jobSubs = [];
+      let unsubscribedBlogEmails = new Set();
       try {
-        const [blogResults, jobResults] = await Promise.all([
+        const [blogResults, jobResults, unsubBlogResults] = await Promise.all([
           prisma.$queryRawUnsafe(
             `SELECT id, email, unsubscribe_token FROM blog_subscribers WHERE is_active = true AND is_verified = true`
           ),
           prisma.$queryRawUnsafe(
             `SELECT id, email, unsubscribe_token FROM job_subscribers WHERE is_active = true AND is_verified = true`
           ),
+          prisma.$queryRawUnsafe(
+            `SELECT LOWER(email) AS email FROM blog_subscribers WHERE is_active = false`
+          ),
         ]);
         blogSubs = Array.isArray(blogResults) ? blogResults : [];
         jobSubs = Array.isArray(jobResults) ? jobResults : [];
+        if (Array.isArray(unsubBlogResults)) {
+          unsubscribedBlogEmails = new Set(unsubBlogResults.map((r) => r.email).filter(Boolean));
+        }
       } catch (err) {
         console.error("Failed to query subscribers for blog broadcast:", err.message);
         return;
@@ -466,7 +494,7 @@ async function sendBlogPublishedNotification(blog) {
       jobSubs.forEach((sub) => {
         if (sub.email) {
           const key = sub.email.toLowerCase().trim();
-          if (!subscriberMap.has(key)) {
+          if (!subscriberMap.has(key) && !unsubscribedBlogEmails.has(key)) {
             subscriberMap.set(key, {
               ...sub,
               sourceType: "job",
@@ -503,9 +531,12 @@ async function sendBlogPublishedNotification(blog) {
               return;
             }
 
+            const sourceTable = sub.sourceType === "job" ? "job_subscribers" : "blog_subscribers";
+            const unsubscribeToken = await ensureSubscriberUnsubscribeToken(sub, sourceTable);
+
             const html = getNewBlogPostHtml({
               blog,
-              unsubscribeToken: sub.unsubscribe_token || "default",
+              unsubscribeToken,
               subscriberType: sub.sourceType || "blog",
             });
 
@@ -560,17 +591,24 @@ async function sendJobPublishedNotification(job) {
       // 1. Fetch active & verified subscribers from BOTH job_subscribers ("Notify Me") and blog_subscribers ("Subscribe")
       let jobSubs = [];
       let blogSubs = [];
+      let unsubscribedJobEmails = new Set();
       try {
-        const [jobResults, blogResults] = await Promise.all([
+        const [jobResults, blogResults, unsubJobResults] = await Promise.all([
           prisma.$queryRawUnsafe(
             `SELECT id, email, unsubscribe_token FROM job_subscribers WHERE is_active = true AND is_verified = true`
           ),
           prisma.$queryRawUnsafe(
             `SELECT id, email, unsubscribe_token FROM blog_subscribers WHERE is_active = true AND is_verified = true`
           ),
+          prisma.$queryRawUnsafe(
+            `SELECT LOWER(email) AS email FROM job_subscribers WHERE is_active = false`
+          ),
         ]);
         jobSubs = Array.isArray(jobResults) ? jobResults : [];
         blogSubs = Array.isArray(blogResults) ? blogResults : [];
+        if (Array.isArray(unsubJobResults)) {
+          unsubscribedJobEmails = new Set(unsubJobResults.map((r) => r.email).filter(Boolean));
+        }
       } catch (err) {
         console.error("Failed to query subscribers for job broadcast:", err.message);
         return;
@@ -589,7 +627,7 @@ async function sendJobPublishedNotification(job) {
       blogSubs.forEach((sub) => {
         if (sub.email) {
           const key = sub.email.toLowerCase().trim();
-          if (!subscriberMap.has(key)) {
+          if (!subscriberMap.has(key) && !unsubscribedJobEmails.has(key)) {
             subscriberMap.set(key, {
               ...sub,
               sourceType: "blog",
@@ -627,9 +665,12 @@ async function sendJobPublishedNotification(job) {
               return;
             }
 
+            const sourceTable = sub.sourceType === "blog" ? "blog_subscribers" : "job_subscribers";
+            const unsubscribeToken = await ensureSubscriberUnsubscribeToken(sub, sourceTable);
+
             const html = getNewJobPostingHtml({
               job,
-              unsubscribeToken: sub.unsubscribe_token || "default",
+              unsubscribeToken,
               subscriberType: sub.sourceType || "job",
             });
 

@@ -205,25 +205,40 @@ async function subscribeJob(rawEmail) {
  * Unsubscribe using 1-click token
  */
 async function unsubscribe(type, token) {
-  if (!token) throw new Error("Invalid or missing unsubscribe token.");
+  const cleanToken = String(token || "").trim();
+  if (!cleanToken || cleanToken === "default") {
+    throw new Error("Invalid or missing unsubscribe token.");
+  }
 
-  const targetTable = type === "job" ? "job_subscribers" : "blog_subscribers";
+  const primaryTable = type === "job" ? "job_subscribers" : "blog_subscribers";
+  const secondaryTable = type === "job" ? "blog_subscribers" : "job_subscribers";
 
-  const rows = await prisma.$queryRawUnsafe(
-    `UPDATE ${targetTable} SET is_active = false, updated_at = NOW() 
+  let resolvedTable = primaryTable;
+  let rows = await prisma.$queryRawUnsafe(
+    `UPDATE ${primaryTable} SET is_active = false, updated_at = NOW() 
      WHERE unsubscribe_token = $1 
      RETURNING id, email, is_active`,
-    token
+    cleanToken
   );
 
   if (!Array.isArray(rows) || rows.length === 0) {
-    throw new Error("Subscriber token not found or already unsubscribed.");
+    rows = await prisma.$queryRawUnsafe(
+      `UPDATE ${secondaryTable} SET is_active = false, updated_at = NOW() 
+       WHERE unsubscribe_token = $1 
+       RETURNING id, email, is_active`,
+      cleanToken
+    );
+    resolvedTable = secondaryTable;
+  }
+
+  if (!Array.isArray(rows) || rows.length === 0) {
+    throw new Error("Subscriber token not found or invalid.");
   }
 
   return {
     success: true,
     email: rows[0].email,
-    type: type === "job" ? "Job Alerts" : "Blog Newsletter",
+    type: resolvedTable === "job_subscribers" ? "Job Alerts" : "Blog Newsletter",
   };
 }
 

@@ -1,29 +1,610 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import {
-  Cloud,
-  Code2,
-  Database,
-  Globe,
-  Headset,
-  Rocket,
-  Shield,
-  Smartphone,
-} from "lucide-react";
-import netopsysAiLogo from "../assets/netopsys-ai-logo.png";
+import { Check, Loader2, Rocket } from "lucide-react";
 
 interface LaunchingPageProps {
-  /** Initial countdown duration in seconds (defaults to 120s -> 02 : 00) */
+  /** Initial countdown duration in seconds (defaults to 30s -> 00 : 30) */
   initialSeconds?: number;
-  /** Optional callback when Launch button is clicked */
+  /** Optional callback when launch sequence completes and opens the home page */
   onLaunch?: () => void;
 }
+
+type LaunchPhase =
+  | "idle"
+  | "igniting"
+  | "liftoff"
+  | "clouds"
+  | "weAreLaunched"
+  | "websiteLaunched";
 
 // In-memory SPA guard: once launched, browser Back navigation cannot reopen LaunchingPage
 let hasLaunchedInTab = false;
 
-export default function LaunchingPage({ initialSeconds = 120, onLaunch }: LaunchingPageProps) {
+/** Pure-code Netopsys AI brand mark (no external image assets) */
+function NetopsysBrandMark({ centered = false }: { centered?: boolean }) {
+  return (
+    <div
+      className={`inline-flex items-center gap-2.5 select-none ${
+        centered ? "justify-center" : ""
+      }`}
+    >
+      <svg
+        width="44"
+        height="22"
+        viewBox="0 0 44 22"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
+        className="shrink-0"
+      >
+        <circle cx="11" cy="11" r="9.5" fill="#FBAE42" fillOpacity="0.92" />
+        <circle cx="22" cy="11" r="9.5" fill="#BE3093" fillOpacity="0.88" />
+        <circle cx="33" cy="11" r="9.5" fill="#693092" fillOpacity="0.92" />
+      </svg>
+      <span className="text-[22px] sm:text-[25px] font-medium tracking-[-0.03em] text-[#141010] leading-none">
+        netopsys
+        <sup className="ml-0.5 text-[10px] font-bold tracking-normal text-[#5E2282] align-super">
+          AI
+        </sup>
+      </span>
+    </div>
+  );
+}
+
+/** Pure SVG 3D-styled Rocket with animated ignition flames */
+function PureCodeRocket({ isIgnited }: { isIgnited: boolean }) {
+  return (
+    <div className="relative flex flex-col items-center justify-center select-none">
+      <svg
+        viewBox="0 0 220 300"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        className="w-[170px] sm:w-[210px] md:w-[235px] h-auto drop-shadow-[0_22px_35px_rgba(93,35,129,0.22)]"
+      >
+        <defs>
+          <linearGradient id="rocketBodyGrad" x1="68" y1="30" x2="152" y2="205" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#FFFFFF" />
+            <stop offset="55%" stopColor="#F5EEFC" />
+            <stop offset="100%" stopColor="#D7C3EE" />
+          </linearGradient>
+          <linearGradient id="rocketNoseGrad" x1="88" y1="22" x2="132" y2="75" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#9333EA" />
+            <stop offset="100%" stopColor="#5B21B6" />
+          </linearGradient>
+          <linearGradient id="rocketFinGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#A855F7" />
+            <stop offset="100%" stopColor="#4C1D95" />
+          </linearGradient>
+          <linearGradient id="windowRimGrad" x1="90" y1="88" x2="130" y2="128" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#C084FC" />
+            <stop offset="100%" stopColor="#4C1D95" />
+          </linearGradient>
+          <radialGradient id="windowGlassGrad" cx="40%" cy="35%" r="65%">
+            <stop offset="0%" stopColor="#64748B" />
+            <stop offset="45%" stopColor="#1E1B4B" />
+            <stop offset="100%" stopColor="#090514" />
+          </radialGradient>
+          <linearGradient id="flameOuterGrad" x1="110" y1="210" x2="110" y2="298" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#FEF08A" />
+            <stop offset="38%" stopColor="#FB923C" />
+            <stop offset="75%" stopColor="#F97316" stopOpacity="0.85" />
+            <stop offset="100%" stopColor="#EC4899" stopOpacity="0" />
+          </linearGradient>
+          <linearGradient id="flameInnerGrad" x1="110" y1="210" x2="110" y2="275" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#FFFFFF" />
+            <stop offset="55%" stopColor="#FDE047" />
+            <stop offset="100%" stopColor="#FB923C" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+
+        {/* Exhaust Flames (visible when ignited) */}
+        {isIgnited && (
+          <motion.g
+            initial={{ opacity: 0, scaleY: 0.35 }}
+            animate={{
+              opacity: [0.85, 1, 0.9, 1],
+              scaleY: [0.92, 1.12, 0.98, 1.08],
+              scaleX: [0.96, 1.05, 0.98, 1.03],
+            }}
+            transition={{ duration: 0.45, repeat: Infinity, ease: "easeInOut" }}
+            style={{ transformOrigin: "110px 212px" }}
+          >
+            <path
+              d="M90 212 C84 246, 94 278, 110 296 C126 278, 136 246, 130 212 Z"
+              fill="url(#flameOuterGrad)"
+            />
+            <path
+              d="M99 212 C96 236, 102 260, 110 272 C118 260, 124 236, 121 212 Z"
+              fill="url(#flameInnerGrad)"
+            />
+          </motion.g>
+        )}
+
+        {/* Left Fin */}
+        <path
+          d="M72 152 C52 162, 43 188, 48 214 C56 205, 68 197, 78 194 Z"
+          fill="url(#rocketFinGrad)"
+        />
+        {/* Right Fin */}
+        <path
+          d="M148 152 C168 162, 177 188, 172 214 C164 205, 152 197, 142 194 Z"
+          fill="url(#rocketFinGrad)"
+        />
+
+        {/* Thruster Nozzle */}
+        <path d="M88 196 L132 196 L124 214 L96 214 Z" fill="#4C1D95" />
+        <ellipse cx="110" cy="214" rx="14" ry="3.5" fill="#2E1065" />
+
+        {/* Main Rocket Fuselage */}
+        <path
+          d="M110 22 C136 52, 150 96, 148 148 C147 172, 140 190, 132 198 L88 198 C80 190, 73 172, 72 148 C70 96, 84 52, 110 22 Z"
+          fill="url(#rocketBodyGrad)"
+        />
+
+        {/* Purple Nose Cone */}
+        <path
+          d="M110 22 C126 40, 135 58, 140 74 C121 80, 99 80, 80 74 C85 58, 94 40, 110 22 Z"
+          fill="url(#rocketNoseGrad)"
+        />
+
+        {/* Center Fin / Stabilizer */}
+        <path
+          d="M110 166 C115 178, 116 196, 110 212 C104 196, 105 178, 110 166 Z"
+          fill="#6D28D9"
+        />
+
+        {/* Porthole Window */}
+        <circle cx="110" cy="112" r="23" fill="url(#windowRimGrad)" />
+        <circle cx="110" cy="112" r="17.5" fill="url(#windowGlassGrad)" />
+        {/* Glass Specular Highlight */}
+        <ellipse
+          cx="104"
+          cy="105"
+          rx="6"
+          ry="3.5"
+          transform="rotate(-28 104 105)"
+          fill="#FFFFFF"
+          fillOpacity="0.45"
+        />
+      </svg>
+    </div>
+  );
+}
+
+/** Volumetric 3D launchpad smoke & billowing exhaust plume (pure SVG/CSS, no images) */
+function LaunchpadSmokePlume({
+  phase,
+}: {
+  phase: LaunchPhase;
+}) {
+  const isIgnited = phase === "igniting" || phase === "liftoff" || phase === "clouds";
+  const isLiftoff = phase === "liftoff" || phase === "clouds";
+
+  // Sculpted 3D cloud puffs around the rocket base: [cx, cy, r, delay, driftX, driftY, layer]
+  const basePuffs = [
+    { cx: 65, cy: 132, r: 28, delay: 0.0, driftX: -26, driftY: -4, layer: "back" },
+    { cx: 255, cy: 132, r: 28, delay: 0.1, driftX: 26, driftY: -4, layer: "back" },
+    { cx: 105, cy: 122, r: 36, delay: 0.05, driftX: -18, driftY: -8, layer: "back" },
+    { cx: 215, cy: 122, r: 36, delay: 0.15, driftX: 18, driftY: -8, layer: "back" },
+    { cx: 160, cy: 116, r: 44, delay: 0.08, driftX: 0, driftY: -10, layer: "mid" },
+    { cx: 42, cy: 140, r: 20, delay: 0.12, driftX: -34, driftY: 2, layer: "mid" },
+    { cx: 278, cy: 140, r: 20, delay: 0.18, driftX: 34, driftY: 2, layer: "mid" },
+    { cx: 90, cy: 136, r: 30, delay: 0.04, driftX: -22, driftY: -2, layer: "front" },
+    { cx: 230, cy: 136, r: 30, delay: 0.14, driftX: 22, driftY: -2, layer: "front" },
+    { cx: 132, cy: 134, r: 34, delay: 0.09, driftX: -10, driftY: -5, layer: "front" },
+    { cx: 188, cy: 134, r: 34, delay: 0.11, driftX: 10, driftY: -5, layer: "front" },
+    { cx: 160, cy: 136, r: 38, delay: 0.02, driftX: 0, driftY: -3, layer: "front" },
+  ];
+
+  // Dynamic billowing smoke particles emitted during ignition & liftoff
+  const blastParticles = [
+    { id: 1, startX: 152, startY: 112, endX: 48, endY: 132, r: 26, dur: 1.35, delay: 0.0 },
+    { id: 2, startX: 168, startY: 112, endX: 272, endY: 132, r: 26, dur: 1.35, delay: 0.12 },
+    { id: 3, startX: 156, startY: 116, endX: 82, endY: 104, r: 30, dur: 1.55, delay: 0.25 },
+    { id: 4, startX: 164, startY: 116, endX: 238, endY: 104, r: 30, dur: 1.55, delay: 0.35 },
+    { id: 5, startX: 160, startY: 118, endX: 122, endY: 88, r: 28, dur: 1.65, delay: 0.45 },
+    { id: 6, startX: 160, startY: 118, endX: 198, endY: 88, r: 28, dur: 1.65, delay: 0.55 },
+    { id: 7, startX: 155, startY: 122, endX: 24, endY: 142, r: 22, dur: 1.4, delay: 0.65 },
+    { id: 8, startX: 165, startY: 122, endX: 296, endY: 142, r: 22, dur: 1.4, delay: 0.75 },
+  ];
+
+  return (
+    <div
+      className="pointer-events-none absolute -bottom-6 sm:-bottom-8 left-1/2 -translate-x-1/2 w-[310px] sm:w-[390px] md:w-[430px] z-20"
+      aria-hidden="true"
+    >
+      <svg
+        viewBox="0 0 320 175"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        className="w-full h-auto overflow-visible"
+      >
+        <defs>
+          {/* Organic turbulent smoke edge filter */}
+          <filter id="smokeWispyFilter" x="-30%" y="-30%" width="160%" height="160%">
+            <feTurbulence
+              type="fractalNoise"
+              baseFrequency="0.032"
+              numOctaves="3"
+              seed="7"
+              result="noise"
+            />
+            <feDisplacementMap
+              in="SourceGraphic"
+              in2="noise"
+              scale="9"
+              xChannelSelector="R"
+              yChannelSelector="G"
+              result="displaced"
+            />
+            <feGaussianBlur in="displaced" stdDeviation="2.4" />
+          </filter>
+
+          {/* Soft ambient haze filter */}
+          <filter id="smokeSoftHaze" x="-35%" y="-35%" width="170%" height="170%">
+            <feGaussianBlur stdDeviation="8" />
+          </filter>
+
+          {/* Volumetric 3D puff gradients (sunlit top, cool lavender underside shadow) */}
+          <radialGradient id="smokePuffFront" cx="42%" cy="28%" r="68%">
+            <stop offset="0%" stopColor="#FFFFFF" />
+            <stop offset="52%" stopColor="#F8F3FE" />
+            <stop offset="82%" stopColor="#E6D7F8" />
+            <stop offset="100%" stopColor="#CBB2EA" stopOpacity="0.95" />
+          </radialGradient>
+
+          <radialGradient id="smokePuffMid" cx="44%" cy="30%" r="68%">
+            <stop offset="0%" stopColor="#FCF9FF" />
+            <stop offset="55%" stopColor="#EFE4FB" />
+            <stop offset="100%" stopColor="#C8AFE8" stopOpacity="0.88" />
+          </radialGradient>
+
+          <radialGradient id="smokePuffBack" cx="48%" cy="32%" r="70%">
+            <stop offset="0%" stopColor="#F6EEFD" stopOpacity="0.92" />
+            <stop offset="60%" stopColor="#E1CEF6" stopOpacity="0.85" />
+            <stop offset="100%" stopColor="#BFA1E3" stopOpacity="0.7" />
+          </radialGradient>
+
+          {/* Warm orange/gold firelight bounce inside the smoke */}
+          <radialGradient id="fireBounceGlow" cx="50%" cy="45%" r="55%">
+            <stop offset="0%" stopColor="#FEF08A" stopOpacity="0.95" />
+            <stop offset="35%" stopColor="#FDBA74" stopOpacity="0.72" />
+            <stop offset="70%" stopColor="#F97316" stopOpacity="0.32" />
+            <stop offset="100%" stopColor="#C084FC" stopOpacity="0" />
+          </radialGradient>
+
+          {/* Ground contact shadow */}
+          <radialGradient id="cloudContactShadow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#8B5CF6" stopOpacity="0.22" />
+            <stop offset="65%" stopColor="#A78BFA" stopOpacity="0.08" />
+            <stop offset="100%" stopColor="#A78BFA" stopOpacity="0" />
+          </radialGradient>
+        </defs>
+
+        {/* Ground Ambient Shadow */}
+        <ellipse
+          cx="160"
+          cy="154"
+          rx={isIgnited ? 142 : 112}
+          ry="16"
+          fill="url(#cloudContactShadow)"
+        />
+
+        {/* Soft drifting outer vapor halo */}
+        <motion.g
+          filter="url(#smokeSoftHaze)"
+          animate={{
+            scale: isIgnited ? [1, 1.18, 1.24] : [1, 1.03, 1],
+            opacity: isIgnited ? [0.65, 0.9, 0.85] : [0.5, 0.62, 0.5],
+          }}
+          transition={{
+            duration: isIgnited ? 1.1 : 4.2,
+            repeat: Infinity,
+            repeatType: "mirror",
+            ease: "easeInOut",
+          }}
+          style={{ transformOrigin: "160px 135px" }}
+        >
+          <ellipse cx="160" cy="134" rx="115" ry="34" fill="#E9D8FA" />
+        </motion.g>
+
+        {/* Turbulent billowing smoke layer (displaced edges for realistic cloud silhouette) */}
+        <motion.g
+          filter="url(#smokeWispyFilter)"
+          animate={
+            isIgnited
+              ? { scale: [1, 1.22, 1.32], y: [0, -4, -2] }
+              : { scale: [1, 1.025, 1], y: [0, -2, 0] }
+          }
+          transition={{
+            duration: isIgnited ? 1.2 : 4.5,
+            repeat: isIgnited ? 0 : Infinity,
+            repeatType: "mirror",
+            ease: "easeOut",
+          }}
+          style={{ transformOrigin: "160px 136px" }}
+        >
+          {basePuffs.map((puff, idx) => (
+            <motion.circle
+              key={`base-${idx}`}
+              cx={puff.cx}
+              cy={puff.cy}
+              r={puff.r}
+              fill={
+                puff.layer === "front"
+                  ? "url(#smokePuffFront)"
+                  : puff.layer === "mid"
+                  ? "url(#smokePuffMid)"
+                  : "url(#smokePuffBack)"
+              }
+              animate={
+                isIgnited
+                  ? {
+                      x: [0, puff.driftX * 0.65, puff.driftX],
+                      y: [0, puff.driftY - 4, puff.driftY],
+                      scale: [1, 1.18, 1.28],
+                    }
+                  : {
+                      x: [0, puff.driftX * 0.08, 0],
+                      y: [0, -3, 0],
+                      scale: [1, 1.03, 1],
+                    }
+              }
+              transition={{
+                duration: isIgnited ? 1.25 : 3.6 + (idx % 3) * 0.5,
+                delay: puff.delay,
+                repeat: isIgnited ? 0 : Infinity,
+                repeatType: "mirror",
+                ease: "easeInOut",
+              }}
+              style={{ transformOrigin: `${puff.cx}px ${puff.cy}px` }}
+            />
+          ))}
+        </motion.g>
+
+        {/* Continuous turbulent exhaust blast puffs when rocket ignites / lifts off */}
+        {isIgnited && (
+          <g filter="url(#smokeWispyFilter)">
+            {blastParticles.map((p) => (
+              <motion.circle
+                key={`blast-${p.id}`}
+                cx={p.startX}
+                cy={p.startY}
+                r={p.r}
+                fill="url(#smokePuffFront)"
+                initial={{ opacity: 0, scale: 0.45, x: 0, y: 0 }}
+                animate={{
+                  opacity: [0, 0.92, 0.7, 0],
+                  scale: [0.45, 1.15, 1.55, 1.85],
+                  x: p.endX - p.startX,
+                  y: p.endY - p.startY,
+                }}
+                transition={{
+                  duration: p.dur,
+                  delay: p.delay,
+                  repeat: Infinity,
+                  ease: [0.16, 1, 0.3, 1],
+                }}
+                style={{ transformOrigin: `${p.startX}px ${p.startY}px` }}
+              />
+            ))}
+          </g>
+        )}
+
+        {/* Vertical rising smoke column behind ascending rocket */}
+        {isLiftoff && (
+          <motion.g
+            filter="url(#smokeWispyFilter)"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: [0.2, 0.95, 0.75] }}
+            transition={{ duration: 0.85, ease: "easeOut" }}
+          >
+            {[
+              { cy: 96, r: 28, dx: -10, delay: 0 },
+              { cy: 70, r: 26, dx: 12, delay: 0.08 },
+              { cy: 42, r: 24, dx: -8, delay: 0.16 },
+              { cy: 14, r: 22, dx: 9, delay: 0.24 },
+              { cy: -16, r: 20, dx: -6, delay: 0.32 },
+            ].map((trail, i) => (
+              <motion.circle
+                key={`trail-${i}`}
+                cx={160 + trail.dx}
+                cy={trail.cy}
+                r={trail.r}
+                fill="url(#smokePuffMid)"
+                initial={{ opacity: 0, scale: 0.4 }}
+                animate={{
+                  opacity: [0, 0.92, 0.55],
+                  scale: [0.4, 1.25, 1.55],
+                }}
+                transition={{
+                  duration: 1.1,
+                  delay: trail.delay,
+                  ease: "easeOut",
+                }}
+                style={{ transformOrigin: `${160 + trail.dx}px ${trail.cy}px` }}
+              />
+            ))}
+          </motion.g>
+        )}
+
+        {/* Warm thruster firelight illuminating the inner smoke puffs */}
+        {isIgnited && (
+          <motion.ellipse
+            cx="160"
+            cy="118"
+            rx="72"
+            ry="34"
+            fill="url(#fireBounceGlow)"
+            animate={{
+              opacity: [0.72, 1, 0.78, 0.96],
+              scaleX: [0.95, 1.1, 0.98, 1.06],
+              scaleY: [0.92, 1.08, 0.96, 1.05],
+            }}
+            transition={{ duration: 0.4, repeat: Infinity, ease: "easeInOut" }}
+            style={{ transformOrigin: "160px 118px" }}
+          />
+        )}
+      </svg>
+    </div>
+  );
+}
+
+/** Pure-CSS/SVG volumetric cloud bank rising across the bottom of the screen */
+function FluffyCloudBank({ expanded }: { expanded: boolean }) {
+  const backMounds = [
+    { cx: 80, cy: 230, r: 125 },
+    { cx: 260, cy: 215, r: 140 },
+    { cx: 470, cy: 225, r: 130 },
+    { cx: 690, cy: 205, r: 150 },
+    { cx: 920, cy: 220, r: 135 },
+    { cx: 1140, cy: 210, r: 145 },
+    { cx: 1350, cy: 228, r: 130 },
+  ];
+
+  const frontPuffs = [
+    { cx: 40, cy: 270, r: 110, drift: -6 },
+    { cx: 190, cy: 255, r: 125, drift: 5 },
+    { cx: 355, cy: 265, r: 115, drift: -5 },
+    { cx: 525, cy: 245, r: 135, drift: 6 },
+    { cx: 705, cy: 260, r: 120, drift: -4 },
+    { cx: 885, cy: 248, r: 132, drift: 5 },
+    { cx: 1065, cy: 262, r: 125, drift: -6 },
+    { cx: 1245, cy: 250, r: 130, drift: 4 },
+    { cx: 1400, cy: 268, r: 115, drift: -5 },
+  ];
+
+  return (
+    <motion.div
+      initial={false}
+      animate={{
+        y: expanded ? 0 : 140,
+        scale: expanded ? 1.03 : 0.96,
+        opacity: expanded ? 1 : 0,
+      }}
+      transition={{ duration: 1.05, ease: [0.22, 1, 0.36, 1] }}
+      className="fixed inset-x-0 bottom-0 h-[40vh] sm:h-[45vh] pointer-events-none z-20 overflow-hidden"
+      aria-hidden="true"
+    >
+      {/* Back soft lavender-mist atmospheric gradient */}
+      <div
+        className="absolute inset-x-0 bottom-0 h-full"
+        style={{
+          background:
+            "linear-gradient(to top, rgba(226,210,248,0.96) 0%, rgba(242,233,252,0.78) 48%, transparent 100%)",
+        }}
+      />
+
+      <svg
+        viewBox="0 0 1440 320"
+        preserveAspectRatio="none"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        className="absolute inset-x-0 bottom-0 w-full h-full"
+      >
+        <defs>
+          <filter id="bankTurbulence" x="-10%" y="-20%" width="120%" height="140%">
+            <feTurbulence
+              type="fractalNoise"
+              baseFrequency="0.014"
+              numOctaves="3"
+              seed="11"
+              result="noise"
+            />
+            <feDisplacementMap
+              in="SourceGraphic"
+              in2="noise"
+              scale="16"
+              xChannelSelector="R"
+              yChannelSelector="G"
+            />
+          </filter>
+
+          <radialGradient id="bankBackGrad" cx="48%" cy="25%" r="72%">
+            <stop offset="0%" stopColor="#FAF6FF" stopOpacity="0.95" />
+            <stop offset="55%" stopColor="#E9DAF9" stopOpacity="0.9" />
+            <stop offset="100%" stopColor="#CDB4EC" stopOpacity="0.85" />
+          </radialGradient>
+
+          <radialGradient id="bankFrontGrad" cx="44%" cy="26%" r="70%">
+            <stop offset="0%" stopColor="#FFFFFF" />
+            <stop offset="52%" stopColor="#F8F2FE" />
+            <stop offset="84%" stopColor="#E5D4F7" />
+            <stop offset="100%" stopColor="#CEB5EC" />
+          </radialGradient>
+        </defs>
+
+        {/* Back layer */}
+        <g filter="url(#bankTurbulence)" opacity="0.85">
+          {backMounds.map((m, i) => (
+            <circle key={`bm-${i}`} cx={m.cx} cy={m.cy} r={m.r} fill="url(#bankBackGrad)" />
+          ))}
+        </g>
+
+        {/* Foreground sculpted volumetric cloud layer */}
+        <g filter="url(#bankTurbulence)">
+          {frontPuffs.map((p, i) => (
+            <motion.circle
+              key={`fp-${i}`}
+              cx={p.cx}
+              cy={p.cy}
+              r={p.r}
+              fill="url(#bankFrontGrad)"
+              animate={
+                expanded
+                  ? {
+                      y: [6, -6, 3],
+                      x: [0, p.drift, 0],
+                    }
+                  : { y: 20, x: 0 }
+              }
+              transition={{
+                duration: 4.2 + (i % 3) * 0.7,
+                delay: i * 0.06,
+                repeat: Infinity,
+                repeatType: "mirror",
+                ease: "easeInOut",
+              }}
+            />
+          ))}
+        </g>
+      </svg>
+    </motion.div>
+  );
+}
+
+/** Celebration burst lines around Launched titles */
+function CelebrationSparkTicks() {
+  const ticks = [
+    { x: -175, y: -38, rotate: -38, color: "#F97316" },
+    { x: -195, y: 2, rotate: -10, color: "#6D28D9" },
+    { x: -168, y: 36, rotate: 28, color: "#EC4899" },
+    { x: 175, y: -38, rotate: 38, color: "#EC4899" },
+    { x: 195, y: 2, rotate: 10, color: "#F97316" },
+    { x: 168, y: 36, rotate: -28, color: "#6D28D9" },
+  ];
+
+  return (
+    <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+      {ticks.map((tick, idx) => (
+        <motion.span
+          key={idx}
+          initial={{ opacity: 0, scale: 0.4, x: tick.x * 0.5, y: tick.y * 0.5 }}
+          animate={{ opacity: 1, scale: 1, x: tick.x, y: tick.y }}
+          transition={{ duration: 0.5, delay: 0.12 + idx * 0.04, ease: [0.22, 1, 0.36, 1] }}
+          style={{
+            backgroundColor: tick.color,
+            rotate: `${tick.rotate}deg`,
+          }}
+          className="hidden sm:block absolute w-4 h-1 rounded-full"
+        />
+      ))}
+    </div>
+  );
+}
+
+export default function LaunchingPage({ initialSeconds = 30, onLaunch }: LaunchingPageProps) {
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -31,6 +612,7 @@ export default function LaunchingPage({ initialSeconds = 120, onLaunch }: Launch
       navigate("/", { replace: true });
     }
   }, [navigate]);
+
   const [remainingSeconds, setRemainingSeconds] = useState<number>(() => {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
@@ -42,709 +624,381 @@ export default function LaunchingPage({ initialSeconds = 120, onLaunch }: Launch
     return Math.max(0, Math.floor(initialSeconds));
   });
 
-  // Smooth floating 3D crystal motion + interactive drag
-  const cubeRigRef = useRef<HTMLDivElement>(null);
-  const isDraggingRef = useRef(false);
-  const prevMouseRef = useRef({ x: 0, y: 0 });
-  const targetRotRef = useRef({ x: 56, y: 0, z: 45 });
-  const currentRotRef = useRef({ x: 56, y: 0, z: 45 });
-  const [isDragging, setIsDragging] = useState(false);
+  const [phase, setPhase] = useState<LaunchPhase>("idle");
+  const [isExiting, setIsExiting] = useState(false);
+  const timersRef = useRef<number[]>([]);
 
   useEffect(() => {
     document.title = "Netopsys AI | Launching Soon";
   }, []);
 
   useEffect(() => {
-    if (remainingSeconds <= 0) return;
+    if (remainingSeconds <= 0 || phase !== "idle") return;
     const timer = window.setInterval(() => {
       setRemainingSeconds((prev) => (prev > 0 ? prev - 1 : 0));
     }, 1000);
     return () => window.clearInterval(timer);
-  }, [remainingSeconds > 0]);
+  }, [remainingSeconds, phase]);
 
   useEffect(() => {
-    let rafId = 0;
-    let lastTime = performance.now();
-    const startTime = lastTime;
-
-    const animateCube = (now: number) => {
-      const dt = Math.min((now - lastTime) / 1000, 0.05);
-      const elapsed = (now - startTime) / 1000;
-      lastTime = now;
-
-      const swayX = isDraggingRef.current ? 0 : Math.sin(elapsed * 1.1) * 1.8;
-      const swayY = isDraggingRef.current ? 0 : Math.cos(elapsed * 0.9) * 2.2;
-      const swayZ = isDraggingRef.current ? 0 : Math.sin(elapsed * 0.75) * 2.5;
-
-      const lerpFactor = 1 - Math.exp(-6 * dt);
-      currentRotRef.current.x += (targetRotRef.current.x + swayX - currentRotRef.current.x) * lerpFactor;
-      currentRotRef.current.y += (targetRotRef.current.y + swayY - currentRotRef.current.y) * lerpFactor;
-      currentRotRef.current.z += (targetRotRef.current.z + swayZ - currentRotRef.current.z) * lerpFactor;
-
-      const floatY = Math.sin(elapsed * 1.5) * 6;
-
-      if (cubeRigRef.current) {
-        cubeRigRef.current.style.transform = `translateY(${floatY.toFixed(
-          2
-        )}px) rotateX(${currentRotRef.current.x.toFixed(2)}deg) rotateY(${currentRotRef.current.y.toFixed(
-          2
-        )}deg) rotateZ(${currentRotRef.current.z.toFixed(2)}deg)`;
-      }
-
-      rafId = requestAnimationFrame(animateCube);
-    };
-
-    rafId = requestAnimationFrame(animateCube);
-    return () => cancelAnimationFrame(rafId);
-  }, []);
-
-  useEffect(() => {
-    const handleMove = (clientX: number, clientY: number) => {
-      if (!isDraggingRef.current) return;
-      const dx = clientX - prevMouseRef.current.x;
-      const dy = clientY - prevMouseRef.current.y;
-      prevMouseRef.current = { x: clientX, y: clientY };
-      targetRotRef.current.z += dx * 0.4;
-      targetRotRef.current.x = Math.max(34, Math.min(74, targetRotRef.current.x - dy * 0.35));
-    };
-
-    const onMouseMove = (e: MouseEvent) => handleMove(e.clientX, e.clientY);
-    const onTouchMove = (e: TouchEvent) => {
-      if (e.touches.length > 0) handleMove(e.touches[0].clientX, e.touches[0].clientY);
-    };
-    const onEnd = () => {
-      if (!isDraggingRef.current) return;
-      isDraggingRef.current = false;
-      setIsDragging(false);
-    };
-
-    window.addEventListener("mousemove", onMouseMove);
-    window.addEventListener("touchmove", onTouchMove, { passive: true });
-    window.addEventListener("mouseup", onEnd);
-    window.addEventListener("touchend", onEnd);
     return () => {
-      window.removeEventListener("mousemove", onMouseMove);
-      window.removeEventListener("touchmove", onTouchMove);
-      window.removeEventListener("mouseup", onEnd);
-      window.removeEventListener("touchend", onEnd);
+      timersRef.current.forEach((id) => window.clearTimeout(id));
+      timersRef.current = [];
     };
   }, []);
-
-  const startDrag = (clientX: number, clientY: number) => {
-    isDraggingRef.current = true;
-    setIsDragging(true);
-    prevMouseRef.current = { x: clientX, y: clientY };
-  };
 
   const showMinutes = remainingSeconds >= 60;
-  const canLaunch = remainingSeconds <= 2;
   const minutesDisplay = String(Math.floor(remainingSeconds / 60)).padStart(2, "0");
   const secondsDisplay = String(remainingSeconds % 60).padStart(2, "0");
 
-  // Crystal clear glassmorphism AI cube proportions & seamless slice stack
-  const cubeSize = 180;
-  const coreSize = 112;
-
-  const makeSliceRange = (start: number, end: number, step = 0.65): number[] => {
-    const out: number[] = [];
-    for (let z = start; z <= end + 1e-6; z += step) {
-      out.push(Number(z.toFixed(2)));
+  const completeLaunchNavigation = useCallback(() => {
+    hasLaunchedInTab = true;
+    try {
+      sessionStorage.setItem("netopsys_launch_confetti", "1");
+    } catch {
+      // ignore storage errors
     }
-    return out;
-  };
-  const layer1WallZs = makeSliceRange(-32.2, -23.1, 0.65);
-  const layer2WallZs = makeSliceRange(1.2, 17.5, 0.65);
-  const layer3WallZs = makeSliceRange(18.8, 30.8, 0.65);
+    if (onLaunch) {
+      onLaunch();
+    } else {
+      navigate("/", { state: { celebrateLaunch: true }, replace: true });
+    }
+  }, [navigate, onLaunch]);
 
-  const hollowRimMask = {
-    WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
-    WebkitMaskComposite: "xor" as const,
-    maskComposite: "exclude" as const,
-  };
-  const basePlateRimGrad =
-    "linear-gradient(250deg, rgba(251,191,36,0.38) 0%, rgba(255,255,255,0.6) 35%, rgba(236,72,153,0.44) 62%, rgba(124,58,237,0.5) 100%)";
-  const trayWallRimGrad =
-    "linear-gradient(250deg, rgba(251,191,36,0.56) 0%, rgba(255,255,255,0.62) 28%, rgba(244,114,182,0.55) 56%, rgba(124,58,237,0.62) 82%, rgba(255,255,255,0.72) 100%)";
-  const coreWallGrad =
-    "linear-gradient(250deg, #FDBA74 0%, #FB7185 30%, #EC4899 54%, #7C3AED 82%, #6366F1 100%)";
-  const outerRingConic =
-    "conic-gradient(from 0deg at 50% 50%, #EC4899 0deg, #C026D3 28deg, #7C3AED 62deg, #6366F1 84deg, #A855F7 108deg, #FB923C 138deg, #FBBF24 156deg, #FDE047 172deg, #F472B6 198deg, #D946EF 224deg, #EC4899 248deg, #FB923C 272deg, #FDA4AF 296deg, #EC4899 330deg, #EC4899 360deg)";
-  const iconCls = "w-[25px] h-[25px] sm:w-[28px] sm:h-[28px]";
-  const outerNodes = [
-    {
-      id: "software",
-      label: "Custom Software Development",
-      angleDeg: -90,
-      icon: <Code2 className={iconCls} strokeWidth={2.05} />,
-    },
-    {
-      id: "mobile",
-      label: "Web & Mobile Applications",
-      angleDeg: -45,
-      icon: <Smartphone className={iconCls} strokeWidth={1.95} />,
-    },
-    {
-      id: "websites",
-      label: "Websites",
-      angleDeg: 0,
-      icon: <Globe className={iconCls} strokeWidth={1.9} />,
-    },
-    {
-      id: "networking",
-      label: "Networking",
-      angleDeg: 45,
-      icon: (
-        <svg
-          aria-hidden="true"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={1.95}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className={iconCls}
-        >
-          <circle cx="11" cy="12" r="2.2" />
-          <circle cx="6.2" cy="12.5" r="1.7" />
-          <circle cx="11.5" cy="6.2" r="1.7" />
-          <circle cx="17.8" cy="9.2" r="1.8" />
-          <circle cx="17.2" cy="17.2" r="1.8" />
-          <circle cx="8" cy="17.5" r="1.6" />
-          <path d="M9 12.2l-1.2.1M11.2 9.9l.2-2M12.9 11l3.2-1.3M12.7 13.4l3.1 2.5M9.5 13.7l-.8 2.3" />
-        </svg>
-      ),
-    },
-    {
-      id: "security",
-      label: "Security",
-      angleDeg: 90,
-      icon: <Shield className={iconCls} strokeWidth={1.95} />,
-    },
-    {
-      id: "cloud",
-      label: "Cloud Solutions",
-      angleDeg: 135,
-      icon: <Cloud className={iconCls} strokeWidth={1.95} />,
-    },
-    {
-      id: "backup",
-      label: "Backup & Recovery",
-      angleDeg: 180,
-      icon: <Database className={iconCls} strokeWidth={1.95} />,
-    },
-    {
-      id: "support",
-      label: "IT Support",
-      angleDeg: 225,
-      icon: <Headset className={iconCls} strokeWidth={1.95} />,
-    },
-  ];
+  const startLaunchSequence = useCallback(() => {
+    if (phase !== "idle") return;
+
+    const prefersReducedMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (prefersReducedMotion) {
+      setPhase("websiteLaunched");
+      timersRef.current.push(
+        window.setTimeout(() => completeLaunchNavigation(), 900)
+      );
+      return;
+    }
+
+    setPhase("igniting");
+    timersRef.current.push(
+      window.setTimeout(() => setPhase("liftoff"), 650),
+      window.setTimeout(() => setPhase("clouds"), 1500),
+      window.setTimeout(() => setPhase("weAreLaunched"), 2850),
+      window.setTimeout(() => setPhase("websiteLaunched"), 4650),
+      window.setTimeout(() => setIsExiting(true), 6400),
+      window.setTimeout(() => completeLaunchNavigation(), 7200)
+    );
+  }, [phase, completeLaunchNavigation]);
+
+  useEffect(() => {
+    if (remainingSeconds !== 0 || phase !== "idle") return;
+    const autoLaunchTimer = window.setTimeout(() => {
+      startLaunchSequence();
+    }, 150);
+    return () => window.clearTimeout(autoLaunchTimer);
+  }, [remainingSeconds, phase, startLaunchSequence]);
+
+  const isRocketScene =
+    phase === "idle" || phase === "igniting" || phase === "liftoff" || phase === "clouds";
+  const isIgnited = phase === "igniting" || phase === "liftoff" || phase === "clouds";
+  const showCloudBank = phase === "igniting" || phase === "liftoff" || phase === "clouds" || phase === "weAreLaunched" || phase === "websiteLaunched";
 
   return (
     <div
       className="relative min-h-[100dvh] w-full overflow-hidden flex flex-col justify-between select-none"
       style={{
         fontFamily: "'Onest', sans-serif",
-        backgroundColor: "#FFFFFF",
-        backgroundImage: [
-          "radial-gradient(ellipse 44% 88% at 0% 48%, rgba(239, 223, 255, 0.72) 0%, rgba(248, 240, 255, 0.34) 55%, rgba(255, 255, 255, 0) 100%)",
-          "radial-gradient(ellipse 46% 92% at 100% 42%, rgba(226, 209, 255, 0.78) 0%, rgba(242, 232, 255, 0.38) 56%, rgba(255, 255, 255, 0) 100%)",
-          "radial-gradient(circle at 50% 48%, #FFFFFF 0%, #FFFFFF 52%, #FAF6FF 100%)",
-        ].join(", "),
+        background:
+          "linear-gradient(125deg, #F6E9FA 0%, #FAF5FD 38%, #F4ECFB 68%, #EBD9FB 100%)",
       }}
     >
-      {/* Top-Left Corner Silky Peach-Pink & Lavender Translucent Waves */}
-      <svg
-        aria-hidden="true"
-        viewBox="0 0 640 460"
-        fill="none"
-        className="pointer-events-none absolute top-0 left-0 w-[34vw] min-w-[230px] max-w-[480px] h-auto z-0"
-      >
-        <defs>
-          <linearGradient id="launchTopWave1" x1="0%" y1="0%" x2="88%" y2="85%">
-            <stop offset="0%" stopColor="#FCAE8E" stopOpacity="0.62" />
-            <stop offset="48%" stopColor="#F49CC8" stopOpacity="0.45" />
-            <stop offset="100%" stopColor="#D7B5FF" stopOpacity="0.12" />
-          </linearGradient>
-          <linearGradient id="launchTopWave2" x1="5%" y1="0%" x2="80%" y2="100%">
-            <stop offset="0%" stopColor="#FDBA8C" stopOpacity="0.52" />
-            <stop offset="52%" stopColor="#E9A8EA" stopOpacity="0.32" />
-            <stop offset="100%" stopColor="#C4B5FD" stopOpacity="0" />
-          </linearGradient>
-        </defs>
-        <path
-          d="M-20 -20 H410 C325 75 230 148 110 185 C45 205 10 235 -20 270 Z"
-          fill="url(#launchTopWave1)"
-          stroke="rgba(255,255,255,0.55)"
-          strokeWidth="1.5"
-        />
-        <path
-          d="M-20 -20 H255 C235 95 165 205 60 275 C22 300 0 322 -20 345 Z"
-          fill="url(#launchTopWave2)"
-          stroke="rgba(255,255,255,0.45)"
-          strokeWidth="1.2"
-        />
-      </svg>
-
-      {/* Bottom-Right Corner Layered Lavender & Periwinkle Gloss Ribbons */}
-      <svg
-        aria-hidden="true"
-        viewBox="0 0 760 480"
-        fill="none"
-        className="pointer-events-none absolute bottom-0 right-0 w-[44vw] min-w-[280px] max-w-[680px] h-auto z-0"
-      >
-        <defs>
-          <linearGradient id="launchBottomWave1" x1="12%" y1="88%" x2="96%" y2="14%">
-            <stop offset="0%" stopColor="#E9D8FF" stopOpacity="0.08" />
-            <stop offset="45%" stopColor="#CEB0FC" stopOpacity="0.45" />
-            <stop offset="100%" stopColor="#B896F6" stopOpacity="0.52" />
-          </linearGradient>
-          <linearGradient id="launchBottomWave2" x1="18%" y1="100%" x2="100%" y2="22%">
-            <stop offset="0%" stopColor="#EFE4FF" stopOpacity="0.1" />
-            <stop offset="55%" stopColor="#C8A6FA" stopOpacity="0.48" />
-            <stop offset="100%" stopColor="#A9C4FC" stopOpacity="0.42" />
-          </linearGradient>
-        </defs>
-        <path
-          d="M90 500 C215 390 340 315 475 288 C595 264 685 205 780 115 V500 Z"
-          fill="url(#launchBottomWave1)"
-          stroke="rgba(255,255,255,0.5)"
-          strokeWidth="1.5"
-        />
-        <path
-          d="M250 500 C370 435 465 340 570 295 C655 258 725 225 780 185 V500 Z"
-          fill="url(#launchBottomWave2)"
-          stroke="rgba(255,255,255,0.45)"
-          strokeWidth="1.2"
-        />
-      </svg>
-
-      {/* Soft Ambient Radial Aura behind the Right Cube */}
+      {/* Soft Pastel Ambient Blobs */}
       <div
-        aria-hidden="true"
-        className="pointer-events-none absolute right-[8%] top-[18%] w-[360px] sm:w-[460px] h-[360px] sm:h-[460px] rounded-full blur-[90px] opacity-45 z-0"
+        className="pointer-events-none absolute -top-24 -left-24 w-[420px] h-[420px] rounded-full opacity-55"
         style={{
           background:
-            "radial-gradient(circle, rgba(196,155,252,0.32) 0%, rgba(186,162,252,0.16) 52%, transparent 76%)",
+            "radial-gradient(circle, rgba(244,114,182,0.28) 0%, rgba(192,132,252,0.16) 50%, transparent 72%)",
+        }}
+      />
+      <div
+        className="pointer-events-none absolute top-1/4 -right-28 w-[460px] h-[460px] rounded-full opacity-50"
+        style={{
+          background:
+            "radial-gradient(circle, rgba(167,139,250,0.32) 0%, rgba(232,121,249,0.14) 55%, transparent 74%)",
         }}
       />
 
-      {/* Top Left-Aligned Netopsys AI Brand Logo */}
-      <header className="launching-header relative z-10 w-full max-w-[1260px] mx-auto flex justify-start pt-6 sm:pt-8 px-6 sm:px-10 md:px-14">
-        <img
-          src={netopsysAiLogo}
-          alt="Netopsys AI"
-          className="launching-logo object-contain select-none mix-blend-multiply"
-          style={{ width: "clamp(185px, 17vw, 240px)", height: "auto" }}
-          draggable={false}
-        />
+      {/* Subtle Orbital Rings */}
+      <div className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden">
+        <div className="w-[460px] h-[460px] sm:w-[620px] sm:h-[620px] rounded-full border border-[#C084FC]/20" />
+        <div className="absolute w-[680px] h-[680px] sm:w-[880px] sm:h-[880px] rounded-full border border-[#C084FC]/12" />
+      </div>
+
+      {/* Top Bar: Logo shifts to center during Panels 5 & 6 */}
+      <header className="relative z-30 w-full max-w-[1260px] mx-auto px-6 sm:px-10 md:px-14 pt-6 sm:pt-8">
+        <div
+          className={`flex items-center transition-all duration-700 ${
+            isRocketScene ? "justify-start" : "justify-center"
+          }`}
+        >
+          <NetopsysBrandMark centered={!isRocketScene} />
+        </div>
       </header>
 
-      {/* Main Centered Split Hero Content */}
-      <main className="launching-main relative z-10 flex-1 w-full max-w-[1260px] mx-auto px-6 sm:px-10 md:px-14 py-8 flex items-center">
-        <div className="launching-grid w-full grid grid-cols-1 lg:grid-cols-12 items-center gap-12 lg:gap-8">
-          {/* Left Column: Badge, Headline, Subtitle, Divider, Countdown */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-            className="launching-left-col lg:col-span-7 flex flex-col items-start text-left"
-          >
-            {/* Launching Soon Pill Badge */}
-            <div className="launching-badge inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#FDF7FF] border border-[#C084FC]/50 shadow-[0_4px_16px_rgba(147,51,234,0.08)] mb-6 sm:mb-7">
-              <span className="text-sm sm:text-base leading-none" role="img" aria-label="Rocket">
-                🚀
-              </span>
-              <span className="text-xs sm:text-[13.5px] font-medium text-[#2A1546] tracking-tight">
-                Launching Soon
-              </span>
-            </div>
+      {/* Main Stage */}
+      <main className="relative z-30 flex-1 w-full max-w-[1260px] mx-auto px-6 sm:px-10 md:px-14 flex items-center justify-center">
+        <AnimatePresence mode="wait">
+          {/* PANELS 1-4: Split Hero + Countdown + Rocket Launch */}
+          {isRocketScene && (
+            <motion.div
+              key="rocket-stage"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0, transition: { duration: 0.65, ease: [0.22, 1, 0.36, 1] } }}
+              className="w-full grid grid-cols-1 lg:grid-cols-12 items-center gap-8 lg:gap-10 py-6"
+            >
+              {/* Left Column: Title lingers softly while lower controls dissolve into rising clouds */}
+              <div className="lg:col-span-7 flex flex-col items-center lg:items-start text-center lg:text-left">
+                <motion.h1
+                  animate={
+                    phase === "clouds"
+                      ? { opacity: 0.2, y: -10, filter: "blur(1.5px)" }
+                      : { opacity: 1, y: 0, filter: "blur(0px)" }
+                  }
+                  transition={{ duration: 0.95, ease: [0.22, 1, 0.36, 1] }}
+                  className="font-bold tracking-[-0.03em] leading-[1.06] text-[2.35rem] sm:text-[3.35rem] md:text-[3.9rem] xl:text-[4.25rem] text-[#110C24] mb-4 sm:mb-5 will-change-transform"
+                >
+                  <span className="block">Netopsys AI is</span>
+                  <span
+                    className="block mt-1 bg-clip-text text-transparent"
+                    style={{
+                      backgroundImage:
+                        "linear-gradient(90deg, #6D12F2 0%, #B824B2 48%, #F97316 100%)",
+                    }}
+                  >
+                    Launching.
+                  </span>
+                </motion.h1>
 
-            {/* Display Heading */}
-            <h1 className="launching-title font-bold tracking-[-0.03em] leading-[1.06] text-[2.65rem] sm:text-[3.5rem] md:text-[4rem] xl:text-[4.35rem] text-[#0B0924] mb-5 sm:mb-6">
-              <span className="block">Netopsys AI is</span>
-              <span
-                className="block mt-1 bg-clip-text text-transparent"
-                style={{
-                  backgroundImage:
-                    "linear-gradient(90deg, #6D12F2 0%, #9A1CD8 30%, #E51C8E 60%, #F5554A 82%, #FA7921 100%)",
-                }}
-              >
-                Coming Soon.
-              </span>
-            </h1>
+                <motion.div
+                  animate={
+                    phase === "clouds"
+                      ? { opacity: 0, y: 14 }
+                      : { opacity: 1, y: 0 }
+                  }
+                  transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+                  className="flex flex-col items-center lg:items-start w-full will-change-transform"
+                >
+                  <p className="text-[#3C3154] text-sm sm:text-base md:text-[17.5px] leading-[1.58] max-w-[500px] mb-6 sm:mb-8">
+                    AI-powered solutions to automate operations, boost productivity,
+                    and drive smarter business growth.
+                  </p>
 
-            {/* Description Copy */}
-            <p className="launching-desc text-[#2E2249] text-sm sm:text-base md:text-[18px] leading-[1.58] font-normal max-w-[530px] mb-8 sm:mb-10">
-              AI-powered solutions to automate operations, boost productivity
-              <br className="hidden sm:inline" /> and drive smarter business growth.
-            </p>
+                  <div className="w-full max-w-[340px] flex flex-col items-center">
+                    <div className="w-full flex items-center gap-3 mb-4">
+                      <div className="flex-1 h-[1px] bg-[#B48CE2]/60" />
+                      <span className="text-[11px] font-bold tracking-[0.14em] text-[#281448] uppercase whitespace-nowrap">
+                        Our Website Launches In
+                      </span>
+                      <div className="flex-1 h-[1px] bg-[#B48CE2]/60" />
+                    </div>
 
-            {/* Countdown Section */}
-            <div className="launching-countdown-wrap w-full max-w-[390px] sm:max-w-[430px] flex flex-col items-center">
-              {/* "OUR PLATFORM LAUNCHES IN" with side horizontal rules */}
-              <div className="launching-divider w-full flex items-center gap-3.5 sm:gap-4 mb-5 sm:mb-6">
-                <div className="flex-1 h-[1px] bg-[#B48CE2]/65" />
-                <span className="text-[10.5px] sm:text-[11.5px] font-bold tracking-[0.22em] text-[#281448] whitespace-nowrap">
-                  Our Platform Launches In
-                </span>
-                <div className="flex-1 h-[1px] bg-[#B48CE2]/65" />
-              </div>
+                    {/* Countdown Cards */}
+                    <div className="flex items-center justify-center gap-3.5 sm:gap-4 mb-5">
+                      {showMinutes && (
+                        <>
+                          <div className="w-[116px] sm:w-[132px] py-3.5 px-3 rounded-[18px] bg-white/95 border border-[#C7A1F5]/55 shadow-[0_12px_28px_rgba(124,58,237,0.12)] flex flex-col items-center">
+                            <span className="text-[2rem] sm:text-[2.4rem] font-extrabold leading-none text-[#240F46] tabular-nums">
+                              {minutesDisplay}
+                            </span>
+                            <span className="mt-2 text-[10px] font-bold tracking-[0.2em] text-[#29154A] uppercase">
+                              MINUTES
+                            </span>
+                          </div>
+                          <span className="text-2xl font-extrabold text-[#2A144D] pb-1">:</span>
+                        </>
+                      )}
 
-              {/* Minutes & Seconds Cards (Minutes box hides at <= 59s) */}
-              <div className="flex items-center justify-center gap-4 sm:gap-5">
-                <AnimatePresence mode="popLayout">
-                  {showMinutes && (
-                    <motion.div
-                      key="minutes-group"
-                      initial={{ opacity: 0, scale: 0.92 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.85, width: 0, marginRight: -16 }}
-                      transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-                      className="flex items-center gap-4 sm:gap-5"
-                    >
-                      {/* Minutes Box */}
-                      <div className="launching-timer-box w-[132px] sm:w-[154px] py-4 sm:py-5 px-4 rounded-[20px] bg-white/95 border border-[#C7A1F5]/55 shadow-[0_14px_34px_rgba(124,58,237,0.12)] flex flex-col items-center justify-center backdrop-blur-sm">
-                        <span className="launching-timer-num text-[2.25rem] sm:text-[2.75rem] font-extrabold leading-none text-[#240F46] tracking-tight tabular-nums">
-                          {minutesDisplay}
+                      <div className="w-[116px] sm:w-[132px] py-3.5 px-3 rounded-[18px] bg-white/95 border border-[#C7A1F5]/55 shadow-[0_12px_28px_rgba(124,58,237,0.12)] flex flex-col items-center">
+                        <span className="text-[2rem] sm:text-[2.4rem] font-extrabold leading-none text-[#240F46] tabular-nums">
+                          {secondsDisplay}
                         </span>
-                        <span className="launching-timer-label mt-2.5 text-[10px] sm:text-[11px] font-bold tracking-[0.22em] text-[#29154A] uppercase">
-                          MINUTES
+                        <span className="mt-2 text-[10px] font-bold tracking-[0.2em] text-[#29154A] uppercase">
+                          SECONDS
                         </span>
                       </div>
+                    </div>
 
-                      {/* Colon Separator */}
-                      <span
-                        aria-hidden="true"
-                        className="text-2xl sm:text-3xl font-extrabold text-[#2A144D] pb-2 select-none"
-                      >
-                        :
-                      </span>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-
-                {/* Seconds Box */}
-                <motion.div
-                  layout
-                  transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-                  className="launching-timer-box w-[132px] sm:w-[154px] py-4 sm:py-5 px-4 rounded-[20px] bg-white/95 border border-[#C7A1F5]/55 shadow-[0_14px_34px_rgba(124,58,237,0.12)] flex flex-col items-center justify-center backdrop-blur-sm"
-                >
-                  <span className="launching-timer-num text-[2.25rem] sm:text-[2.75rem] font-extrabold leading-none text-[#240F46] tracking-tight tabular-nums">
-                    {secondsDisplay}
-                  </span>
-                  <span className="launching-timer-label mt-2.5 text-[10px] sm:text-[11px] font-bold tracking-[0.22em] text-[#29154A] uppercase">
-                    SECONDS
-                  </span>
-                </motion.div>
-              </div>
-
-              {/* Launch Button appearing below timer once countdown enters final 59 seconds */}
-              <AnimatePresence>
-                {!showMinutes && (
-                  <motion.div
-                    key="launch-cta"
-                    initial={{ opacity: 0, y: 12, scale: 0.94 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 8, scale: 0.94 }}
-                    transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                    className="launching-cta-wrap mt-6 sm:mt-7"
-                  >
+                    {/* Launch / Launching... Pill Button */}
                     <button
                       type="button"
-                      disabled={!canLaunch}
-                      aria-disabled={!canLaunch}
-                      onClick={() => {
-                        if (!canLaunch) return;
-                        hasLaunchedInTab = true;
-                        try {
-                          sessionStorage.setItem("netopsys_launch_confetti", "1");
-                        } catch {}
-                        if (onLaunch) {
-                          onLaunch();
-                        } else {
-                          navigate("/", { state: { celebrateLaunch: true }, replace: true });
-                        }
-                      }}
-                      className={`launching-cta-btn inline-flex items-center justify-center gap-2.5 px-9 sm:px-11 py-3.5 sm:py-4 rounded-full text-white font-semibold text-sm sm:text-[15px] tracking-wide border border-white/40 transition-all duration-200 ${
-                        canLaunch
-                          ? "shadow-[0_14px_34px_rgba(179,36,181,0.3)] hover:shadow-[0_18px_40px_rgba(116,40,232,0.38)] hover:scale-[1.03] active:scale-[0.98] cursor-pointer"
-                          : "opacity-65 shadow-[0_8px_20px_rgba(179,36,181,0.18)] cursor-not-allowed"
+                      disabled={phase !== "idle"}
+                      onClick={startLaunchSequence}
+                      className={`inline-flex items-center justify-center gap-2.5 px-9 py-3.5 rounded-full text-white font-semibold text-sm sm:text-[15px] tracking-wide border border-white/40 transition-all duration-300 ${
+                        phase === "idle"
+                          ? "shadow-[0_14px_34px_rgba(179,36,181,0.32)] hover:shadow-[0_18px_40px_rgba(116,40,232,0.4)] hover:scale-[1.03] active:scale-[0.98] cursor-pointer"
+                          : "opacity-80 shadow-[0_8px_20px_rgba(116,40,232,0.2)] cursor-default"
                       }`}
                       style={{
                         background:
-                          "linear-gradient(90deg, #7428E8 0%, #B324B5 52%, #EA267A 100%)",
+                          phase === "idle"
+                            ? "linear-gradient(90deg, #7428E8 0%, #B324B5 52%, #EA267A 100%)"
+                            : "linear-gradient(90deg, #8B7BB8 0%, #A185BD 100%)",
                       }}
                     >
-                      <Rocket className="w-4 h-4 stroke-[2.2]" />
-                      <span>Launch</span>
+                      {phase === "idle" ? (
+                        <>
+                          <Rocket className="w-4 h-4 stroke-[2.2]" />
+                          <span>Launch</span>
+                        </>
+                      ) : (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <span>Launching...</span>
+                        </>
+                      )}
                     </button>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          </motion.div>
-
-          {/* Right Column: 3D Frosted Glassmorphism AI Cube + Outer Iridescent Service Orbit */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.94 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1], delay: 0.08 }}
-            className="launching-cube-col lg:col-span-5 flex flex-col items-center justify-center relative py-4 sm:py-6"
-          >
-            <div
-              className={`launching-orbit-stage relative flex items-center justify-center w-[356px] sm:w-[420px] lg:w-[448px] aspect-square ${
-                isDragging ? "cursor-grabbing" : "cursor-grab"
-              }`}
-              onMouseDown={(e) => startDrag(e.clientX, e.clientY)}
-              onTouchStart={(e) => {
-                if (e.touches.length > 0) {
-                  startDrag(e.touches[0].clientX, e.touches[0].clientY);
-                }
-              }}
-            >
-              {/* Slow Autonomous Rotating Outer Part (Ring + 8 Services Only) */}
-              <div
-                aria-hidden="true"
-                className="pointer-events-none absolute inset-0 z-[15] launching-orbit-spin"
-              >
-                {/* Outer Iridescent Luminous 3D Glass-Tube Ring (matching reference image) */}
-                <div className="pointer-events-none absolute inset-[8.5%] rounded-full z-0">
-                  {/* Soft Pastel Chromatic Halo Behind Tube */}
-                  <div
-                    className="absolute inset-[-4px] rounded-full blur-[7px] opacity-75"
-                    style={{
-                      padding: "8px",
-                      background: outerRingConic,
-                      ...hollowRimMask,
-                    }}
-                  />
-                  {/* Outer Chromatic Glass Tube Shell */}
-                  <div
-                    className="absolute inset-0 rounded-full"
-                    style={{
-                      padding: "4.5px",
-                      background: outerRingConic,
-                      ...hollowRimMask,
-                    }}
-                  />
-                  {/* Crisp White Glowing Inner Glass Filament (creating the 3D double-edge tube look) */}
-                  <div
-                    className="absolute inset-[1.25px] rounded-full"
-                    style={{
-                      padding: "2px",
-                      background:
-                        "linear-gradient(145deg, rgba(255,255,255,0.96) 0%, rgba(255,255,255,0.82) 50%, rgba(255,255,255,0.95) 100%)",
-                      ...hollowRimMask,
-                    }}
-                  />
-                  {/* Subtle Outer Specular Glass Bevel Highlight */}
-                  <div
-                    className="absolute inset-[-0.5px] rounded-full"
-                    style={{
-                      padding: "1px",
-                      background:
-                        "linear-gradient(135deg, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.22) 50%, rgba(255,255,255,0.75) 100%)",
-                      ...hollowRimMask,
-                    }}
-                  />
-                </div>
-
-                {/* 8 Frosted Pearl-Glass Service Icon Cards (counter-rotated to stay upright) */}
-                {outerNodes.map((node) => {
-                  const rad = (node.angleDeg * Math.PI) / 180;
-                  const radiusPct = 41.5;
-                  const leftPct = 50 + radiusPct * Math.cos(rad);
-                  const topPct = 50 + radiusPct * Math.sin(rad);
-                  return (
-                    <div
-                      key={node.id}
-                      className="pointer-events-none absolute z-10"
-                      style={{
-                        left: `${leftPct}%`,
-                        top: `${topPct}%`,
-                        transform: "translate(-50%, -50%)",
-                      }}
-                    >
-                      <div
-                        aria-label={node.label}
-                        className="launching-orbit-counter-spin flex items-center justify-center w-[54px] h-[54px] sm:w-[62px] sm:h-[62px] rounded-[16px] sm:rounded-[18px] backdrop-blur-md border-[1.5px] border-white"
-                        style={{
-                          background:
-                            "linear-gradient(155deg, #FFFFFF 0%, #FAF7FF 58%, #F1EBFF 100%)",
-                          boxShadow:
-                            "0 12px 26px rgba(124, 58, 237, 0.14), 0 4px 10px rgba(168, 85, 247, 0.08), inset 0 2px 5px rgba(255,255,255,0.98)",
-                          color: "#8D1BC8",
-                        }}
-                      >
-                        {node.icon}
-                      </div>
-                    </div>
-                  );
-                })}
+                  </div>
+                </motion.div>
               </div>
 
-              {/* Soft Multi-Tone Floor Reflection under the Crystal AI Cube */}
-              <div
-                aria-hidden="true"
-                className="pointer-events-none absolute bottom-14 sm:bottom-16 w-52 sm:w-64 h-12 sm:h-14 rounded-full blur-2xl z-0"
-                style={{
-                  background:
-                    "radial-gradient(ellipse at 26% 52%, rgba(251, 146, 60, 0.34) 0%, rgba(236, 72, 153, 0.44) 45%, rgba(124, 58, 237, 0.42) 78%, transparent 100%)",
-                }}
-              />
+              {/* Right Column: Pure Code Rocket + Base Cloud */}
+              <div className="lg:col-span-5 relative flex items-center justify-center min-h-[260px] sm:min-h-[340px]">
+                {/* Orbital Ring behind rocket */}
+                <div className="pointer-events-none absolute w-[260px] h-[260px] sm:w-[330px] sm:h-[330px] rounded-full border border-[#B48CE2]/35" />
 
-              {/* Dedicated 3D Perspective Container */}
-              <div
-                className="relative z-10 flex items-center justify-center pointer-events-none"
-                style={{ perspective: "1200px" }}
-              >
-                {/* 3D Stacked Crystal Clear Glassmorphism AI Cube (matching Image 1) */}
-                <div
-                  ref={cubeRigRef}
-                  className="relative flex items-center justify-center pointer-events-none"
+                {/* Continuous Silky-Smooth Rocket Launch Motion */}
+                <motion.div
+                  initial={{ y: 0, x: 0, scale: 1, opacity: 1 }}
+                  animate={
+                    phase === "idle"
+                      ? { y: [0, -8, 0], x: 0, scale: 1, opacity: 1 }
+                      : phase === "igniting"
+                      ? {
+                          y: [0, -1.5, 0.5, -1, 0],
+                          x: [-0.8, 0.8, -0.5, 0.5, 0],
+                          scale: 1.015,
+                          opacity: 1,
+                        }
+                      : {
+                          y: [0, -130, -350, -720],
+                          x: 0,
+                          scale: [1.015, 0.9, 0.72, 0.52],
+                          opacity: [1, 1, 0.95, 0],
+                        }
+                  }
+                  transition={
+                    phase === "idle"
+                      ? { duration: 3.4, repeat: Infinity, ease: "easeInOut" }
+                      : phase === "igniting"
+                      ? { duration: 0.18, repeat: Infinity, ease: "linear" }
+                      : {
+                          duration: 2.15,
+                          times: [0, 0.34, 0.68, 1],
+                          ease: [0.36, 0, 0.66, 1],
+                        }
+                  }
+                  className="relative z-10 will-change-transform"
+                >
+                  <PureCodeRocket isIgnited={isIgnited} />
+                </motion.div>
+
+                {/* Volumetric 3D Launchpad Smoke & Exhaust Plume */}
+                <LaunchpadSmokePlume phase={phase} />
+              </div>
+            </motion.div>
+          )}
+
+          {/* PANEL 5: "We Are Launched!" */}
+          {phase === "weAreLaunched" && (
+            <motion.div
+              key="we-are-launched"
+              initial={{ opacity: 0, y: 18, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -14, scale: 0.97 }}
+              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+              className="relative flex flex-col items-center text-center py-12 mb-16"
+            >
+              <CelebrationSparkTicks />
+              <h2 className="text-4xl sm:text-6xl font-bold tracking-[-0.03em] leading-[1.08] text-[#110C24]">
+                <span className="block">We Are</span>
+                <span
+                  className="block mt-1 bg-clip-text text-transparent"
                   style={{
-                    width: `${cubeSize}px`,
-                    height: `${cubeSize}px`,
-                    transformStyle: "preserve-3d",
-                    WebkitTransformStyle: "preserve-3d",
-                    transform: "rotateX(56deg) rotateZ(45deg)",
-                    willChange: "transform",
+                    backgroundImage:
+                      "linear-gradient(90deg, #6D12F2 0%, #C026D3 52%, #F97316 100%)",
                   }}
                 >
-                  {/* LAYER 1: Bottom Crystal Clear Acrylic Glass Plate */}
-                  <div
-                    className="absolute inset-0 rounded-[24px]"
-                    style={{
-                      transform: "translateZ(-33px)",
-                      background:
-                        "linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.04) 55%, rgba(216,198,254,0.16) 100%)",
-                      boxShadow: "0 20px 40px rgba(139, 92, 246, 0.2)",
-                    }}
-                  />
-                  {/* Bottom Plate Seamless Hollow Perimeter Rim Walls */}
-                  {layer1WallZs.map((z) => (
-                    <div
-                      key={`base-rim-${z}`}
-                      className="absolute inset-0 rounded-[24px]"
-                      style={{
-                        transform: `translateZ(${z}px)`,
-                        padding: "2px",
-                        background: basePlateRimGrad,
-                        ...hollowRimMask,
-                      }}
-                    />
-                  ))}
-                  {/* Bottom Plate Crisp Top Edge Highlight */}
-                  <div
-                    className="absolute inset-0 rounded-[24px]"
-                    style={{
-                      transform: "translateZ(-22.2px)",
-                      background:
-                        "linear-gradient(135deg, rgba(255,255,255,0.28) 0%, rgba(255,255,255,0.04) 50%, rgba(226,210,254,0.18) 100%)",
-                      border: "1.5px solid rgba(255,255,255,0.9)",
-                      boxShadow: "inset 0 1px 6px rgba(255,255,255,0.75)",
-                    }}
-                  />
+                  Launched!
+                </span>
+              </h2>
+              <p className="mt-4 text-base sm:text-lg text-[#3C3154] font-medium">
+                Our website is now live.
+              </p>
+            </motion.div>
+          )}
 
-                  {/* LAYER 1.5: Soft Iridescent Bounce Glow Floating Between Plates */}
-                  <div
-                    className="absolute rounded-[22px] blur-lg pointer-events-none"
-                    style={{
-                      width: `${cubeSize * 0.78}px`,
-                      height: `${cubeSize * 0.78}px`,
-                      transform: "translateZ(-11px)",
-                      background:
-                        "radial-gradient(circle at 68% 68%, rgba(251,146,60,0.42), rgba(236,72,153,0.4) 48%, rgba(124,58,237,0.34) 84%, transparent 100%)",
-                    }}
-                  />
+          {/* PANEL 6: "Website Launched!" -> smooth automatic transition to Home */}
+          {phase === "websiteLaunched" && (
+            <motion.div
+              key="website-launched"
+              initial={{ opacity: 0, y: 18, scale: 0.95 }}
+              animate={
+                isExiting
+                  ? { opacity: 0, y: -10, scale: 1.03 }
+                  : { opacity: 1, y: 0, scale: 1 }
+              }
+              transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+              className="relative flex flex-col items-center text-center py-12 mb-16"
+            >
+              <CelebrationSparkTicks />
 
-                  {/* LAYER 2: Upper Crystal Clear Glass Collar Tray (see-through walls) */}
-                  <div
-                    className="absolute inset-0 rounded-[24px]"
-                    style={{
-                      transform: "translateZ(0.4px)",
-                      background:
-                        "linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.03) 55%, rgba(226,210,254,0.14) 100%)",
-                      border: "1.25px solid rgba(255,255,255,0.8)",
-                      boxShadow: "0 12px 26px rgba(139,92,246,0.14)",
-                    }}
-                  />
-                  {/* Tall Seamless Crystal Glass Perimeter Walls (hollow center, zero striping) */}
-                  {layer2WallZs.map((z) => (
-                    <div
-                      key={`tray-wall-${z}`}
-                      className="absolute inset-0 rounded-[24px]"
-                      style={{
-                        transform: `translateZ(${z}px)`,
-                        padding: "2.2px",
-                        background: trayWallRimGrad,
-                        ...hollowRimMask,
-                      }}
-                    />
-                  ))}
-                  {/* Upper Glass Tray Top Specular Rim + Subtle Crystal Film */}
-                  <div
-                    className="absolute inset-0 rounded-[24px]"
-                    style={{
-                      transform: "translateZ(18.2px)",
-                      background:
-                        "linear-gradient(135deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.03) 52%, rgba(232,216,255,0.18) 100%)",
-                      border: "1.75px solid rgba(255,255,255,0.95)",
-                      boxShadow:
-                        "inset 0 2px 8px rgba(255,255,255,0.88), inset -3px -3px 14px rgba(168,85,247,0.16)",
-                    }}
-                  />
+              {/* Checkmark Badge */}
+              <motion.div
+                initial={{ scale: 0.4, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ type: "spring", stiffness: 280, damping: 18 }}
+                className="w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center text-white shadow-[0_12px_30px_rgba(124,58,237,0.3)] mb-5"
+                style={{
+                  background: "linear-gradient(135deg, #A855F7 0%, #6D28D9 100%)",
+                }}
+              >
+                <Check className="w-7 h-7 stroke-[2.8]" />
+              </motion.div>
 
-                  {/* LAYER 3: Raised Glowing AI Core Block */}
-                  {layer3WallZs.map((z) => (
-                    <div
-                      key={`core-wall-${z}`}
-                      className="absolute rounded-[18px]"
-                      style={{
-                        width: `${coreSize}px`,
-                        height: `${coreSize}px`,
-                        transform: `translateZ(${z}px)`,
-                        background: coreWallGrad,
-                      }}
-                    />
-                  ))}
-                  {/* AI Core Satin Pearl-White Top Cap */}
-                  <div
-                    className="absolute rounded-[18px] flex items-center justify-center"
-                    style={{
-                      width: `${coreSize}px`,
-                      height: `${coreSize}px`,
-                      transform: "translateZ(31.8px)",
-                      background:
-                        "linear-gradient(135deg, #FFFFFF 0%, #F8F4FF 54%, #E6DDFF 100%)",
-                      border: "1.5px solid rgba(255,255,255,0.98)",
-                      boxShadow:
-                        "inset 0 2px 6px rgba(255,255,255,0.98), inset -4px -4px 14px rgba(124,58,237,0.2), 0 12px 24px rgba(124,58,237,0.24)",
-                    }}
-                  >
-                    <span
-                      className="font-black tracking-[-0.04em] leading-none bg-clip-text text-transparent select-none"
-                      style={{
-                        fontSize: "3.4rem",
-                        backgroundImage:
-                          "linear-gradient(135deg, #8B5CF6 0%, #7C3AED 55%, #5B21B6 100%)",
-                        filter: "drop-shadow(0 1px 0 rgba(255,255,255,0.85))",
-                      }}
-                    >
-                      AI
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        </div>
+              <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-[-0.03em] leading-[1.1] text-[#110C24]">
+                Website{" "}
+                <span
+                  className="bg-clip-text text-transparent"
+                  style={{
+                    backgroundImage:
+                      "linear-gradient(90deg, #6D12F2 0%, #C026D3 55%, #F97316 100%)",
+                  }}
+                >
+                  Launched!
+                </span>
+              </h2>
+
+              <p className="mt-3.5 text-base sm:text-lg text-[#3C3154] font-medium">
+                Ready to Witness Innovation?
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </main>
 
-      {/* Bottom Balance Spacer matching clean full-viewport framing */}
-      <div className="launching-spacer h-6 sm:h-8 pointer-events-none" />
+      {/* Bottom Cloud Bank rising on Launch */}
+      <FluffyCloudBank expanded={showCloudBank} />
+
+      {/* Smooth luminous veil matching HeroLaunchReveal for seamless transition to Home */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: isExiting ? 1 : 0 }}
+        transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1] }}
+        className="fixed inset-0 z-50 pointer-events-none bg-[#FAF7FC]"
+        aria-hidden="true"
+      />
     </div>
   );
 }
-
