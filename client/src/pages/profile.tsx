@@ -383,7 +383,7 @@ export default function ProfilePage() {
         setOtpError(data.message || "Failed to send verification code.");
         showToast(data.message || "Failed to send code.");
       }
-    } catch (err) {
+    } catch {
       setOtpError("Network error. Please try again.");
       showToast("Network error. Please check connection.");
     } finally {
@@ -428,11 +428,13 @@ export default function ProfilePage() {
             p.isEmailVerified = true;
             localStorage.setItem("career_profile_details", JSON.stringify(p));
           }
-        } catch {}
+        } catch {
+          // ignore localStorage access issues
+        }
       } else {
         setOtpError(data.message || "Invalid verification code.");
       }
-    } catch (err) {
+    } catch {
       setOtpError("Unable to verify. Please try again.");
     } finally {
       setIsSubmittingOtp(false);

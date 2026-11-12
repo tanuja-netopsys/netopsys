@@ -180,6 +180,17 @@ html, body {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+
+  .animate-marquee,
+  .animate-float,
+  .animate-navbar-top,
+  .animate-text-fade-in,
+  .animate-cube-slide-right,
+  .launching-orbit-spin,
+  .launching-orbit-counter-spin {
+    animation: none !important;
+    transform: none !important;
+  }
 }
 /* Infinite Horizontal Marquee Ticker */
 @keyframes marqueeScroll {
@@ -984,26 +995,85 @@ img, svg, video, canvas {
 
 @media (min-width: 768px) and (max-width: 1023px) {
   .nav-pill-wrap {
-    width: min(96%, 736px) !important;
-    padding: 0.55rem 1.15rem !important;
-    gap: 0.85rem !important;
+    width: min(96%, 744px) !important;
+    padding: 0.5rem 1rem !important;
+    gap: 0.75rem !important;
   }
 
   .nav-links-wrap {
-    gap: 0.95rem !important;
+    gap: 0.72rem !important;
+  }
+
+  .nav-link-item {
+    font-size: 0.78rem !important;
+  }
+
+  .nav-cta-btn {
+    font-size: 0.76rem !important;
+    padding: 0.42rem 0.9rem !important;
   }
 }
 
 @media (max-width: 767px) {
   .nav-pill-wrap {
     width: min(94%, 560px) !important;
-    padding: 0.5rem 0.9rem 0.5rem 1rem !important;
-    gap: 0.75rem !important;
+    padding: 0.5rem 0.75rem 0.5rem 0.95rem !important;
+    gap: 0.5rem !important;
+  }
+
+  .nav-logo-img {
+    height: 1.35rem !important;
   }
 
   .hero-section-wrap {
     padding-top: 5.5rem !important;
     padding-bottom: 2.5rem !important;
+  }
+
+  .hero-heading-lead {
+    font-size: clamp(1.25rem, 0.95rem + 1.8vw, 1.85rem) !important;
+    line-height: 1.15 !important;
+  }
+
+  .hero-heading-title {
+    font-size: clamp(1.68rem, 1.05rem + 3.6vw, 2.75rem) !important;
+    line-height: 1.08 !important;
+  }
+
+  .hero-cube-wrap {
+    max-width: 100% !important;
+  }
+
+  .teams-title,
+  .about-title,
+  .services-title,
+  .portfolio-title,
+  .contact-title,
+  .careers-title,
+  .about-page-title,
+  .services-page-title,
+  .blogs-page-title,
+  .contact-page-title {
+    font-size: clamp(1.58rem, 1.05rem + 3.2vw, 2.5rem) !important;
+    line-height: 1.08 !important;
+  }
+
+  .hero-subtitle,
+  .about-desc,
+  .services-desc,
+  .portfolio-desc,
+  .contact-desc,
+  .careers-desc,
+  .services-page-desc,
+  .blogs-page-desc,
+  .contact-page-desc {
+    font-size: clamp(0.875rem, 0.82rem + 0.35vw, 1rem) !important;
+    line-height: 1.55 !important;
+  }
+
+  .hero-btn {
+    font-size: 0.875rem !important;
+    padding: 0.72rem 1.35rem !important;
   }
 
   .portfolio-section-wrap,
@@ -1013,17 +1083,200 @@ img, svg, video, canvas {
     padding-bottom: 3rem !important;
   }
 
+  .teams-section-wrap {
+    min-height: auto !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    overflow-x: clip !important;
+  }
+
+  .teams-gallery {
+    gap: 0.875rem !important;
+  }
+
   .teams-card {
-    width: clamp(210px, 62vw, 250px) !important;
+    width: clamp(160px, 44vw, 200px) !important;
   }
 
   .teams-card-img-wrap {
-    height: 270px !important;
+    height: clamp(168px, 46vw, 210px) !important;
+    border-radius: 16px !important;
   }
 
   .contact-card {
     min-height: auto !important;
     padding: 1.35rem !important;
+  }
+}
+
+/* About Section Mobile & Tablet Responsive System (< 1024px only; desktop >= 1024px unchanged) */
+@media (max-width: 1023px) {
+  .about-section-wrap {
+    min-height: auto !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+
+  .about-content-wrap {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    padding-top: 2.25rem !important;
+    padding-bottom: 2.75rem !important;
+  }
+
+  .about-cards-wrap {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 0.75rem !important;
+  }
+
+  .about-card {
+    height: 100% !important;
+    padding: 1rem 1.15rem !important;
+    border-radius: 1rem !important;
+    word-break: normal !important;
+    overflow-wrap: break-word !important;
+  }
+
+  .about-card-number {
+    font-size: clamp(1.75rem, 1.3rem + 1.4vw, 2.35rem) !important;
+  }
+
+  .about-card-suffix {
+    font-size: clamp(1.35rem, 1.05rem + 1vw, 1.8rem) !important;
+  }
+
+  .about-card-label {
+    font-size: clamp(0.875rem, 0.82rem + 0.25vw, 1rem) !important;
+    word-break: normal !important;
+    overflow-wrap: break-word !important;
+  }
+
+  .about-card-sub {
+    font-size: clamp(0.72rem, 0.68rem + 0.15vw, 0.82rem) !important;
+    line-height: 1.45 !important;
+    word-break: normal !important;
+    overflow-wrap: break-word !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .about-content-wrap {
+    padding-top: 2rem !important;
+    padding-bottom: 2.25rem !important;
+  }
+
+  .about-grid-container {
+    gap: 1.35rem !important;
+  }
+
+  .about-title {
+    font-size: clamp(1.5rem, 0.95rem + 3vw, 2.35rem) !important;
+    line-height: 1.08 !important;
+    margin-bottom: 0.75rem !important;
+  }
+
+  .about-desc {
+    font-size: clamp(0.84rem, 0.8rem + 0.25vw, 0.96rem) !important;
+    line-height: 1.55 !important;
+    margin-bottom: 1rem !important;
+  }
+
+  .about-cards-wrap {
+    gap: 0.625rem !important;
+  }
+
+  .about-card {
+    padding: 0.78rem 0.85rem !important;
+    border-radius: 0.875rem !important;
+  }
+
+  .about-card-number {
+    font-size: clamp(1.5rem, 1.2rem + 1.2vw, 2rem) !important;
+    margin-bottom: 0.2rem !important;
+  }
+
+  .about-card-suffix {
+    font-size: clamp(1.15rem, 0.95rem + 0.8vw, 1.55rem) !important;
+  }
+
+  .about-card-label {
+    font-size: clamp(0.8rem, 0.75rem + 0.25vw, 0.94rem) !important;
+    line-height: 1.25 !important;
+  }
+
+  .about-card-sub {
+    font-size: clamp(0.6875rem, 0.65rem + 0.15vw, 0.78rem) !important;
+    line-height: 1.35 !important;
+    margin-top: 0.25rem !important;
+  }
+}
+
+/* Portfolio Section Mobile & Tablet Responsive System (< 1024px only; desktop >= 1024px unchanged) */
+@media (max-width: 1023px) {
+  .portfolio-section-wrap {
+    min-height: auto !important;
+  }
+
+  .portfolio-content-wrap {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .portfolio-section-wrap {
+    padding-top: 5.75rem !important;
+    padding-bottom: 2.5rem !important;
+  }
+
+  .portfolio-header {
+    margin-bottom: 0.5rem !important;
+  }
+
+  .portfolio-eyebrow-wrap {
+    margin-bottom: 0.65rem !important;
+  }
+
+  .portfolio-title {
+    font-size: clamp(1.58rem, 1.05rem + 3.2vw, 2.45rem) !important;
+    line-height: 1.08 !important;
+    margin-bottom: 0.45rem !important;
+  }
+
+  .portfolio-desc {
+    font-size: clamp(0.84rem, 0.8rem + 0.25vw, 0.96rem) !important;
+    line-height: 1.52 !important;
+  }
+
+  .portfolio-card {
+    padding: 0.875rem !important;
+    border-radius: 1rem !important;
+    word-break: normal !important;
+    overflow-wrap: break-word !important;
+  }
+
+  .portfolio-card-img-wrap {
+    aspect-ratio: 16 / 9 !important;
+  }
+
+  .portfolio-card-title {
+    font-size: clamp(0.95rem, 0.88rem + 0.35vw, 1.125rem) !important;
+    line-height: 1.3 !important;
+    margin-bottom: 0.35rem !important;
+    word-break: normal !important;
+    overflow-wrap: break-word !important;
+  }
+
+  .portfolio-card-desc {
+    font-size: clamp(0.8rem, 0.76rem + 0.18vw, 0.875rem) !important;
+    line-height: 1.48 !important;
+    margin-bottom: 0.6rem !important;
+    word-break: normal !important;
+    overflow-wrap: break-word !important;
+  }
+
+  .portfolio-know-more-wrap {
+    margin-top: 1rem !important;
   }
 }
 
@@ -1516,6 +1769,7 @@ img, svg, video, canvas {
     margin-bottom: 0.65rem !important;
     display: -webkit-box !important;
     -webkit-line-clamp: 2 !important;
+    line-clamp: 2 !important;
     -webkit-box-orient: vertical !important;
     overflow: hidden !important;
   }
@@ -3203,5 +3457,54 @@ body.hide-recaptcha-badge .grecaptcha-badge {
   animation: launchingOrbitCcw 60s linear infinite;
   will-change: transform;
 }
+
+/* ==========================================================================
+   MOBILE (<= 768px) GPU & SCROLL PERFORMANCE OPTIMIZATIONS
+   Strictly scoped to max-width: 768px — desktop/tablet (> 768px) untouched.
+   ========================================================================== */
+@media (max-width: 768px) {
+  *,
+  ::before,
+  ::after {
+    background-attachment: scroll !important;
+  }
+
+  /* Replace expensive backdrop-filter blur with crisp solid surfaces on phones */
+  [class*="backdrop-blur"] {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+
+  .about-card {
+    background-color: #0D0A18 !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
+  }
+
+  .nav-pill-wrap {
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25) !important;
+  }
+
+  .portfolio-card,
+  .teams-card-img-wrap {
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12) !important;
+  }
+
+  /* Hide oversized Gaussian blur glow circles that overload mobile GPUs */
+  [class*="blur-[60px]"],
+  [class*="blur-[100px]"],
+  [class*="blur-[120px]"],
+  [class*="blur-[130px]"],
+  [class*="blur-[140px]"],
+  [class*="blur-[150px]"],
+  [class*="blur-[160px]"] {
+    display: none !important;
+  }
+
+  /* Avoid cross-layer blend mode compositing stalls on mobile cards */
+  [class*="mix-blend-"] {
+    mix-blend-mode: normal !important;
+  }
+}
+
 
 

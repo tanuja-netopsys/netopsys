@@ -1,10 +1,11 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Fragment } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ChevronRight, ArrowRight, Zap, Loader2 } from "lucide-react";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
 import Navbar from "../componenets/navbar.tsx";
 import Footer from "../componenets/footer.tsx";
 import BackToHeroButton from "../componenets/back-to-hero.tsx";
+import { OptimizedPicture } from "../utils/optimized-image.tsx";
 
 export interface Project {
   id: string | number;
@@ -18,54 +19,6 @@ export interface Project {
   metrics?: { label: string; value: string }[];
   extendedDescription?: string;
 }
-
-const DEFAULT_PROJECTS: Project[] = [
-  {
-    id: 3,
-    title: "A Complete AI Secured Candidate Assessment Platform",
-    category: "AI & Assessment",
-    status: "Deployed",
-    technologies: ["Computer Vision", "Facial Biometrics", "AI Proctoring"],
-    description:
-      "Comprehensive AI-powered platform for secure candidate evaluation with advanced proctoring, skill assessment, and automated scoring systems.",
-    image: "/portfolio/portfolio-1.jpg",
-  },
-  {
-    id: 2,
-    title: "Skill Bridge",
-    category: "Cybersecurity & SOC",
-    status: "Deployed",
-    technologies: ["Threat Intelligence", "SIEM Monitoring", "Incident Response"],
-    description:
-      "Comprehensive Security Operations Center (SOC) course offering hands-on cyber defense training, SIEM log analysis, threat intelligence, and live incident response drills.",
-    image: "/portfolio/portfolio-3.jpg",
-  },
-  {
-    id: 1,
-    title: "BizOne (Intelligent ERP Solutions)",
-    category: "Enterprise ERP",
-    status: "Deployed",
-    technologies: ["AI Automation", "Business Intelligence", "Process Optimization"],
-    description:
-      "AI-driven Enterprise Resource Planning system that automates business processes, optimizes workflows, and provides intelligent insights.",
-    image: "/portfolio/portfolio-2.jpg",
-  },
-];
-
-const getInitialProjects = (): Project[] => {
-  try {
-    const cached = sessionStorage.getItem("cached_portfolio_projects");
-    if (cached) {
-      const parsed = JSON.parse(cached);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        return parsed;
-      }
-    }
-  } catch {
-    // fallback to DEFAULT_PROJECTS
-  }
-  return DEFAULT_PROJECTS;
-};
 
 // Card Animation Variants: Current card moves UP and next card comes from DOWN when scrolling down
 const cardVariants: Variants = {
@@ -98,15 +51,15 @@ const cardVariants: Variants = {
 
 export default function PortfolioPage() {
   const navigate = useNavigate();
-  const [projects, setProjects] = useState<Project[]>(getInitialProjects);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
   const [direction, setDirection] = useState(1);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const sectionRef = useRef<HTMLElement | null>(null);
   const isTransitioningRef = useRef(false);
   const activeIndexRef = useRef(0);
-  const projectsLengthRef = useRef(DEFAULT_PROJECTS.length);
+  const projectsLengthRef = useRef(0);
 
   // Keep refs in sync with state for event listeners
   useEffect(() => {
@@ -126,13 +79,7 @@ export default function PortfolioPage() {
         const res = await fetch("/api/projects");
         if (!res.ok) throw new Error("Failed to load projects");
         const json = await res.json();
-        if (isMounted && json.success && Array.isArray(json.data) && json.data.length > 0) {
-          try {
-            sessionStorage.setItem("cached_portfolio_projects", JSON.stringify(json.data));
-          } catch {
-            // ignore storage errors
-          }
-
+        if (isMounted && json.success && Array.isArray(json.data)) {
           // Compare with previous projects to prevent unnecessary state update and re-render blink
           setProjects((prev) => {
             if (
@@ -231,16 +178,42 @@ export default function PortfolioPage() {
       }
     };
 
-    // Touch Swipe support for mobile
+    // Touch Swipe support for mobile (vertical & horizontal card swipe)
+    let touchStartX = 0;
     let touchStartY = 0;
     const onTouchStart = (e: TouchEvent) => {
+      touchStartX = e.touches[0].clientX;
       touchStartY = e.touches[0].clientY;
     };
     const onTouchEnd = (e: TouchEvent) => {
+      const touchEndX = e.changedTouches[0].clientX;
       const touchEndY = e.changedTouches[0].clientY;
+      const diffX = touchStartX - touchEndX;
       const diffY = touchStartY - touchEndY;
-      if (Math.abs(diffY) < 45) return;
+
       if (isTransitioningRef.current) return;
+
+      // Horizontal swipe on mobile (< 768px) switches showcase project directly
+      if (window.innerWidth < 768 && Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 40) {
+        if (diffX > 0 && activeIndexRef.current < projectsLengthRef.current - 1) {
+          isTransitioningRef.current = true;
+          setDirection(1);
+          setActiveIndex((prev) => prev + 1);
+          setTimeout(() => {
+            isTransitioningRef.current = false;
+          }, 420);
+        } else if (diffX < 0 && activeIndexRef.current > 0) {
+          isTransitioningRef.current = true;
+          setDirection(-1);
+          setActiveIndex((prev) => prev - 1);
+          setTimeout(() => {
+            isTransitioningRef.current = false;
+          }, 420);
+        }
+        return;
+      }
+
+      if (Math.abs(diffY) < 45) return;
 
       if (window.scrollY > 20) {
         if (diffY < 0) {
@@ -296,7 +269,7 @@ export default function PortfolioPage() {
     }, 600);
   };
 
-  const activeProject = projects[activeIndex] || projects[0] || DEFAULT_PROJECTS[0];
+  const activeProject = projects[activeIndex] || projects[0];
 
   return (
     <div
@@ -309,7 +282,7 @@ export default function PortfolioPage() {
       {/* Main Interactive Portfolio Section with Scroll Interactivity */}
       <main
         ref={sectionRef}
-        className="portfolio-page-main relative flex-1 w-full pt-24 sm:pt-28 md:pt-30 pb-14 sm:pb-18 select-none overflow-hidden"
+        className="portfolio-page-main relative flex-1 w-full pt-20 md:pt-30 pb-6 md:pb-18 select-none overflow-hidden"
       >
         {/* Subtle background tech grid */}
         <div
@@ -328,7 +301,7 @@ export default function PortfolioPage() {
         {/* Main Full-Width Container matching other pages */}
         <div className="relative w-full max-w-[2100px] mx-auto px-4 sm:px-6 md:px-8 lg:px-10 xl:px-14 2xl:px-18">
           {/* Breadcrumb Navigation: Home > Portfolio */}
-          <nav aria-label="Breadcrumb" className="portfolio-page-breadcrumb mb-4 sm:mb-6">
+          <nav aria-label="Breadcrumb" className="portfolio-page-breadcrumb mb-2 md:mb-6">
             <ol className="inline-flex items-center gap-1.5 sm:gap-2 text-xs sm:text-[13.5px] font-medium">
               <li>
                 <Link
@@ -355,25 +328,86 @@ export default function PortfolioPage() {
             </div>
           )}
 
+          {/* Empty State if backend returns no projects */}
+          {!isLoading && !activeProject && (
+            <div className="w-full py-24 text-center text-sm font-medium text-[#554E62]">
+              No projects published yet.
+            </div>
+          )}
+
           {/* 2-Column Interactive Showcase Layout */}
-          {!isLoading && (
-            <div className="portfolio-page-grid grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 xl:gap-16 items-start">
+          {!isLoading && activeProject && (
+            <div className="portfolio-page-grid grid grid-cols-1 lg:grid-cols-12 gap-3.5 md:gap-10 lg:gap-12 xl:gap-16 items-start">
               {/* Left Column: Heading, Subtitle & Interactive Project Stepper */}
-              <div className="portfolio-page-left-col lg:col-span-5 flex flex-col justify-start text-left pt-2">
+              <div className="portfolio-page-left-col lg:col-span-5 flex flex-col justify-start text-left pt-0 md:pt-2">
 
                 {/* Main Heading */}
-                <h1 className="portfolio-page-title text-4xl sm:text-5xl md:text-6xl lg:text-[3.85rem] xl:text-[4.25rem] font-light tracking-[-0.035em] leading-[1.04] text-[#141010] mb-4 sm:mb-5">
+                <h1 className="portfolio-page-title text-[1.75rem] md:text-6xl lg:text-[3.85rem] xl:text-[4.25rem] font-light tracking-[-0.035em] leading-[1.06] md:leading-[1.04] text-[#141010] mb-2 md:mb-5">
                   AI Solutions <br />
                   <span className="text-[#693092]">in Action</span>
                 </h1>
 
                 {/* Subtitle */}
-                <p className="portfolio-page-desc text-[#554E62] leading-relaxed font-normal text-sm sm:text-base md:text-[16px] lg:text-[17px] max-w-lg mb-8 sm:mb-12">
+                <p className="portfolio-page-desc text-[#554E62] leading-[1.45] md:leading-relaxed font-normal text-[12.5px] md:text-[16px] lg:text-[17px] max-w-lg mb-4 md:mb-12">
                   Explore our transformative AI projects that have revolutionized business operations and delivered measurable results.
                 </p>
 
-                {/* Stepper List of Projects */}
-                <div className="portfolio-page-stepper flex flex-col w-full max-w-lg">
+                {/* Mobile-only Horizontal Stepper & Active Project Header (< 768px) */}
+                <div className="flex flex-col w-full md:hidden">
+                  {/* Horizontal Number Circles with Connecting Lines */}
+                  <div className="flex items-center w-full">
+                    {projects.map((project, index) => {
+                      const isSelected = index === activeIndex;
+                      const itemNumber = String(index + 1).padStart(2, "0");
+                      const isLast = index === projects.length - 1;
+
+                      return (
+                        <Fragment key={`mobile-step-${project.id}`}>
+                          <button
+                            type="button"
+                            onClick={() => handleSelectProject(index)}
+                            aria-label={`Select project ${itemNumber}: ${project.title}`}
+                            className={`w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-semibold transition-all duration-300 shrink-0 cursor-pointer ${
+                              isSelected
+                                ? "bg-[#693092] text-white shadow-md ring-3 ring-[#693092]/20"
+                                : "border border-[#E2D5EE] bg-white text-[#554E62]"
+                            }`}
+                          >
+                            {itemNumber}
+                          </button>
+                          {!isLast && (
+                            <div className="flex-1 h-[1.5px] bg-[#E2D5EE] mx-2" />
+                          )}
+                        </Fragment>
+                      );
+                    })}
+                  </div>
+
+                  {/* Active Project Title Strip with Arrow & Underline */}
+                  <div className="mt-2.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <h3 className="text-[13.5px] font-semibold text-[#141010] leading-snug text-left">
+                        {activeProject.title}
+                      </h3>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          navigate(`/portfolio/${activeProject.id}`, {
+                            state: { project: activeProject },
+                          })
+                        }
+                        aria-label={`View ${activeProject.title}`}
+                        className="text-[#693092] shrink-0 p-0.5 cursor-pointer"
+                      >
+                        <ArrowRight className="w-4 h-4 stroke-[2]" />
+                      </button>
+                    </div>
+                    <div className="h-[1.5px] w-full mt-1.5 bg-gradient-to-r from-[#693092]/60 via-[#8E5BAA]/35 to-[#E2D5EE] rounded-full" />
+                  </div>
+                </div>
+
+                {/* Desktop & Tablet Stepper List of Projects (md+ only; unchanged) */}
+                <div className="portfolio-page-stepper hidden md:flex flex-col w-full max-w-lg">
                   {projects.map((project, index) => {
                     const isSelected = index === activeIndex;
                     const itemNumber = String(index + 1).padStart(2, "0");
@@ -439,74 +473,115 @@ export default function PortfolioPage() {
               </div>
 
               {/* Right Column: Featured Dark Showcase Card with Up/Down Slide Transition */}
-              <div className="portfolio-page-card-wrap lg:col-span-7 w-full flex flex-col relative overflow-hidden rounded-[30px] sm:rounded-[36px] lg:rounded-[40px] mt-8 sm:mt-12 lg:mt-20 xl:mt-28">
-                <AnimatePresence initial={false} mode="wait" custom={direction}>
-                  <motion.div
-                    key={activeIndex}
-                    custom={direction}
-                    variants={cardVariants}
-                    initial={false}
-                    animate="center"
-                    exit="exit"
-                    className="portfolio-page-card relative w-full rounded-[24px] sm:rounded-[36px] lg:rounded-[40px] bg-gradient-to-br from-[#090514] via-[#0E071F] to-[#180A2E] text-white border border-[#3E255B]/60 shadow-[0_25px_60px_rgba(15,7,30,0.35)] overflow-hidden p-5 sm:p-9 md:p-11 lg:p-13 h-auto min-h-[380px] sm:min-h-[480px] lg:min-h-[540px] flex flex-col justify-between min-w-0 break-words"
-                  >
-                    {/* Background Photography with enhanced visibility */}
-                    {activeProject.image && (
-                      <img
-                        src={activeProject.image}
-                        alt={activeProject.title}
-                        className="absolute inset-0 w-full h-full object-cover object-right sm:object-center opacity-45 pointer-events-none transition-opacity duration-500"
+              <div className="portfolio-page-card-wrap lg:col-span-7 w-full flex flex-col relative mt-0 md:mt-12 lg:mt-20 xl:mt-28">
+                <div className="relative overflow-hidden rounded-[20px] md:rounded-[36px] lg:rounded-[40px]">
+                  <AnimatePresence initial={false} mode="wait" custom={direction}>
+                    <motion.div
+                      key={activeIndex}
+                      custom={direction}
+                      variants={cardVariants}
+                      initial={false}
+                      animate="center"
+                      exit="exit"
+                      className="portfolio-page-card relative w-full rounded-[20px] md:rounded-[36px] lg:rounded-[40px] bg-gradient-to-br from-[#090514] via-[#0E071F] to-[#180A2E] text-white border border-[#3E255B]/60 shadow-[0_25px_60px_rgba(15,7,30,0.35)] overflow-hidden p-4.5 md:p-11 lg:p-13 h-auto min-h-[210px] md:min-h-[480px] lg:min-h-[540px] flex flex-col justify-between min-w-0 break-words"
+                    >
+                      {/* Subtle grid texture inside dark card on mobile matching design */}
+                      <div
+                        className="absolute inset-0 opacity-[0.07] md:hidden pointer-events-none"
+                        style={{
+                          backgroundImage:
+                            "linear-gradient(rgba(255,255,255,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.6) 1px, transparent 1px)",
+                          backgroundSize: "28px 28px",
+                        }}
                       />
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-r from-[#090514] via-[#090514]/80 to-[#090514]/25 pointer-events-none" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#090514] via-[#090514]/40 to-transparent pointer-events-none" />
 
-                    {/* Ambient Neon Purple / Cyan Backlight Glows */}
-                    <div className="absolute top-1/4 -right-16 w-80 h-80 rounded-full bg-[#BE3093]/20 blur-[100px] pointer-events-none" />
-                    <div className="absolute -bottom-16 -left-16 w-80 h-80 rounded-full bg-[#693092]/25 blur-[100px] pointer-events-none" />
+                      {/* Background Photography with enhanced visibility */}
+                      {activeProject.image && (
+                        <OptimizedPicture
+                          src={activeProject.image}
+                          alt={activeProject.title}
+                          width={1100}
+                          height={620}
+                          sizes="100vw"
+                          loading="lazy"
+                          decoding="async"
+                          className="absolute inset-0 w-full h-full object-cover object-right md:object-center opacity-20 md:opacity-45 pointer-events-none transition-opacity duration-500"
+                        />
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-r from-[#090514] via-[#090514]/80 to-[#090514]/25 pointer-events-none" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#090514] via-[#090514]/40 to-transparent pointer-events-none" />
 
-                    {/* Top Group: Icon Box & Status Pill */}
-                    <div className="portfolio-page-card-top relative z-10 flex flex-col items-start mb-6 sm:mb-8">
-                      {/* Cyan Lightning Bolt in Glass Square */}
-                      <div className="portfolio-page-card-icon w-12 h-12 rounded-2xl bg-white/[0.07] border border-white/10 backdrop-blur-md flex items-center justify-center text-cyan-400 mb-4 sm:mb-5 shadow-inner">
-                        <Zap className="w-5 h-5 fill-cyan-400/20 text-cyan-400 stroke-[2.2]" />
+                      {/* Ambient Neon Purple / Cyan Backlight Glows */}
+                      <div className="absolute top-1/4 -right-16 w-80 h-80 rounded-full bg-[#BE3093]/20 blur-[100px] pointer-events-none" />
+                      <div className="absolute -bottom-16 -left-16 w-80 h-80 rounded-full bg-[#693092]/25 blur-[100px] pointer-events-none" />
+
+                      {/* Top Group: Icon Box & Status Pill */}
+                      <div className="portfolio-page-card-top relative z-10 flex flex-col items-start mb-3 md:mb-8">
+                        {/* Cyan Lightning Bolt in Glass Square */}
+                        <div className="portfolio-page-card-icon w-9 h-9 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-white/[0.07] border border-white/10 backdrop-blur-md flex items-center justify-center text-cyan-400 mb-2.5 md:mb-5 shadow-inner">
+                          <Zap className="w-4 h-4 md:w-5 md:h-5 fill-cyan-400/20 text-cyan-400 stroke-[2.2]" />
+                        </div>
+
+                        {/* Deployed Status Pill */}
+                        <span className="portfolio-page-card-pill inline-flex items-center gap-1.5 md:gap-2 px-2.5 md:px-3.5 py-0.5 md:py-1.5 rounded-full bg-[#032318]/70 border border-emerald-500/40 text-[#34D399] text-[11px] md:text-[13px] font-medium backdrop-blur-md">
+                          <span className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-[#34D399]" />
+                          <span>{activeProject.status || "Deployed"}</span>
+                        </span>
                       </div>
 
-                      {/* Deployed Status Pill */}
-                      <span className="portfolio-page-card-pill inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#032318]/70 border border-emerald-500/40 text-[#34D399] text-xs sm:text-[13px] font-medium backdrop-blur-md">
-                        <span className="w-2 h-2 rounded-full bg-[#34D399]" />
-                        <span>{activeProject.status || "Deployed"}</span>
-                      </span>
-                    </div>
+                      {/* Middle Group: Title, Description & Tags */}
+                      <div className="portfolio-page-card-mid relative z-10 mb-3 md:mb-10 text-left">
+                        <h2 className="portfolio-page-card-title text-[1.15rem] md:text-3xl lg:text-4xl xl:text-[2.65rem] font-bold text-white tracking-tight leading-tight mb-1.5 md:mb-5">
+                          {activeProject.title}
+                        </h2>
 
-                    {/* Middle Group: Title, Description & Tags */}
-                    <div className="portfolio-page-card-mid relative z-10 mb-8 sm:mb-10 text-left">
-                      <h2 className="portfolio-page-card-title text-2xl sm:text-3xl lg:text-4xl xl:text-[2.65rem] font-bold text-white tracking-tight leading-tight mb-4 sm:mb-5">
-                        {activeProject.title}
-                      </h2>
+                        <p className="portfolio-page-card-desc text-white/75 text-[12px] md:text-base lg:text-[16px] leading-[1.45] md:leading-relaxed font-normal max-w-xl mb-2 md:mb-8 line-clamp-3 md:line-clamp-none">
+                          {activeProject.description}
+                        </p>
+                      </div>
 
-                      <p className="portfolio-page-card-desc text-white/75 text-sm sm:text-base lg:text-[16px] leading-relaxed font-normal max-w-xl mb-6 sm:mb-8">
-                        {activeProject.description}
-                      </p>
-                    </div>
+                      {/* Bottom Action: Explore with Arrow */}
+                      <div className="portfolio-page-card-cta relative z-10 pt-1 md:pt-4 text-left">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            navigate(`/portfolio/${activeProject.id}`, {
+                              state: { project: activeProject },
+                            })
+                          }
+                          className="inline-flex items-center gap-1.5 md:gap-2 text-white font-medium text-[13px] md:text-base border-b border-white/70 hover:border-white pb-0.5 hover:text-white transition-all cursor-pointer group"
+                        >
+                          <span>Explore</span>
+                          <ArrowRight className="w-3.5 h-3.5 md:w-4 md:h-4 stroke-[2.2] group-hover:translate-x-1.5 transition-transform" />
+                        </button>
+                      </div>
+                    </motion.div>
+                  </AnimatePresence>
+                </div>
 
-                    {/* Bottom Action: Learn more with Arrow */}
-                    <div className="portfolio-page-card-cta relative z-10 pt-4 text-left">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          navigate(`/portfolio/${activeProject.id}`, {
-                            state: { project: activeProject },
-                          })
-                        }
-                        className="inline-flex items-center gap-2 text-white font-medium text-sm sm:text-base border-b border-white/70 hover:border-white pb-0.5 hover:text-white transition-all cursor-pointer group"
-                      >
-                        <span>Learn more</span>
-                        <ArrowRight className="w-4 h-4 stroke-[2.2] group-hover:translate-x-1.5 transition-transform" />
-                      </button>
-                    </div>
-                  </motion.div>
-                </AnimatePresence>
+                {/* Mobile-only Carousel Pagination Dots below Card */}
+                {projects.length > 1 && (
+                  <div className="flex md:hidden items-center justify-center gap-1.5 mt-2.5">
+                    {projects.map((p, idx) => {
+                      const isDotActive = idx === activeIndex;
+                      return (
+                        <button
+                          key={`dot-${p.id}`}
+                          type="button"
+                          onClick={() => handleSelectProject(idx)}
+                          aria-label={`View project ${idx + 1}: ${p.title}`}
+                          className="p-1 cursor-pointer"
+                        >
+                          <span
+                            className={`block h-1.5 rounded-full transition-all duration-300 ${
+                              isDotActive ? "w-6 bg-[#693092]" : "w-1.5 bg-[#693092]/25"
+                            }`}
+                          />
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             </div>
           )}

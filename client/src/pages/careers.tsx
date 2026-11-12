@@ -19,7 +19,7 @@ import Navbar from "../componenets/navbar.tsx";
 import Footer from "../componenets/footer.tsx";
 import { toast } from "../componenets/toast.tsx";
 import BackToHeroButton from "../componenets/back-to-hero.tsx";
-import LoginModal, { type CareerUser } from "./login.tsx";
+import LoginModal from "./login.tsx";
 
 interface JobRole {
   id: string;
@@ -106,7 +106,7 @@ export default function CareersPage() {
     }
   };
 
-  const handleLoginSuccess = (_user: CareerUser) => {
+  const handleLoginSuccess = () => {
     setIsAuthModalOpen(false);
     if (pendingJobForApply) {
       const targetRole = pendingJobForApply;

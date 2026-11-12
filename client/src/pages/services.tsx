@@ -191,7 +191,13 @@ export default function ServicesPage() {
                         <div className="absolute right-0 top-0 bottom-0 w-full sm:w-[60%] lg:w-[54%] h-full overflow-hidden pointer-events-none z-0">
                           <img
                             src={service.image}
+                            srcSet={service.imageSrcSet}
+                            sizes="(max-width: 640px) 100vw, 60vw"
                             alt={service.title}
+                            width={800}
+                            height={450}
+                            loading="lazy"
+                            decoding="async"
                             className="w-full h-full object-cover object-center opacity-50 sm:opacity-100"
                             style={{
                               maskImage:

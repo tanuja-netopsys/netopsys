@@ -4,11 +4,13 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-  "dev": "concurrently \"npm run dev --prefix client\" \"npm run dev --prefix server\"",
-  "client": "npm run dev --prefix client",
-  "server": "npm run dev --prefix server",
-  "build": "node ./client/node_modules/typescript/bin/tsc -b && node ./client/node_modules/vite/bin/vite.js build"
-},
+    "dev": "concurrently --names \"FRONTEND,BACKEND\" --prefix-colors \"cyan,magenta\" --kill-others-on-fail \"npm --prefix client run dev\" \"npm --prefix server run dev\"",
+    "start": "concurrently --names \"FRONTEND,BACKEND\" --prefix-colors \"cyan,magenta\" --kill-others-on-fail \"npm --prefix client run dev\" \"npm --prefix server run start\"",
+    "client": "npm --prefix client run dev",
+    "server": "npm --prefix server run dev",
+    "build": "npm --prefix client run build",
+    "install:all": "npm install && npm --prefix client install && npm --prefix server install"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",

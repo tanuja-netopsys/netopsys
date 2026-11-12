@@ -85,7 +85,9 @@ export default function ProtectedRoute({
     const targetLogin = isSuperPath ? "/superadmin/login" : "/admin/login";
     try {
       sessionStorage.setItem("netopsys_redirect_after_login", location.pathname);
-    } catch {}
+    } catch {
+      // ignore sessionStorage restrictions
+    }
     return <Navigate to={targetLogin} state={{ from: location }} replace />;
   }
 
@@ -96,13 +98,19 @@ export default function ProtectedRoute({
 
   // 3. Module-level permission check for standard admins
   if (moduleId && !authState.isSuperAdmin) {
+    let isModuleDisabled = false;
     try {
       const permsByUser = JSON.parse(localStorage.getItem("netopsys_admin_permissions_by_user") || "{}");
       const userPerms = permsByUser[authState.userEmail];
       if (userPerms && userPerms[moduleId] && userPerms[moduleId].enabled === false) {
-        return <Navigate to="/admin/dashboard" replace />;
+        isModuleDisabled = true;
       }
-    } catch {}
+    } catch {
+      isModuleDisabled = false;
+    }
+    if (isModuleDisabled) {
+      return <Navigate to="/admin/dashboard" replace />;
+    }
   }
 
   return <>{children}</>;

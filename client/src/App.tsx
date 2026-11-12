@@ -1,5 +1,6 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
+import { MotionConfig } from "framer-motion";
 import Navbar from "./componenets/navbar.tsx";
 import Hero from "./sections/hero.tsx";
 import About from "./sections/about.tsx";
@@ -11,40 +12,40 @@ import Contact from "./sections/contact.tsx";
 import Footer from "./componenets/footer.tsx";
 import BackToHeroButton from "./componenets/back-to-hero.tsx";
 import { ToastContainer } from "./componenets/toast.tsx";
-import ServicesPage from "./pages/services.tsx";
-import ServiceDetailPage from "./pages/service-detail.tsx";
-import AboutPage from "./pages/about.tsx";
-import PortfolioPage from "./pages/portfolio.tsx";
-import PortfolioDetailPage from "./pages/portfolio-detail.tsx";
-import CareersPage from "./pages/careers.tsx";
-import JobDescriptionPage from "./pages/jobdescription.tsx";
-import ApplyPage from "./pages/apply.tsx";
-import AdminDashboard from "./admin/admin-dashboard.tsx";
-import JobPostings from "./admin/job-postings.tsx";
-import CategoryPage from "./admin/category.tsx";
-import UsersPage from "./admin/users.tsx";
-import AdminBlogsPage from "./admin/blogs.tsx";
-import PublicBlogsPage from "./pages/blogs.tsx";
-import BlogsDetailPage from "./pages/blogs-detail.tsx";
-import ApplicationsPage from "./admin/applications.tsx";
-import InterviewSlotsPage from "./admin/interview-slots.tsx";
-import ProjectsAdminPage from "./admin/projects.tsx";
-import TeamsAdminPage from "./admin/teams.tsx";
-import SubscribersAdminPage from "./admin/subscribers.tsx";
-import PermissionsPage from "./admin/permissions.tsx";
-import SuperAdminLoginPage from "./pages/superadmin-login.tsx";
-import LoginPage from "./pages/login.tsx";
-import ProfilePage from "./pages/profile.tsx";
-import ContactPage from "./pages/contact.tsx";
-import LaunchingPage from "./pages/launchingpage.tsx";
-import TermsAndConditionsPage from "./pages/terms&conditions.tsx";
-import PrivacyPolicyPage from "./pages/privacypolicy.tsx";
-import CookiePolicyPage from "./pages/cookie-policy.tsx";
-import NotFoundPage from "./pages/not-found.tsx";
 import ProtectedRoute from "./componenets/ProtectedRoute.tsx";
 import SmoothScrollController from "./componenets/SmoothScrollController.tsx";
 import CookieConsent from "./componenets/cookie-consent.tsx";
-import { preloadRecaptcha } from "./utils/recaptcha.ts";
+
+const ServicesPage = lazy(() => import("./pages/services.tsx"));
+const ServiceDetailPage = lazy(() => import("./pages/service-detail.tsx"));
+const AboutPage = lazy(() => import("./pages/about.tsx"));
+const PortfolioPage = lazy(() => import("./pages/portfolio.tsx"));
+const PortfolioDetailPage = lazy(() => import("./pages/portfolio-detail.tsx"));
+const CareersPage = lazy(() => import("./pages/careers.tsx"));
+const JobDescriptionPage = lazy(() => import("./pages/jobdescription.tsx"));
+const ApplyPage = lazy(() => import("./pages/apply.tsx"));
+const AdminDashboard = lazy(() => import("./admin/admin-dashboard.tsx"));
+const JobPostings = lazy(() => import("./admin/job-postings.tsx"));
+const CategoryPage = lazy(() => import("./admin/category.tsx"));
+const UsersPage = lazy(() => import("./admin/users.tsx"));
+const AdminBlogsPage = lazy(() => import("./admin/blogs.tsx"));
+const PublicBlogsPage = lazy(() => import("./pages/blogs.tsx"));
+const BlogsDetailPage = lazy(() => import("./pages/blogs-detail.tsx"));
+const ApplicationsPage = lazy(() => import("./admin/applications.tsx"));
+const InterviewSlotsPage = lazy(() => import("./admin/interview-slots.tsx"));
+const ProjectsAdminPage = lazy(() => import("./admin/projects.tsx"));
+const TeamsAdminPage = lazy(() => import("./admin/teams.tsx"));
+const SubscribersAdminPage = lazy(() => import("./admin/subscribers.tsx"));
+const PermissionsPage = lazy(() => import("./admin/permissions.tsx"));
+const SuperAdminLoginPage = lazy(() => import("./pages/superadmin-login.tsx"));
+const LoginPage = lazy(() => import("./pages/login.tsx"));
+const ProfilePage = lazy(() => import("./pages/profile.tsx"));
+const ContactPage = lazy(() => import("./pages/contact.tsx"));
+const LaunchingPage = lazy(() => import("./pages/launchingpage.tsx"));
+const TermsAndConditionsPage = lazy(() => import("./pages/terms&conditions.tsx"));
+const PrivacyPolicyPage = lazy(() => import("./pages/privacypolicy.tsx"));
+const CookiePolicyPage = lazy(() => import("./pages/cookie-policy.tsx"));
+const NotFoundPage = lazy(() => import("./pages/not-found.tsx"));
 
 
 function RouteThemeSync() {
@@ -62,10 +63,9 @@ function RouteThemeSync() {
       const isAdminRoute = p.startsWith("/admin") || p.startsWith("/superadmin");
       const isLaunchingRoute = p.startsWith("/launching");
       document.body.classList.toggle("hide-recaptcha-badge", isAdminRoute || isLaunchingRoute);
-      if (!isAdminRoute && !isLaunchingRoute) {
-        preloadRecaptcha();
-      }
-    } catch {}
+    } catch {
+      // ignore DOM style/classList access restrictions
+    }
   }, [location.pathname]);
 
   return null;
@@ -126,23 +126,29 @@ export default function App() {
 
   if (isOffline) {
     return (
-      <BrowserRouter>
-        <NotFoundPage
-          forceOffline
-          onRetry={() => setIsOffline(!navigator.onLine)}
-        />
-      </BrowserRouter>
+      <MotionConfig reducedMotion="user">
+        <BrowserRouter>
+          <Suspense fallback={<div className="min-h-screen w-full" />}>
+            <NotFoundPage
+              forceOffline
+              onRetry={() => setIsOffline(!navigator.onLine)}
+            />
+          </Suspense>
+        </BrowserRouter>
+      </MotionConfig>
     );
   }
 
   return (
-    <BrowserRouter>
-      <RouteThemeSync />
-      <ScrollToHashElement />
-      <SmoothScrollController />
-      <ToastContainer />
-      <CookieConsent />
-      <Routes>
+    <MotionConfig reducedMotion="user">
+      <BrowserRouter>
+        <RouteThemeSync />
+        <ScrollToHashElement />
+        <SmoothScrollController />
+        <ToastContainer />
+        <CookieConsent />
+        <Suspense fallback={<div className="min-h-screen w-full" />}>
+          <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/launchingpage" element={<LaunchingPage />} />
         <Route path="/services" element={<ServicesPage />} />
@@ -251,7 +257,9 @@ export default function App() {
         {/* 404 Not Found & Catch-All Routes */}
         <Route path="/404" element={<NotFoundPage />} />
         <Route path="*" element={<NotFoundPage />} />
-      </Routes>
-    </BrowserRouter>
+          </Routes>
+        </Suspense>
+      </BrowserRouter>
+    </MotionConfig>
   );
 }

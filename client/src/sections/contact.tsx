@@ -4,6 +4,7 @@ import { motion, AnimatePresence, useScroll, useTransform, useSpring } from "fra
 import { ArrowRight, X, ChevronDown, CheckCircle2, Sparkles, AlertCircle } from "lucide-react";
 import { preloadRecaptcha, executeRecaptcha } from "../utils/recaptcha.ts";
 import { toast } from "../componenets/toast.tsx";
+import { SERVICES_LIST } from "../data/services-list.ts";
 
 // ============================================================================
 // 1. CRISP VECTOR COUNTRY FLAGS (Renders true visual flags on Windows/all OS)
@@ -156,18 +157,6 @@ const GLOBAL_OFFICES: Office[] = [
       "Irving, TX 75063",
     ],
   },
-];
-
-export const SERVICES_LIST = [
-  "Custom Software Development",
-  "Web & Mobile Applications",
-  "Websites",
-  "Networking",
-  "Security",
-  "Cloud Solutions",
-  "VoIP Solutions",
-  "Backup & Recovery",
-  "IT Support",
 ];
 
 // ============================================================================
@@ -502,6 +491,128 @@ export function MailboxDeliveryAnimation({
   );
 }
 
+function renderOfficeCardContent(office: (typeof GLOBAL_OFFICES)[number]) {
+  return (
+    <div className="flex flex-col justify-between h-full w-full">
+      <div>
+        <div className="contact-card-top flex items-center justify-between mb-4 sm:mb-5 lg:mb-4 xl:mb-5">
+          <office.flagComponent className="contact-flag w-9 h-6 sm:w-10 sm:h-6.5" />
+        </div>
+
+        <h3 className="contact-country text-2xl sm:text-[26px] lg:text-[28px] font-bold text-[#141010] tracking-tight mb-1">
+          {office.country}
+        </h3>
+
+        <p className="contact-office-type text-xs sm:text-sm md:text-[14.5px] text-[#736B7E] font-normal">
+          {office.type}
+        </p>
+      </div>
+
+      <div className="mt-4 sm:mt-5 lg:mt-4 xl:mt-5">
+        <div className="contact-divider w-full h-px bg-[#F0EBF5] mb-4 sm:mb-5 lg:mb-3.5 xl:mb-4" />
+        <div className="contact-address text-xs sm:text-sm md:text-[14.5px] text-[#4A4553] font-normal leading-relaxed space-y-1">
+          {office.addressLines.map((line, aIdx) => (
+            <p key={aIdx} className="block">
+              {line}
+            </p>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DesktopContactCardsGrid({
+  sectionRef,
+  isDesktop,
+}: {
+  sectionRef: React.RefObject<HTMLElement | null>;
+  isDesktop: boolean;
+}) {
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "start 10%"],
+  });
+
+  const smoothProgress = useSpring(scrollYProgress, {
+    stiffness: 120,
+    damping: 26,
+    restDelta: 0.001,
+  });
+
+  const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
+
+  const leftCardX = useTransform(smoothProgress, (raw) => {
+    const v = clamp01(raw);
+    return isDesktop ? `${(1 - v) * 75}%` : "0%";
+  });
+  const leftCardRotate = useTransform(smoothProgress, (raw) => {
+    const v = clamp01(raw);
+    return isDesktop ? (1 - v) * -8 : 0;
+  });
+  const leftCardY = useTransform(smoothProgress, (raw) => {
+    const v = clamp01(raw);
+    return (1 - v) * 52;
+  });
+
+  const midCardY = useTransform(smoothProgress, (raw) => {
+    const v = clamp01(raw);
+    return (1 - v) * -18;
+  });
+  const midCardScale = useTransform(smoothProgress, (raw) => {
+    const v = clamp01(raw);
+    return 1 + (1 - v) * 0.03;
+  });
+
+  const rightCardX = useTransform(smoothProgress, (raw) => {
+    const v = clamp01(raw);
+    return isDesktop ? `${(1 - v) * -75}%` : "0%";
+  });
+  const rightCardRotate = useTransform(smoothProgress, (raw) => {
+    const v = clamp01(raw);
+    return isDesktop ? (1 - v) * 8 : 0;
+  });
+  const rightCardY = useTransform(smoothProgress, (raw) => {
+    const v = clamp01(raw);
+    return (1 - v) * 52;
+  });
+
+  return (
+    <div className="contact-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-7 xl:gap-8 items-stretch mb-8 sm:mb-10 lg:mb-8 xl:mb-10 w-full">
+      {GLOBAL_OFFICES.map((office, idx) => {
+        const cardMotionStyle =
+          idx === 0
+            ? {
+                x: isDesktop ? leftCardX : "0%",
+                rotate: isDesktop ? leftCardRotate : 0,
+                y: leftCardY,
+                zIndex: 10,
+              }
+            : idx === 1
+            ? { y: midCardY, scale: midCardScale, zIndex: 20 }
+            : {
+                x: isDesktop ? rightCardX : "0%",
+                rotate: isDesktop ? rightCardRotate : 0,
+                y: rightCardY,
+                zIndex: 10,
+              };
+
+        return (
+          <motion.div
+            key={office.id}
+            style={cardMotionStyle}
+            className={`contact-card relative bg-white rounded-[22px] p-6 sm:p-7 lg:p-8 shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-black/[0.04] flex flex-col justify-between hover:shadow-lg hover:shadow-purple-900/[0.04] transition-shadow duration-300 text-left h-auto min-w-0 break-words ${
+              idx === 1 ? "shadow-xl" : ""
+            }`}
+          >
+            {renderOfficeCardContent(office)}
+          </motion.div>
+        );
+      })}
+    </div>
+  );
+}
+
 // ============================================================================
 // 3. MAIN CONTACT SECTION COMPONENT
 // ============================================================================
@@ -546,59 +657,6 @@ export default function Contact() {
     window.addEventListener("resize", checkViewport);
     return () => window.removeEventListener("resize", checkViewport);
   }, []);
-
-  // Track scroll position: starts fanned when section enters viewport,
-  // and finishes completely back to original positions by the time the section is in full view
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start end", "start 10%"],
-  });
-
-  const smoothProgress = useSpring(scrollYProgress, {
-    stiffness: 120,
-    damping: 26,
-    restDelta: 0.001,
-  });
-
-  const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
-
-  // Left Card (India): starts shifted behind the middle card, tilted counter-clockwise and down
-  const leftCardX = useTransform(smoothProgress, (raw) => {
-    const v = clamp01(raw);
-    return isDesktop ? `${(1 - v) * 75}%` : "0%";
-  });
-  const leftCardRotate = useTransform(smoothProgress, (raw) => {
-    const v = clamp01(raw);
-    return isDesktop ? (1 - v) * -8 : 0;
-  });
-  const leftCardY = useTransform(smoothProgress, (raw) => {
-    const v = clamp01(raw);
-    return isTabletOrUp ? (1 - v) * 52 : 0;
-  });
-
-  // Middle Card (Singapore): elevated on top in the center, straight
-  const midCardY = useTransform(smoothProgress, (raw) => {
-    const v = clamp01(raw);
-    return isTabletOrUp ? (1 - v) * -18 : 0;
-  });
-  const midCardScale = useTransform(smoothProgress, (raw) => {
-    const v = clamp01(raw);
-    return isTabletOrUp ? 1 + (1 - v) * 0.03 : 1;
-  });
-
-  // Right Card (United States): starts shifted behind the middle card, tilted clockwise and down
-  const rightCardX = useTransform(smoothProgress, (raw) => {
-    const v = clamp01(raw);
-    return isDesktop ? `${(1 - v) * -75}%` : "0%";
-  });
-  const rightCardRotate = useTransform(smoothProgress, (raw) => {
-    const v = clamp01(raw);
-    return isDesktop ? (1 - v) * 8 : 0;
-  });
-  const rightCardY = useTransform(smoothProgress, (raw) => {
-    const v = clamp01(raw);
-    return isTabletOrUp ? (1 - v) * 52 : 0;
-  });
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -708,66 +766,23 @@ export default function Contact() {
           </p>
         </div>
 
-        {/* 3 Global Offices Cards Grid with Scroll-driven separation effect */}
-        <div className="contact-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-7 xl:gap-8 items-stretch mb-8 sm:mb-10 lg:mb-8 xl:mb-10 w-full">
-          {GLOBAL_OFFICES.map((office, idx) => {
-            const cardMotionStyle =
-              idx === 0
-                ? { x: leftCardX, rotate: leftCardRotate, y: leftCardY, zIndex: 10 }
-                : idx === 1
-                ? { y: midCardY, scale: midCardScale, zIndex: 20 }
-                : { x: rightCardX, rotate: rightCardRotate, y: rightCardY, zIndex: 10 };
-
-            return (
-              <motion.div
+        {/* 3 Global Offices Cards Grid (Scroll parallax on tablet/desktop only; zero scroll listeners on mobile) */}
+        {isTabletOrUp ? (
+          <DesktopContactCardsGrid sectionRef={sectionRef} isDesktop={isDesktop} />
+        ) : (
+          <div className="contact-grid grid grid-cols-1 gap-6 items-stretch mb-8 w-full">
+            {GLOBAL_OFFICES.map((office, idx) => (
+              <div
                 key={office.id}
-                style={cardMotionStyle}
-                className={`contact-card relative bg-white rounded-[22px] p-6 sm:p-7 lg:p-8 shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-black/[0.04] flex flex-col justify-between hover:shadow-lg hover:shadow-purple-900/[0.04] transition-shadow duration-300 text-left h-auto min-w-0 break-words ${
-                  idx === 1 ? "shadow-xl" : ""
+                className={`contact-card relative bg-white rounded-[22px] p-6 shadow-sm border border-black/[0.04] flex flex-col justify-between text-left h-auto min-w-0 break-words ${
+                  idx === 1 ? "shadow-md" : ""
                 }`}
               >
-                <div className="flex flex-col justify-between h-full w-full">
-                  <div>
-                    {/* Top Row: Flag on left, Operational Badge on right */}
-                    <div className="contact-card-top flex items-center justify-between mb-4 sm:mb-5 lg:mb-4 xl:mb-5">
-                      <office.flagComponent className="contact-flag w-9 h-6 sm:w-10 sm:h-6.5" />
-                      <div className="contact-status-badge inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#EDE4F7] text-[#693092]">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#693092]" />
-                        <span className="text-xs font-semibold tracking-tight">
-                          {office.status}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Country Title */}
-                    <h3 className="contact-country text-2xl sm:text-[26px] lg:text-[28px] font-bold text-[#141010] tracking-tight mb-1">
-                      {office.country}
-                    </h3>
-
-                    {/* Office Sub-label */}
-                    <p className="contact-office-type text-xs sm:text-sm md:text-[14.5px] text-[#736B7E] font-normal">
-                      {office.type}
-                    </p>
-                  </div>
-
-                  <div className="mt-4 sm:mt-5 lg:mt-4 xl:mt-5">
-                    {/* Horizontal Divider Line */}
-                    <div className="contact-divider w-full h-px bg-[#F0EBF5] mb-4 sm:mb-5 lg:mb-3.5 xl:mb-4" />
-
-                    {/* Address Lines */}
-                    <div className="contact-address text-xs sm:text-sm md:text-[14.5px] text-[#4A4553] font-normal leading-relaxed space-y-1">
-                      {office.addressLines.map((line, aIdx) => (
-                        <p key={aIdx} className="block">
-                          {line}
-                        </p>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            );
-          })}
-        </div>
+                {renderOfficeCardContent(office)}
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Centered CTA Button: "Let's Connect" */}
         <div className="contact-cta flex justify-center mt-5 sm:mt-6 lg:mt-7 xl:mt-8">

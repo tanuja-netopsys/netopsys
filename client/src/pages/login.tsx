@@ -607,6 +607,37 @@ export default function LoginPage({
     return email.slice(0, 2).toUpperCase();
   };
 
+  const buildCareerUser = (backendUser: {
+    name: string;
+    email: string;
+    phone?: string | null;
+    role?: string;
+    registeredDate?: string;
+    verificationStatus?: string;
+    isEmailVerified?: boolean;
+    emailVerified?: boolean;
+    accountStatus?: string;
+  }): CareerUser => {
+    const isVerified = Boolean(
+      backendUser.isEmailVerified ??
+        backendUser.emailVerified ??
+        backendUser.verificationStatus === "verified"
+    );
+
+    return {
+      name: backendUser.name,
+      email: backendUser.email,
+      initials: getInitials(backendUser.name, backendUser.email),
+      phone: backendUser.phone || "",
+      role: backendUser.role || "",
+      registeredDate: backendUser.registeredDate || "",
+      verificationStatus:
+        backendUser.verificationStatus || (isVerified ? "verified" : "Unverified"),
+      isEmailVerified: isVerified,
+      accountStatus: backendUser.accountStatus || "",
+    };
+  };
+
   const handleFinishLogin = (user: CareerUser) => {
     try {
       localStorage.setItem("career_user", JSON.stringify(user));
@@ -660,48 +691,20 @@ export default function LoginPage({
         }),
       });
 
-      const data = await res.json();
+      const data = await res.json().catch(() => null);
 
-      if (res.ok && data.success && data.user) {
-        setSuccessMessage(data.message || "Signed in successfully!");
-        toast.success(data.message || "Signed in successfully! Welcome back.", { title: "Signed In" });
-        setTimeout(() => {
-          handleFinishLogin({
-            name: data.user.name,
-            email: data.user.email,
-            initials: getInitials(data.user.name, data.user.email),
-            phone: data.user.phone || "",
-            role: data.user.role || "Candidate",
-            registeredDate: data.user.registeredDate || "28/10/2026",
-            verificationStatus: data.user.verificationStatus || (data.user.emailVerified ? "verified" : "Unverified"),
-            isEmailVerified: Boolean(data.user.isEmailVerified || data.user.emailVerified),
-            accountStatus: data.user.accountStatus || "Active",
-          });
-        }, 500);
-        return;
+      if (!res.ok || !data?.success || !data?.user) {
+        throw new Error(
+          data?.message || "Invalid email or password."
+        );
       }
 
-      if (!res.ok && data.message) {
-        throw new Error(data.message);
-      }
+      setSuccessMessage(data.message || "Signed in successfully!");
+      toast.success(data.message || "Signed in successfully! Welcome back.", { title: "Signed In" });
+      setTimeout(() => {
+        handleFinishLogin(buildCareerUser(data.user));
+      }, 500);
     } catch (err: unknown) {
-      const cleanEmail = signInEmail.trim().toLowerCase();
-      if (cleanEmail === "tanuja@netopsys.in" || cleanEmail === "indrani@netopsys.in") {
-        const demoName = cleanEmail.startsWith("tanuja") ? "Tanuja A" : "Indrani V";
-        toast.success(`Welcome back, ${demoName}!`, { title: "Signed In" });
-        handleFinishLogin({
-          name: demoName,
-          email: cleanEmail,
-          initials: getInitials(demoName, cleanEmail),
-          phone: "+91 98765 43210",
-          role: "Candidate",
-          registeredDate: "14/10/2026",
-          verificationStatus: "verified",
-          accountStatus: "Active",
-        });
-        return;
-      }
-
       const error = err as Error;
       const msg = error.message || "Invalid email or password.";
       setErrorMessage(msg);
@@ -967,43 +970,24 @@ export default function LoginPage({
         }),
       });
 
-      const data = await res.json();
+      const data = await res.json().catch(() => null);
 
-      if (res.ok && data.success && data.user) {
-        setSuccessMessage("Account created successfully!");
-        toast.success("Account created successfully! Welcome to Netopsys.", { title: "Account Created" });
-        setTimeout(() => {
-          handleFinishLogin({
-            name: data.user.name,
-            email: data.user.email,
-            initials: getInitials(data.user.name, data.user.email),
-            phone: data.user.phone || mobileNumber.trim(),
-            role: "Candidate",
-            registeredDate: data.user.registeredDate || new Date().toLocaleDateString("en-GB"),
-            verificationStatus: data.user.verificationStatus || "Unverified",
-            isEmailVerified: Boolean(data.user.isEmailVerified || data.user.emailVerified),
-            accountStatus: "Active",
-          });
-        }, 500);
-        return;
+      if (!res.ok || !data?.success || !data?.user) {
+        throw new Error(
+          data?.message || "Failed to create account."
+        );
       }
 
-      if (!res.ok && data.message) {
-        throw new Error(data.message);
-      }
-    } catch {
-      const fullName = `${firstName.trim()} ${lastName.trim()}`;
-      handleFinishLogin({
-        name: fullName,
-        email: createEmail.trim(),
-        initials: getInitials(fullName, createEmail),
-        phone: mobileNumber.trim(),
-        role: "Candidate",
-        registeredDate: new Date().toLocaleDateString("en-GB"),
-        verificationStatus: "Unverified",
-        isEmailVerified: false,
-        accountStatus: "Active",
-      });
+      setSuccessMessage(data.message || "Account created successfully!");
+      toast.success(data.message || "Account created successfully! Welcome to Netopsys.", { title: "Account Created" });
+      setTimeout(() => {
+        handleFinishLogin(buildCareerUser(data.user));
+      }, 500);
+    } catch (err: unknown) {
+      const error = err as Error;
+      const msg = error.message || "Unable to create account. Please try again.";
+      setErrorMessage(msg);
+      toast.error(msg, { title: "Registration Failed" });
     } finally {
       setIsLoading(false);
     }

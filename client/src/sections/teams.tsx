@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { ArrowRight, Loader2 } from "lucide-react";
+import { OptimizedPicture } from "../utils/optimized-image.tsx";
 
 export interface TeamMember {
   id: string | number;
@@ -60,39 +61,77 @@ export default function Teams() {
     return result;
   }, [teamMembers]);
 
-  // Smooth continuous auto-scroll that pauses on hover
+  // Smooth continuous auto-scroll that pauses on hover, offscreen, or reduced-motion
   useEffect(() => {
     const container = scrollContainerRef.current;
     if (!container || displayMembers.length === 0) return;
 
-    let animId: number;
+    const prefersReducedMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReducedMotion) return;
+
+    const repeatCount = teamMembers.length < 5 ? 4 : 3;
+    let cachedSingleSetWidth = container.scrollWidth / repeatCount;
+    let scrollAccum = container.scrollLeft;
+    let animId: number | null = null;
+    let isInView = false;
     let lastTime = performance.now();
 
+    const updateWidthCache = () => {
+      if (container) {
+        cachedSingleSetWidth = container.scrollWidth / repeatCount;
+      }
+    };
+
     const loop = (now: number) => {
+      if (!isInView) {
+        animId = null;
+        return;
+      }
       const dt = Math.min((now - lastTime) / 1000, 0.1);
       lastTime = now;
 
       if (!isHovered && container) {
-        // Continuous smooth scroll (~42px per second)
-        container.scrollLeft += 42 * dt;
-
-        // Seamless wrap around across the replicated sets
-        const repeatCount = teamMembers.length < 5 ? 4 : 3;
-        const singleSetWidth = container.scrollWidth / repeatCount;
-        if (singleSetWidth > 0) {
-          if (container.scrollLeft >= singleSetWidth * 2) {
-            container.scrollLeft -= singleSetWidth;
-          } else if (container.scrollLeft <= 0) {
-            container.scrollLeft += singleSetWidth;
+        scrollAccum += 42 * dt;
+        if (cachedSingleSetWidth > 0) {
+          if (scrollAccum >= cachedSingleSetWidth * 2) {
+            scrollAccum -= cachedSingleSetWidth;
+          } else if (scrollAccum <= 0) {
+            scrollAccum += cachedSingleSetWidth;
           }
         }
+        container.scrollLeft = scrollAccum;
+      } else if (container) {
+        scrollAccum = container.scrollLeft;
       }
 
       animId = requestAnimationFrame(loop);
     };
 
-    animId = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(animId);
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isInView = entry.isIntersecting;
+        if (isInView && animId === null) {
+          updateWidthCache();
+          scrollAccum = container.scrollLeft;
+          lastTime = performance.now();
+          animId = requestAnimationFrame(loop);
+        } else if (!isInView && animId !== null) {
+          cancelAnimationFrame(animId);
+          animId = null;
+        }
+      },
+      { threshold: 0.05 }
+    );
+
+    observer.observe(container);
+    window.addEventListener("resize", updateWidthCache);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", updateWidthCache);
+      if (animId !== null) cancelAnimationFrame(animId);
+    };
   }, [isHovered, displayMembers, teamMembers]);
 
   return (
@@ -151,11 +190,16 @@ export default function Teams() {
                 {/* Uniform Portrait Photo Container */}
                 <div className="teams-card-img-wrap relative w-full h-[310px] sm:h-[360px] rounded-2xl sm:rounded-[22px] overflow-hidden bg-[#161224] border border-white/[0.08] shadow-xl group-hover:border-white/25 group-hover:shadow-2xl group-hover:shadow-purple-950/30 transition-all duration-500">
                   {/* Team Portrait Photo */}
-                  <img
+                  <OptimizedPicture
                     src={member.image || "/teams/member-1.jpg"}
                     alt={member.name}
-                    className="w-full h-full object-cover object-top select-none filter contrast-[1.08] saturate-[0.7] group-hover:saturate-100 group-hover:scale-105 transition-all duration-700 pointer-events-none"
+                    width={290}
+                    height={360}
+                    sizes="(max-width: 640px) 180px, 290px"
+                    style={{ width: "100%", height: "100%" }}
+                    className="w-full h-full object-cover object-top select-none filter contrast-[1.08] saturate-[0.7] group-hover:saturate-100 group-hover:scale-105 transition-transform duration-700 pointer-events-none block"
                     loading="lazy"
+                    decoding="async"
                   />
 
                   {/* Subtle cool purple duotone mood overlay */}

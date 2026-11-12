@@ -1,7 +1,8 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowRight, ArrowUpRight, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import { OptimizedPicture } from "../utils/optimized-image.tsx";
 
 export interface Project {
   id: string | number;
@@ -23,19 +24,35 @@ export default function Portfolio() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [activeCardId, setActiveCardId] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== "undefined" ? window.innerWidth < 768 : false
+  );
 
-  // Scroll Container Ref & State
+  // Scroll Container & Interaction Refs
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+  const isPausedRef = useRef<boolean>(false);
+  const scrollAccumRef = useRef<number>(0);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
 
-  const checkScrollability = () => {
-    if (scrollContainerRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
-      setCanScrollLeft(scrollLeft > 10);
-      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
-    }
-  };
+  const checkScrollability = useCallback(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const { scrollLeft, scrollWidth, clientWidth } = container;
+    setCanScrollLeft(scrollLeft > 10);
+    setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
+  }, []);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+      checkScrollability();
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [checkScrollability]);
 
   useEffect(() => {
     let isMounted = true;
@@ -67,22 +84,91 @@ export default function Portfolio() {
 
   useEffect(() => {
     checkScrollability();
-    const handleResize = () => checkScrollability();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, [projects]);
+  }, [projects, checkScrollability]);
+
+  // Replicate cards cleanly on mobile (< 768px) for seamless infinite auto-scroll
+  const displayProjects = useMemo(() => {
+    if (!isMobile || projects.length <= 1) return projects;
+    return [...projects, ...projects, ...projects];
+  }, [isMobile, projects]);
+
+  // Continuous smooth auto-scroll on mobile screen only (paused offscreen or reduced-motion)
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!isMobile || !container || isLoading || projects.length <= 1) return;
+
+    const prefersReducedMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReducedMotion) return;
+
+    scrollAccumRef.current = container.scrollLeft;
+    let cachedSingleSetWidth = container.scrollWidth / 3;
+    let animId: number | null = null;
+    let isInView = false;
+    let lastTime = performance.now();
+
+    const updateWidthCache = () => {
+      if (container) {
+        cachedSingleSetWidth = container.scrollWidth / 3;
+      }
+    };
+
+    const loop = (now: number) => {
+      if (!isInView) {
+        animId = null;
+        return;
+      }
+      const dt = Math.min((now - lastTime) / 1000, 0.1);
+      lastTime = now;
+
+      if (!isPausedRef.current && container) {
+        scrollAccumRef.current += 48 * dt;
+        if (cachedSingleSetWidth > 0) {
+          if (scrollAccumRef.current >= cachedSingleSetWidth * 2) {
+            scrollAccumRef.current -= cachedSingleSetWidth;
+          } else if (scrollAccumRef.current <= 0) {
+            scrollAccumRef.current += cachedSingleSetWidth;
+          }
+        }
+        container.scrollLeft = scrollAccumRef.current;
+      } else if (container) {
+        scrollAccumRef.current = container.scrollLeft;
+      }
+
+      animId = requestAnimationFrame(loop);
+    };
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isInView = entry.isIntersecting;
+        if (isInView && animId === null) {
+          updateWidthCache();
+          scrollAccumRef.current = container.scrollLeft;
+          lastTime = performance.now();
+          animId = requestAnimationFrame(loop);
+        } else if (!isInView && animId !== null) {
+          cancelAnimationFrame(animId);
+          animId = null;
+        }
+      },
+      { threshold: 0.05 }
+    );
+
+    observer.observe(container);
+    window.addEventListener("resize", updateWidthCache);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", updateWidthCache);
+      if (animId !== null) cancelAnimationFrame(animId);
+    };
+  }, [isMobile, isLoading, projects.length, displayProjects]);
 
   const handleScroll = (direction: "left" | "right") => {
     if (scrollContainerRef.current) {
       const container = scrollContainerRef.current;
-      // Scroll by one card's width plus gap
       const cardWidth =
-        window.innerWidth >= 1024
-          ? container.clientWidth / 3
-          : window.innerWidth >= 768
-          ? container.clientWidth / 2
-          : container.clientWidth * 0.85;
-
+        window.innerWidth >= 1024 ? container.clientWidth / 3 : container.clientWidth / 2;
       const delta = direction === "left" ? -cardWidth : cardWidth;
       container.scrollBy({ left: delta, behavior: "smooth" });
       setTimeout(checkScrollability, 350);
@@ -92,7 +178,7 @@ export default function Portfolio() {
   return (
     <section
       id="portfolio"
-      className="portfolio-section-wrap relative w-full min-h-[100dvh] flex flex-col justify-center bg-[#FBAE42] px-4 sm:px-6 md:px-8 lg:px-10 xl:px-14 2xl:px-18 select-none overflow-x-clip scroll-mt-0"
+      className="portfolio-section-wrap relative w-full min-h-0 lg:min-h-[100dvh] flex flex-col justify-center bg-[#FBAE42] px-4 sm:px-6 md:px-8 lg:px-10 xl:px-14 2xl:px-18 select-none overflow-x-clip scroll-mt-[72px] lg:scroll-mt-0"
     >
       {/* Main Container - Expanded width matching Hero, About, and Services */}
       <div className="portfolio-content-wrap relative w-full max-w-[2100px] mx-auto flex flex-col justify-center my-auto w-full">
@@ -120,14 +206,14 @@ export default function Portfolio() {
             </p>
           </div>
 
-          {/* Horizontal Scroll Navigation Arrows (visible on mobile/tablet when multiple cards exist, and desktop when > 3) */}
+          {/* Horizontal Scroll Navigation Arrows (hidden on mobile, shown on tablet & desktop when > 3) */}
           {projects.length > 1 && (
-            <div className={`items-center gap-2 self-start sm:self-end shrink-0 pb-1 ${projects.length > 3 ? "flex" : "flex lg:hidden"}`}>
+            <div className={`items-center gap-2 self-end shrink-0 pb-0.5 sm:pb-1 ${projects.length > 3 ? "hidden md:flex" : "hidden md:flex lg:hidden"}`}>
               <button
                 type="button"
                 onClick={() => handleScroll("left")}
                 disabled={!canScrollLeft}
-                className="w-10 h-10 sm:w-9 sm:h-9 rounded-full bg-[#141010] text-white flex items-center justify-center hover:bg-[#693092] transition-all disabled:opacity-30 disabled:pointer-events-none cursor-pointer shadow-md"
+                className="w-9 h-9 rounded-full bg-[#141010] text-white flex items-center justify-center hover:bg-[#693092] transition-all disabled:opacity-30 disabled:pointer-events-none cursor-pointer shadow-md"
                 aria-label="Previous projects"
                 title="Scroll left"
               >
@@ -137,7 +223,7 @@ export default function Portfolio() {
                 type="button"
                 onClick={() => handleScroll("right")}
                 disabled={!canScrollRight}
-                className="w-10 h-10 sm:w-9 sm:h-9 rounded-full bg-[#141010] text-white flex items-center justify-center hover:bg-[#693092] transition-all disabled:opacity-30 disabled:pointer-events-none cursor-pointer shadow-md"
+                className="w-9 h-9 rounded-full bg-[#141010] text-white flex items-center justify-center hover:bg-[#693092] transition-all disabled:opacity-30 disabled:pointer-events-none cursor-pointer shadow-md"
                 aria-label="Next projects"
                 title="Scroll right"
               >
@@ -159,23 +245,36 @@ export default function Portfolio() {
           <div
             ref={scrollContainerRef}
             onScroll={checkScrollability}
-            className="portfolio-scroll-container flex items-stretch gap-4 lg:gap-5 xl:gap-6 w-full overflow-x-auto pb-2 pt-1 scroll-smooth snap-x snap-mandatory [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-track]:bg-black/10 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#141010]/30 hover:[&::-webkit-scrollbar-thumb]:bg-[#141010]/60 [&::-webkit-scrollbar-thumb]:rounded-full"
-            style={{
-              scrollbarWidth: "thin",
-              scrollbarColor: "rgba(20, 16, 16, 0.3) transparent",
+            onTouchStart={() => {
+              isPausedRef.current = true;
             }}
+            onTouchEnd={() => {
+              isPausedRef.current = false;
+            }}
+            onTouchCancel={() => {
+              isPausedRef.current = false;
+            }}
+            onMouseEnter={() => {
+              if (isMobile) isPausedRef.current = true;
+            }}
+            onMouseLeave={() => {
+              if (isMobile) isPausedRef.current = false;
+            }}
+            className={`portfolio-scroll-container flex items-stretch gap-3.5 sm:gap-4 lg:gap-5 xl:gap-6 w-full overflow-x-auto ${projects.length <= 3 ? "lg:overflow-visible" : ""} pt-3 pb-10 -mt-2 -mb-8 md:scroll-smooth md:snap-x md:snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:[scrollbar-width:thin] md:[&::-webkit-scrollbar]:block md:[&::-webkit-scrollbar]:h-1.5 md:[&::-webkit-scrollbar-track]:bg-black/10 md:[&::-webkit-scrollbar-track]:rounded-full md:[&::-webkit-scrollbar-thumb]:bg-[#141010]/30 md:hover:[&::-webkit-scrollbar-thumb]:bg-[#141010]/60 md:[&::-webkit-scrollbar-thumb]:rounded-full`}
           >
-            {projects.map((project, index) => {
+            {displayProjects.map((project, index) => {
               const projId = String(project.id);
               const isActive = activeCardId === projId;
-              const formattedIndex = String(index + 1).padStart(2, "0");
+              const formattedIndex = String(
+                (projects.length > 0 ? index % projects.length : index) + 1
+              ).padStart(2, "0");
 
               return (
                 <motion.div
-                  key={project.id}
+                  key={isMobile ? `${project.id}-m-${index}` : project.id}
                   onMouseEnter={() => setActiveCardId(projId)}
                   onClick={() => navigate(`/portfolio-detail?id=${project.id}`)}
-                  className="portfolio-card group relative bg-[#F5EEF8] rounded-[16px] sm:rounded-[18px] p-3.5 sm:p-4 lg:p-4 xl:p-5 flex flex-col justify-between h-auto min-h-full border border-black/[0.06] shadow-lg shadow-black/[0.06] hover:shadow-xl hover:shadow-black/15 lg:hover:-translate-y-1 transition-all duration-300 w-[85%] sm:w-[calc(50%-12px)] lg:w-[calc((100%-2*1.25rem)/3)] xl:w-[calc((100%-2*1.5rem)/3)] shrink-0 cursor-pointer snap-start min-w-0 break-words"
+                  className="portfolio-card group relative bg-[#F5EEF8] rounded-[16px] sm:rounded-[18px] p-3.5 sm:p-4 lg:p-4 xl:p-5 flex flex-col justify-between h-auto min-h-full border border-black/[0.06] shadow-[0_8px_20px_-4px_rgba(20,16,16,0.08)] hover:shadow-[0_14px_28px_-6px_rgba(20,16,16,0.18)] lg:hover:-translate-y-1 transition-all duration-300 w-[84%] sm:w-[calc(50%-10px)] lg:w-[calc((100%-2*1.25rem)/3)] xl:w-[calc((100%-2*1.5rem)/3)] shrink-0 cursor-pointer md:snap-start min-w-0"
                 >
                   {/* Image Container with active green border state */}
                   <div
@@ -185,22 +284,23 @@ export default function Portfolio() {
                         : "border border-black/[0.08] group-hover:border-[#10B981]/60"
                     }`}
                   >
-                    <img
+                    <OptimizedPicture
                       src={project.image || "/portfolio/portfolio-1.jpg"}
                       alt={project.alt || project.title}
-                      className="w-full h-full object-cover select-none transition-transform duration-500 group-hover:scale-105 pointer-events-none"
+                      width={640}
+                      height={392}
+                      sizes="(max-width: 768px) 84vw, 33vw"
+                      style={{ width: "100%", height: "100%" }}
+                      className="w-full h-full object-cover select-none transition-transform duration-500 group-hover:scale-105 pointer-events-none block"
                       loading="lazy"
+                      decoding="async"
                     />
-                    {/* Subtle vignette overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none" />
+                    {/* Soft blended bottom vignette */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/5 to-transparent opacity-65 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
                   </div>
 
-                  {/* Status Badge */}
-                  <div className="portfolio-card-badge-row mt-2.5 sm:mt-3 mb-1.5 sm:mb-2 flex items-center justify-between">
-                    <span className="portfolio-card-badge-pill inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-0.5 rounded-full bg-[#10B981]/15 text-[#047857] text-[11px] sm:text-xs font-semibold tracking-wide border border-[#10B981]/25">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#10B981]" />
-                      {project.status || "Deployed"}
-                    </span>
+                  {/* Card Index */}
+                  <div className="portfolio-card-badge-row mt-2.5 sm:mt-3 mb-1.5 sm:mb-2 flex items-center justify-end">
                     <span className="portfolio-card-id text-[#693092]/40 text-[11px] sm:text-xs font-mono font-medium">
                       {formattedIndex}
                     </span>
@@ -243,11 +343,11 @@ export default function Portfolio() {
               );
             })}
 
-            {projects.length === 0 && (
-              <div className="col-span-full w-full py-12 text-center text-sm font-medium text-[#141010]/70 bg-white/40 rounded-2xl border border-black/5">
-                No projects published yet.
-              </div>
-            )}
+              {projects.length === 0 && (
+                <div className="col-span-full w-full py-12 text-center text-sm font-medium text-[#141010]/70 bg-white/40 rounded-2xl border border-black/5">
+                  No projects published yet.
+                </div>
+              )}
           </div>
         )}
 

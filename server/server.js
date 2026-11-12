@@ -1,16 +1,22 @@
 const path = require("path");
-const fs = require("fs");
 
 // ==========================================
 // ENVIRONMENT CONFIGURATION
 // ==========================================
 
+// Load environment variables from server/.env.
+// Existing Plesk environment variables take priority.
 require("dotenv").config({
   path: path.join(__dirname, ".env"),
 });
 
 const express = require("express");
 const cors = require("cors");
+const fs = require("fs");
+
+// ==========================================
+// ROUTE IMPORTS
+// ==========================================
 
 const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
@@ -35,9 +41,10 @@ const prisma = require("./config/prisma");
 const app = express();
 
 const PORT = process.env.PORT || 5000;
+
 const isProduction = process.env.NODE_ENV === "production";
 
-// Frontend production build path
+// Frontend production build
 const clientDistPath = path.resolve(
   __dirname,
   "../client/dist"
@@ -48,19 +55,47 @@ const clientIndexPath = path.join(
   "index.html"
 );
 
-// Upload directory
+// Uploaded files directory
 const uploadsDir = path.join(
   __dirname,
   "uploads"
 );
 
-// Hide Express fingerprint
+// Ensure uploads directory exists
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, {
+    recursive: true,
+  });
+}
+
+// Hide Express technology fingerprint
 app.disable("x-powered-by");
 
-// Create uploads directory if missing
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
+// ==========================================
+// STARTUP CONFIGURATION LOGS
+// ==========================================
+
+console.log("==========================================");
+console.log("NETOPSYS SERVER INITIALIZATION");
+console.log(`Environment: ${process.env.NODE_ENV || "development"}`);
+console.log(`Port: ${PORT}`);
+console.log(`Backend: ${__dirname}`);
+
+if (isProduction) {
+  console.log(`Frontend: ${clientDistPath}`);
+
+  if (!fs.existsSync(clientIndexPath)) {
+    console.error(
+      "WARNING: Frontend production build not found:",
+      clientIndexPath
+    );
+  }
+} else {
+  console.log("Frontend: Vite development server");
+  console.log("Expected frontend URL: http://localhost:5173");
 }
+
+console.log("==========================================");
 
 // ==========================================
 // CORS CONFIGURATION
@@ -71,7 +106,7 @@ const allowedOrigins = [
   "https://www.netopsys.in",
 ];
 
-// Allow local frontend development
+// Allow local Vite development
 if (!isProduction) {
   allowedOrigins.push(
     "http://localhost:5173",
@@ -79,15 +114,30 @@ if (!isProduction) {
   );
 }
 
+// Additional trusted origins can be configured
+// using CORS_ALLOWED_ORIGINS in the environment.
+const additionalOrigins = (
+  process.env.CORS_ALLOWED_ORIGINS || ""
+)
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+allowedOrigins.push(...additionalOrigins);
+
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests without browser Origin headers
-      if (!origin || allowedOrigins.includes(origin)) {
+      // Allow server-to-server and non-browser requests
+      if (!origin) {
         return callback(null, true);
       }
 
-      // Do not grant CORS access to unknown origins
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      // Reject untrusted browser origins
       return callback(null, false);
     },
 
@@ -127,9 +177,10 @@ app.use(
 );
 
 // ==========================================
-// UPLOADED FILES
+// STATIC UPLOADS
 // ==========================================
 
+// Preserve existing public uploaded-file URLs
 app.use(
   "/uploads",
   express.static(uploadsDir)
@@ -240,35 +291,17 @@ app.use(
 // PUBLIC / GENERAL API ROUTES
 // ==========================================
 
-app.use(
-  "/api/users",
-  userRoutes
-);
+app.use("/api/users", userRoutes);
 
-app.use(
-  "/api/jobs",
-  jobRoutes
-);
+app.use("/api/jobs", jobRoutes);
 
-app.use(
-  "/api/projects",
-  projectRoutes
-);
+app.use("/api/projects", projectRoutes);
 
-app.use(
-  "/api/teams",
-  teamRoutes
-);
+app.use("/api/teams", teamRoutes);
 
-app.use(
-  "/api/blogs",
-  blogRoutes
-);
+app.use("/api/blogs", blogRoutes);
 
-app.use(
-  "/api/subscribers",
-  subscriberRoutes
-);
+app.use("/api/subscribers", subscriberRoutes);
 
 app.use(
   "/api/upload",
@@ -291,6 +324,7 @@ app.use(
 // API 404 HANDLER
 // ==========================================
 
+// Unknown API routes must never return React index.html
 app.use("/api", (req, res) => {
   return res.status(404).json({
     success: false,
@@ -299,22 +333,40 @@ app.use("/api", (req, res) => {
 });
 
 // ==========================================
-// PRODUCTION FRONTEND CONFIGURATION
+// LOCAL DEVELOPMENT ROOT
 // ==========================================
 
-// Only serve the React production build in production.
-// During local development, Vite runs separately on port 5173.
+// In development, Vite serves the frontend separately.
+// This root route is only for checking the local backend.
+
+if (!isProduction) {
+  app.get("/", (req, res) => {
+    return res.status(200).json({
+      name: "Netopsys Backend Server",
+      status: "running",
+      environment: "development",
+      frontend: "http://localhost:5173",
+      health: "/api/health",
+    });
+  });
+}
+
+// ==========================================
+// PRODUCTION FRONTEND SERVING
+// ==========================================
+
+// In production, Express serves the Vite build.
+// In development, Vite handles all frontend requests.
 
 if (isProduction) {
 
-  if (fs.existsSync(clientIndexPath)) {
+  const frontendBuildExists = fs.existsSync(
+    clientIndexPath
+  );
 
-    console.log(
-      "Frontend production build detected:",
-      clientDistPath
-    );
+  if (frontendBuildExists) {
 
-    // Serve Vite production assets
+    // Serve production frontend assets
     app.use(
       express.static(clientDistPath, {
         index: false,
@@ -322,22 +374,36 @@ if (isProduction) {
     );
 
     // React Router fallback
+    // Supports direct access and page refreshes
     app.get("*", (req, res, next) => {
 
-      // Do not route uploads or file requests to React
       if (
         req.path === "/uploads" ||
-        req.path.startsWith("/uploads/") ||
-        path.extname(req.path)
+        req.path.startsWith("/uploads/")
       ) {
         return next();
       }
 
-      res.sendFile(
+      // Do not return index.html for missing files
+      // such as JS, CSS, images and other assets.
+      if (path.extname(req.path)) {
+        return next();
+      }
+
+      return res.sendFile(
         clientIndexPath,
         (error) => {
           if (error) {
-            return next(error);
+            console.error(
+              "Frontend delivery error:",
+              error
+            );
+
+            if (!res.headersSent) {
+              return res.status(500).send(
+                "Unable to load the frontend application."
+              );
+            }
           }
         }
       );
@@ -345,12 +411,8 @@ if (isProduction) {
 
   } else {
 
-    console.error(
-      "ERROR: Frontend production build not found:",
-      clientDistPath
-    );
-
-    // Prevent silently serving a broken production homepage
+    // Keep backend APIs available even if frontend
+    // production build is temporarily unavailable.
     app.get("*", (req, res, next) => {
 
       if (
@@ -362,7 +424,7 @@ if (isProduction) {
       }
 
       return res.status(503).send(
-        "Frontend production build is unavailable."
+        "Frontend production build is unavailable. Please deploy the latest frontend build."
       );
     });
   }
@@ -373,12 +435,10 @@ if (isProduction) {
 // ==========================================
 
 app.use((req, res) => {
-
   return res.status(404).json({
     success: false,
     message: `Cannot ${req.method} ${req.url}`,
   });
-
 });
 
 // ==========================================
@@ -404,7 +464,6 @@ app.use((err, req, res, next) => {
       ? undefined
       : err.message,
   });
-
 });
 
 // ==========================================
@@ -416,12 +475,10 @@ const server = app.listen(PORT, () => {
   console.log("==========================================");
 
   console.log(
-    "Netopsys Application Started Successfully"
+    "NETOPSYS APPLICATION STARTED SUCCESSFULLY"
   );
 
-  console.log(
-    `Port: ${PORT}`
-  );
+  console.log(`Port: ${PORT}`);
 
   console.log(
     `Environment: ${process.env.NODE_ENV || "development"}`
@@ -431,15 +488,9 @@ const server = app.listen(PORT, () => {
     `Backend: ${__dirname}`
   );
 
-  if (isProduction) {
-    console.log(
-      `Frontend: ${clientDistPath}`
-    );
-  } else {
-    console.log(
-      "Frontend: Running separately through Vite"
-    );
-  }
+  console.log(
+    `Frontend Mode: ${isProduction ? "Production Build" : "Vite Development Server"}`
+  );
 
   console.log(
     "API Health: /api/health"

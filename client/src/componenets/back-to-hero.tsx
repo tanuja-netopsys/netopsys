@@ -6,25 +6,37 @@ export default function BackToHeroButton() {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => {
-      const aboutSection = document.getElementById("about");
-      if (aboutSection) {
-        const rect = aboutSection.getBoundingClientRect();
-        // Becomes visible once the user scrolls into the About section
-        if (rect.top <= window.innerHeight * 0.7) {
-          setIsVisible(true);
+    const heroTarget = document.getElementById("home") || document.getElementById("hero");
+    let sentinel: HTMLDivElement | null = null;
+    let targetEl: Element | null = heroTarget;
+
+    if (!targetEl) {
+      sentinel = document.createElement("div");
+      sentinel.setAttribute("aria-hidden", "true");
+      sentinel.style.cssText =
+        "position:absolute;top:0;left:0;width:1px;height:400px;pointer-events:none;opacity:0;";
+      document.body.appendChild(sentinel);
+      targetEl = sentinel;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (heroTarget) {
+          setIsVisible(entry.intersectionRatio < 0.35);
         } else {
-          setIsVisible(false);
+          setIsVisible(!entry.isIntersecting);
         }
-      } else {
-        // Fallback for pages without an #about element
-        setIsVisible(window.scrollY > 400);
+      },
+      { threshold: heroTarget ? [0, 0.35] : [0] }
+    );
+
+    observer.observe(targetEl);
+    return () => {
+      observer.disconnect();
+      if (sentinel && sentinel.parentNode) {
+        sentinel.parentNode.removeChild(sentinel);
       }
     };
-
-    handleScroll();
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const scrollToHero = () => {

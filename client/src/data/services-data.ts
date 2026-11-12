@@ -1,12 +1,21 @@
-import service01Img from "../assets/services/service-01.jpg";
-import service02Img from "../assets/services/service-02.jpg";
-import service03Img from "../assets/services/service-03.jpg";
-import service04Img from "../assets/services/service-04.jpg";
-import service05Img from "../assets/services/service-05.jpg";
-import service06Img from "../assets/services/service-06.jpg";
-import service07Img from "../assets/services/service-07.jpg";
-import service08Img from "../assets/services/service-08.jpg";
-import service09Img from "../assets/services/service-09.jpg";
+import service01Img from "../assets/services/service-01.webp";
+import service01SmImg from "../assets/services/service-01-sm.webp";
+import service02Img from "../assets/services/service-02.webp";
+import service02SmImg from "../assets/services/service-02-sm.webp";
+import service03Img from "../assets/services/service-03.webp";
+import service03SmImg from "../assets/services/service-03-sm.webp";
+import service04Img from "../assets/services/service-04.webp";
+import service04SmImg from "../assets/services/service-04-sm.webp";
+import service05Img from "../assets/services/service-05.webp";
+import service05SmImg from "../assets/services/service-05-sm.webp";
+import service06Img from "../assets/services/service-06.webp";
+import service06SmImg from "../assets/services/service-06-sm.webp";
+import service07Img from "../assets/services/service-07.webp";
+import service07SmImg from "../assets/services/service-07-sm.webp";
+import service08Img from "../assets/services/service-08.webp";
+import service08SmImg from "../assets/services/service-08-sm.webp";
+import service09Img from "../assets/services/service-09.webp";
+import service09SmImg from "../assets/services/service-09-sm.webp";
 
 export interface ServiceOfferItem {
   number: string;
@@ -50,6 +59,7 @@ export interface ServiceDetailItem {
   description: string;
   tags: string[];
   image: string;
+  imageSrcSet?: string;
   whatWeOfferSubtitle: string;
   whatWeOffer: ServiceOfferItem[];
   whyChooseUsSubtitle: string;
@@ -67,6 +77,7 @@ export const SERVICES_DATA: ServiceDetailItem[] = [
       "Tailored AI-powered software solutions built from the ground up to meet your unique business requirements and objectives.",
     tags: ["Custom AI Applications", "Enterprise Software", "API Development"],
     image: service01Img,
+    imageSrcSet: `${service01SmImg} 600w, ${service01Img} 1200w`,
     whatWeOfferSubtitle:
       "Comprehensive Custom Software Development services tailored to modern enterprise requirements.",
     whatWeOffer: [
@@ -102,6 +113,7 @@ export const SERVICES_DATA: ServiceDetailItem[] = [
       "Modern, responsive web applications with integrated AI capabilities for enhanced user experiences and business intelligence.",
     tags: ["Progressive Web Apps", "Real-time Dashboards", "AI-Powered Features"],
     image: service03Img,
+    imageSrcSet: `${service03SmImg} 600w, ${service03Img} 1200w`,
     whatWeOfferSubtitle:
       "Comprehensive Web & Mobile Applications services tailored to modern enterprise requirements.",
     whatWeOffer: [
@@ -137,6 +149,7 @@ export const SERVICES_DATA: ServiceDetailItem[] = [
       "Professional, high-performance websites with AI-driven personalization, analytics, and optimization features.",
     tags: ["AI Content Optimization", "Smart Analytics", "Personalized UX"],
     image: service02Img,
+    imageSrcSet: `${service02SmImg} 600w, ${service02Img} 1200w`,
     whatWeOfferSubtitle:
       "Comprehensive Websites development services tailored to modern enterprise requirements.",
     whatWeOffer: [
@@ -172,6 +185,7 @@ export const SERVICES_DATA: ServiceDetailItem[] = [
       "Comprehensive network infrastructure solutions designed to optimize connectivity, security, and performance for modern businesses.",
     tags: ["Network Architecture", "Infrastructure Design", "Performance Optimization"],
     image: service04Img,
+    imageSrcSet: `${service04SmImg} 600w, ${service04Img} 1200w`,
     whatWeOfferSubtitle:
       "Comprehensive Enterprise Networking services tailored to modern enterprise requirements.",
     whatWeOffer: [
@@ -207,6 +221,7 @@ export const SERVICES_DATA: ServiceDetailItem[] = [
       "Advanced cybersecurity solutions to protect your digital assets, data, and infrastructure from evolving threats.",
     tags: ["Threat Detection", "Security Audits", "Compliance Management"],
     image: service05Img,
+    imageSrcSet: `${service05SmImg} 600w, ${service05Img} 1200w`,
     whatWeOfferSubtitle:
       "Comprehensive Cybersecurity services tailored to modern enterprise requirements.",
     whatWeOffer: [
@@ -242,6 +257,7 @@ export const SERVICES_DATA: ServiceDetailItem[] = [
       "Scalable cloud infrastructure and migration services to modernize your business operations and reduce costs.",
     tags: ["Cloud Migration", "Infrastructure as Code", "Auto-scaling Solutions"],
     image: service06Img,
+    imageSrcSet: `${service06SmImg} 600w, ${service06Img} 1200w`,
     whatWeOfferSubtitle:
       "Comprehensive Cloud Solutions services tailored to modern enterprise requirements.",
     whatWeOffer: [
@@ -277,6 +293,7 @@ export const SERVICES_DATA: ServiceDetailItem[] = [
       "Modern Voice over Internet Protocol systems for seamless communication and collaboration across your organization.",
     tags: ["VoIP Implementation", "Call Center Solutions", "Unified Communications"],
     image: service07Img,
+    imageSrcSet: `${service07SmImg} 600w, ${service07Img} 1200w`,
     whatWeOfferSubtitle:
       "Comprehensive VoIP Solutions services tailored to modern enterprise requirements.",
     whatWeOffer: [
@@ -312,6 +329,7 @@ export const SERVICES_DATA: ServiceDetailItem[] = [
       "Reliable data backup and disaster recovery solutions to ensure business continuity and data protection.",
     tags: ["Automated Backups", "Disaster Recovery", "Data Retention Policies"],
     image: service08Img,
+    imageSrcSet: `${service08SmImg} 600w, ${service08Img} 1200w`,
     whatWeOfferSubtitle:
       "Comprehensive Backup & Recovery services tailored to modern enterprise requirements.",
     whatWeOffer: [
@@ -347,6 +365,7 @@ export const SERVICES_DATA: ServiceDetailItem[] = [
       "Comprehensive IT support and maintenance services to keep your systems running smoothly and efficiently.",
     tags: ["24/7 Support", "System Maintenance", "Technical Consulting"],
     image: service09Img,
+    imageSrcSet: `${service09SmImg} 600w, ${service09Img} 1200w`,
     whatWeOfferSubtitle:
       "Comprehensive IT Support services tailored to modern enterprise requirements.",
     whatWeOffer: [

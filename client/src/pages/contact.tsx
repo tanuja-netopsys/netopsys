@@ -16,7 +16,8 @@ import { preloadRecaptcha, executeRecaptcha } from "../utils/recaptcha.ts";
 import Navbar from "../componenets/navbar.tsx";
 import Footer from "../componenets/footer.tsx";
 import BackToHeroButton from "../componenets/back-to-hero.tsx";
-import { MailboxDeliveryAnimation, SERVICES_LIST } from "../sections/contact.tsx";
+import { MailboxDeliveryAnimation } from "../sections/contact.tsx";
+import { SERVICES_LIST } from "../data/services-list.ts";
 
 // ============================================================================
 // 1. OFFICE ADDRESS CONFIG (VISAKHAPATNAM)
@@ -56,10 +57,10 @@ export default function ContactPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Preload Google reCAPTCHA v3 script silently on mount
-  useEffect(() => {
+  // Load Google reCAPTCHA v3 lazily when the user starts interacting with the form
+  const handleFormInteraction = () => {
     preloadRecaptcha();
-  }, []);
+  };
 
   // Close dropdown on click outside
   useEffect(() => {
@@ -229,10 +230,6 @@ export default function ContactPage() {
                       Location &amp; Address
                     </span>
                   </div>
-                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full bg-[#F4EEF9] text-[#5B2A82] shrink-0">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#693092]" />
-                    Operational
-                  </span>
                 </div>
 
                 {/* Address Lines (Left) + Email & Phone Cards (Right) */}
@@ -305,6 +302,8 @@ export default function ContactPage() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, scale: 0.95 }}
                       transition={{ duration: 0.25 }}
+                      onFocusCapture={handleFormInteraction}
+                      onPointerDown={handleFormInteraction}
                       onSubmit={handleSubmit}
                       className="contact-page-form flex-1 flex flex-col justify-between gap-4"
                     >

@@ -5,6 +5,7 @@ import { ChevronRight, Search, TrendingUp } from "lucide-react";
 import Navbar from "../componenets/navbar.tsx";
 import Footer from "../componenets/footer.tsx";
 import BackToHeroButton from "../componenets/back-to-hero.tsx";
+import { OptimizedPicture } from "../utils/optimized-image.tsx";
 
 const LOCATIONS = ["Singapore", "India", "United States"];
 
@@ -635,9 +636,14 @@ export default function AboutPage() {
                   className="lg:col-span-6 w-full"
                 >
                   <div className="about-page-timeline-img-wrap relative w-full aspect-[4/3] max-h-[380px] rounded-2xl sm:rounded-3xl overflow-hidden border border-[#693092]/15 shadow-md group bg-[#EBDFF1]">
-                    <img
+                    <OptimizedPicture
                       src="/about/about-mission.jpg"
                       alt="Netopsys Technology Strategy and Architecture Workshop"
+                      width={800}
+                      height={600}
+                      sizes="(max-width: 1024px) 100vw, 50vw"
+                      loading="lazy"
+                      decoding="async"
                       className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                     />
                     <div className="absolute inset-0 ring-1 ring-inset ring-black/5 rounded-2xl sm:rounded-3xl pointer-events-none" />
@@ -728,9 +734,14 @@ export default function AboutPage() {
                   className="lg:col-span-6 w-full order-1 lg:order-2"
                 >
                   <div className="about-page-timeline-img-wrap relative w-full aspect-[4/3] max-h-[380px] rounded-2xl sm:rounded-3xl overflow-hidden border border-[#693092]/15 shadow-md group bg-[#EBDFF1]">
-                    <img
+                    <OptimizedPicture
                       src="/about/about-global.jpg"
                       alt="Netopsys Global International Headquarters at Twilight"
+                      width={800}
+                      height={600}
+                      sizes="(max-width: 1024px) 100vw, 50vw"
+                      loading="lazy"
+                      decoding="async"
                       className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                     />
                     <div className="absolute inset-0 ring-1 ring-inset ring-black/5 rounded-2xl sm:rounded-3xl pointer-events-none" />

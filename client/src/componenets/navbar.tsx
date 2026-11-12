@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, lazy, Suspense } from "react";
 import {
   Menu,
   X,
@@ -9,8 +9,9 @@ import {
   CheckCircle,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
-import netopsysLogo from "../assets/netopsys-logo.png";
-import LoginPage from "../pages/login.tsx";
+import netopsysLogo from "../assets/netopsys-logo.webp";
+
+const LoginPage = lazy(() => import("../pages/login.tsx"));
 
 export interface NavbarProps {
   activeTab?: string;
@@ -83,8 +84,11 @@ export default function Navbar({
 
   // Close mobile drawer automatically on route changes
   useEffect(() => {
-    setIsMobileMenuOpen(false);
-    setIsDropdownOpen(false);
+    const rafId = requestAnimationFrame(() => {
+      setIsMobileMenuOpen(false);
+      setIsDropdownOpen(false);
+    });
+    return () => cancelAnimationFrame(rafId);
   }, [location.pathname, location.hash]);
 
   // Close mobile drawer / user dropdown on Escape key or outside tap/click
@@ -271,7 +275,10 @@ export default function Navbar({
             <img
               src={netopsysLogo}
               alt="Netopsys Logo"
-              className="nav-logo-img h-5 sm:h-5.5 md:h-5.5 lg:h-6 xl:h-6 w-auto object-contain transition-all duration-200 group-hover:opacity-90"
+              width={180}
+              height={32}
+              decoding="async"
+              className="nav-logo-img h-5 sm:h-5.5 md:h-5.5 lg:h-6 xl:h-6 w-auto object-contain transition-opacity duration-200 group-hover:opacity-90"
             />
           </a>
 
@@ -494,14 +501,16 @@ export default function Navbar({
           LOGIN & CREATE ACCOUNT MODAL FOR CANDIDATES (FROM login.tsx)
       ===================================================================== */}
       {isLoginModalOpen && (
-        <LoginPage
-          key={isLoginModalOpen ? "modal-open" : "modal-closed"}
-          isOpen={isLoginModalOpen}
-          onClose={() => setIsLoginModalOpen(false)}
-          onLoginSuccess={(user) => {
-            handleLogin(user);
-          }}
-        />
+        <Suspense fallback={null}>
+          <LoginPage
+            key={isLoginModalOpen ? "modal-open" : "modal-closed"}
+            isOpen={isLoginModalOpen}
+            onClose={() => setIsLoginModalOpen(false)}
+            onLoginSuccess={(user) => {
+              handleLogin(user);
+            }}
+          />
+        </Suspense>
       )}
 
       {/* =====================================================================

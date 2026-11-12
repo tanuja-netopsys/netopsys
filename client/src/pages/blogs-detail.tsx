@@ -221,14 +221,11 @@ function parseUniversalBlogData(blog: BlogPostDetail | null): ParsedBlogData {
   }
 
   // 1. Raw text extraction
-  let raw = "";
-  if (Array.isArray(blog.content)) {
-    raw = blog.content.join("\n\n");
-  } else if (typeof blog.content === "string") {
-    raw = blog.content;
-  } else {
-    raw = "";
-  }
+  const raw = Array.isArray(blog.content)
+    ? blog.content.join("\n\n")
+    : typeof blog.content === "string"
+    ? blog.content
+    : "";
 
   // 2. Metadata extraction
   let category = blog.category?.trim() || "";

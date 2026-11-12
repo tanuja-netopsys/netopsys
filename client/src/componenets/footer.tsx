@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Send, Mail, Loader2, Check } from "lucide-react";
-import netopsysLogo from "../assets/netopsys-logo.png";
+import netopsysLogo from "../assets/netopsys-logo.webp";
 import { toast } from "./toast.tsx";
 import { openCookiePreferences } from "../utils/cookie-consent.ts";
 
@@ -52,8 +52,10 @@ export default function Footer() {
         setIsRocketLaunching(false);
         setIsSubscribedSuccess(false);
       }, 2600);
-    } catch (err: any) {
-      toast.error(err.message || "Failed to subscribe. Please try again later.", {
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : "Failed to subscribe. Please try again later.";
+      toast.error(message, {
         title: "Subscription Error",
       });
       setIsRocketLaunching(false);
@@ -138,6 +140,10 @@ export default function Footer() {
                 <img
                   src={netopsysLogo}
                   alt="Netopsys Logo"
+                  width={180}
+                  height={32}
+                  loading="lazy"
+                  decoding="async"
                   className="h-7 sm:h-8 w-auto object-contain transition-opacity duration-200 group-hover:opacity-90"
                 />
               </a>
@@ -192,7 +198,7 @@ export default function Footer() {
 
                 {/* Email (Beside LinkedIn) */}
                 <a
-                  href="mailto:helpdesk@netopsys.net"
+                  href="mailto:connectme@netopsys.in"
                   aria-label="Email Netopsys"
                   className="w-8 h-8 rounded-full border border-white/15 hover:border-white/40 bg-white/[0.02] hover:bg-white/[0.08] text-[#9CA3AF] hover:text-white flex items-center justify-center transition-all duration-200 cursor-pointer pointer-events-auto"
                 >
@@ -471,9 +477,14 @@ export default function Footer() {
         <div className="text-center text-[#7E7A8D] text-xs sm:text-[13px] leading-relaxed pb-8 sm:pb-10 relative">
           <p>
             © 2026 Netopsys Pte. Ltd. (Singapore) &amp; Netopsys AI Pvt. Ltd. (India). All rights reserved. Powered by{" "}
-            <span className="text-[#38BDF8] hover:underline cursor-pointer">
+            <a
+              href="https://myrsv.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[#38BDF8] hover:underline cursor-pointer"
+            >
               RSV Infotech Pte. Ltd.
-            </span>
+            </a>
           </p>
           <p className="mt-1 text-[#666173] text-[11.5px] sm:text-[12.5px]">
             All company names, product names, and logos are trademarks of their respective owners.

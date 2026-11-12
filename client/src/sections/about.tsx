@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { motion, useScroll, useTransform, useSpring, useInView } from "framer-motion";
+import { motion, useScroll, useTransform, useInView } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 
 // Animated counter component: counts up from 1 to target value when scrolled into view
@@ -96,29 +96,41 @@ const STATS = [
   },
 ];
 
+function DesktopAboutParallaxWrap({ children }: { children: React.ReactNode }) {
+  const { scrollY } = useScroll();
+  const contentY = useTransform(scrollY, [300, 900], [28, 0]);
+  const contentOpacity = useTransform(scrollY, [300, 780], [0.85, 1]);
+
+  return (
+    <motion.div
+      style={{ y: contentY, opacity: contentOpacity }}
+      className="about-content-wrap relative w-full max-w-[2100px] mx-auto px-4 sm:px-6 md:px-8 lg:px-10 xl:px-14 2xl:px-20 flex-1 flex items-center justify-center my-auto py-8 sm:py-10 lg:py-12"
+    >
+      {children}
+    </motion.div>
+  );
+}
+
 export default function About() {
   const containerRef = useRef<HTMLElement>(null);
+  const [isDesktop, setIsDesktop] = useState(
+    typeof window !== "undefined" ? window.innerWidth >= 1024 : true
+  );
 
-  // Parallax scroll progression for smooth entrance from hero section
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start end", "end start"],
-  });
-
-  const smoothScrollProgress = useSpring(scrollYProgress, {
-    stiffness: 130,
-    damping: 26,
-    restDelta: 0.001,
-  });
-
-  const contentY = useTransform(smoothScrollProgress, [0.02, 0.25], [36, 0]);
-  const contentOpacity = useTransform(smoothScrollProgress, [0.02, 0.20], [0.35, 1]);
+  useEffect(() => {
+    const checkViewport = () => {
+      setIsDesktop(window.innerWidth >= 1024);
+    };
+    checkViewport();
+    window.addEventListener("resize", checkViewport);
+    return () => window.removeEventListener("resize", checkViewport);
+  }, []);
 
   return (
     <section
       ref={containerRef}
       id="about"
-      className="about-section-wrap relative w-full min-h-[100dvh] flex flex-col justify-between bg-[#08050E] text-white overflow-x-clip z-20 -mt-2 sm:-mt-6 lg:mt-0 rounded-t-[2rem] xs:rounded-t-[2.5rem] sm:rounded-t-[3.5rem] lg:rounded-t-none border-t border-white/[0.12] lg:border-t-0 scroll-mt-0"
+      className="about-section-wrap relative w-full min-h-0 lg:min-h-[100dvh] flex flex-col justify-between bg-[#08050E] text-white overflow-x-clip z-20 mt-0 rounded-t-[1.75rem] xs:rounded-t-[2.25rem] sm:rounded-t-[3rem] lg:rounded-t-none border-t border-white/[0.12] lg:border-t-0 scroll-mt-[84px] lg:scroll-mt-0"
       style={{ fontFamily: "'Onest', sans-serif" }}
     >
       {/* ==================================================================== */}
@@ -184,13 +196,11 @@ export default function About() {
       {/* ==================================================================== */}
       {/* 2. MAIN ABOUT SECTION CONTENT                                        */}
       {/* ==================================================================== */}
-      <motion.div
-        style={{ y: contentY, opacity: contentOpacity }}
-        className="about-content-wrap relative w-full max-w-[2100px] mx-auto px-4 sm:px-6 md:px-8 lg:px-10 xl:px-14 2xl:px-20 flex-1 flex items-center justify-center my-auto py-8 sm:py-10 lg:py-12"
-      >
-        <div className="about-grid-container grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-10 lg:gap-10 xl:gap-14 2xl:gap-16 items-center w-full">
+      {(() => {
+        const innerContent = (
+          <div className="about-grid-container grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-10 lg:gap-10 xl:gap-14 2xl:gap-16 items-center w-full">
           {/* Left Column: Heading + Narrative Content + Action Button */}
-          <div className="lg:col-span-7 xl:col-span-7 2xl:col-span-7 flex flex-col items-start text-left w-full">
+          <div className="min-w-0 lg:col-span-7 xl:col-span-7 2xl:col-span-7 flex flex-col items-start text-left w-full">
             {/* Top Badge: About us -> */}
             <div className="about-badge-wrap mb-3.5 sm:mb-4 lg:mb-5">
               <div className="about-badge-text inline-flex items-center gap-2 sm:gap-2.5 px-3.5 sm:px-4 py-1 sm:py-1.5 rounded-full bg-white/[0.08] border border-white/20 text-[11px] sm:text-xs md:text-[13px] text-white/90 font-medium shadow-sm select-none">
@@ -225,10 +235,10 @@ export default function About() {
             </p>
 
             {/* Know More Button */}
-            <div className="w-full xs:w-auto">
+            <div className="w-auto">
               <Link
                 to="/about"
-                className="about-btn hover-brand-gradient rounded-full bg-[#FBAE42] text-[#141010] text-xs sm:text-sm lg:text-[15px] xl:text-base font-semibold px-6 sm:px-8 xl:px-9 py-2.5 sm:py-3 lg:py-3.5 xl:py-4 shadow-[0_0_25px_rgba(251,174,66,0.25)] cursor-pointer inline-flex items-center justify-center text-center w-full xs:w-auto transition-all duration-200 active:scale-95"
+                className="about-btn hover-brand-gradient rounded-full bg-[#FBAE42] text-[#141010] text-xs sm:text-sm lg:text-[15px] xl:text-base font-semibold px-7 sm:px-8 xl:px-9 py-2.5 sm:py-3 lg:py-3.5 xl:py-4 shadow-[0_0_25px_rgba(251,174,66,0.25)] cursor-pointer inline-flex items-center justify-center text-center w-auto transition-all duration-200 active:scale-95"
                 style={{ fontFamily: "'Onest', sans-serif" }}
               >
                 Know More
@@ -236,8 +246,8 @@ export default function About() {
             </div>
           </div>
 
-          {/* Right Column: Stat Cards (Strictly vertical one after another across all screen scales) */}
-          <div className="about-cards-wrap lg:col-span-5 xl:col-span-5 2xl:col-span-5 grid grid-cols-1 gap-2.5 sm:gap-3 lg:gap-3 xl:gap-3.5 w-full">
+          {/* Right Column: Stat Cards (2x2 compact grid on mobile/tablet, single column stack on desktop) */}
+          <div className="min-w-0 about-cards-wrap lg:col-span-5 xl:col-span-5 2xl:col-span-5 grid grid-cols-1 gap-2.5 sm:gap-3 lg:gap-3 xl:gap-3.5 w-full">
             {STATS.map((stat, idx) => (
               <div
                 key={idx}
@@ -264,7 +274,16 @@ export default function About() {
             ))}
           </div>
         </div>
-      </motion.div>
+        );
+
+        return isDesktop ? (
+          <DesktopAboutParallaxWrap>{innerContent}</DesktopAboutParallaxWrap>
+        ) : (
+          <div className="about-content-wrap relative w-full max-w-[2100px] mx-auto px-4 sm:px-6 md:px-8 lg:px-10 xl:px-14 2xl:px-20 flex-1 flex items-center justify-center my-auto py-8 sm:py-10 lg:py-12">
+            {innerContent}
+          </div>
+        );
+      })()}
     </section>
   );
 }

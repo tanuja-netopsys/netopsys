@@ -23,6 +23,11 @@ export default function SmoothScrollController() {
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (prefersReducedMotion) return;
 
+    const isMobileOrTouch =
+      typeof window !== "undefined" &&
+      (window.innerWidth <= 768 || window.matchMedia("(pointer: coarse)").matches);
+    if (isMobileOrTouch) return;
+
     let currentY = window.scrollY;
     let targetY = window.scrollY;
     let lastAppliedY = window.scrollY;

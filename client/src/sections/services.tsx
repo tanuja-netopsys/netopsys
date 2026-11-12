@@ -9,6 +9,7 @@ export default function Services() {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [descentProgress, setDescentProgress] = useState(0);
   const [isServicesSeen, setIsServicesSeen] = useState(false);
+  const [mobileActiveIndex, setMobileActiveIndex] = useState(0);
   const [windowWidth, setWindowWidth] = useState(
     typeof window !== "undefined" ? window.innerWidth : 1200
   );
@@ -16,6 +17,7 @@ export default function Services() {
     typeof window !== "undefined" ? window.innerHeight : 900
   );
   const touchStartX = useRef<number | null>(null);
+  const isSmallScreen = windowWidth <= 768;
 
   // Track window resize for responsive 3D ring dimensions
   useEffect(() => {
@@ -27,8 +29,9 @@ export default function Services() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Compute & smoothly interpolate scroll progress through Part 2 (cards track) and entrance descent
+  // Compute & smoothly interpolate scroll progress through Part 2 (cards track) and entrance descent (desktop only)
   useEffect(() => {
+    if (isSmallScreen) return;
     let targetDescent = 0;
     let targetScroll = 0;
     let smoothDescent = 0;
@@ -104,7 +107,7 @@ export default function Services() {
       if (rafId !== null) cancelAnimationFrame(rafId);
       window.removeEventListener("scroll", handleScroll);
     };
-  }, []);
+  }, [isSmallScreen]);
 
   // Exact 3D physics, ambient rotation & pointer drag tracking (identical to Hero section cube)
   const servicesCubeRigRef = useRef<HTMLDivElement>(null);
@@ -153,8 +156,9 @@ export default function Services() {
     targetCubeRotX.current -= dy * sens;
   };
 
-  // Continuous ambient physics rotation + inertia lerp + scroll-induced roll
+  // Continuous ambient physics rotation + inertia lerp + scroll-induced roll (desktop only)
   useEffect(() => {
+    if (isSmallScreen) return;
     let lastTime = performance.now();
     let animId: number;
 
@@ -186,10 +190,11 @@ export default function Services() {
 
     animId = requestAnimationFrame(updatePhysics);
     return () => cancelAnimationFrame(animId);
-  }, []);
+  }, [isSmallScreen]);
 
-  // Global window mouse & touch handlers for unrestricted omnidirectional dragging
+  // Global window mouse & touch handlers for unrestricted omnidirectional dragging (desktop only)
   useEffect(() => {
+    if (isSmallScreen) return;
     const onWindowMouseMove = (e: globalThis.MouseEvent) => {
       if (!isCubeDraggingRef.current) return;
       handleCubePointerMovement(e.clientX, e.clientY, true);
@@ -228,7 +233,7 @@ export default function Services() {
       window.removeEventListener("touchmove", onWindowTouchMove);
       window.removeEventListener("touchend", onWindowTouchEnd);
     };
-  }, []);
+  }, [isSmallScreen]);
 
   // Pointer Down (mouse or touch) to initiate drag
   const handleCubePointerDown = (clientX: number, clientY: number) => {
@@ -252,6 +257,7 @@ export default function Services() {
   const [autoBlastProgress, setAutoBlastProgress] = useState(0);
 
   useEffect(() => {
+    if (isSmallScreen) return;
     if (descentProgress >= 0.96 && !hasBlasted) {
       const id = requestAnimationFrame(() => setHasBlasted(true));
       return () => cancelAnimationFrame(id);
@@ -263,11 +269,11 @@ export default function Services() {
       });
       return () => cancelAnimationFrame(id);
     }
-  }, [descentProgress, hasBlasted]);
+  }, [descentProgress, hasBlasted, isSmallScreen]);
 
   // Animate autoBlastProgress smoothly from 0 to 1 when hasBlasted becomes true (Slow, smooth, clear cinematic transition)
   useEffect(() => {
-    if (!hasBlasted) {
+    if (isSmallScreen || !hasBlasted) {
       return;
     }
 
@@ -292,7 +298,7 @@ export default function Services() {
 
     animId = requestAnimationFrame(animateBlast);
     return () => cancelAnimationFrame(animId);
-  }, [hasBlasted]);
+  }, [hasBlasted, isSmallScreen]);
 
   // Effective blast progress: maximum of auto-blast animation and scroll advance
   const scrollBlast = Math.min(
@@ -362,18 +368,18 @@ export default function Services() {
   let startX: number;
 
   if (isMobile) {
-    // Mobile (< 640px): balanced radius and card proportions to prevent overlapping and clipping
-    radius = 420;
-    const targetMobileH = Math.round(windowHeight * (windowHeight < 620 ? 0.40 : 0.45));
-    cardHeight = Math.min(370, Math.max(230, targetMobileH));
-    cardWidth = Math.min(310, Math.max(230, Math.round(windowWidth * 0.84)));
+    // Mobile (< 640px): balanced radius and card proportions so content never clips inside the card
+    radius = 400;
+    const targetMobileH = Math.round(windowHeight * (windowHeight < 640 ? 0.49 : 0.47));
+    cardHeight = Math.min(370, Math.max(272, targetMobileH));
+    cardWidth = Math.min(320, Math.max(248, Math.round(windowWidth * 0.85)));
     perspective = 950;
-    cubeSize = Math.min(180, Math.max(130, Math.round(cardHeight * 0.44)));
-    startX = 100;
+    cubeSize = Math.min(180, Math.max(126, Math.round(cardHeight * 0.42)));
+    startX = 95;
   } else if (isTablet) {
     radius = 480;
-    const targetTabletH = Math.round(windowHeight * (windowHeight < 620 ? 0.40 : 0.46));
-    cardHeight = Math.min(410, Math.max(235, targetTabletH));
+    const targetTabletH = Math.round(windowHeight * (windowHeight < 620 ? 0.44 : 0.46));
+    cardHeight = Math.min(410, Math.max(280, targetTabletH));
     cardWidth = Math.round(cardHeight * 0.78);
     perspective = 1100;
     cubeSize = Math.round(cardHeight * 0.50);
@@ -424,25 +430,249 @@ export default function Services() {
   // Cube visibility: visible as soon as Services is seen (Image 1), 100% solid (no fading in bit by bit)
   const cubeVisible = isServicesSeen && blastProgress < 1;
 
+  // Mobile (<= 768px) swipe & circular ring navigation (zero pinned scrolling)
+  const mobileTouchStartX = useRef<number | null>(null);
+  const handleMobileTouchStart = (e: React.TouchEvent) => {
+    mobileTouchStartX.current = e.touches[0].clientX;
+  };
+  const handleMobileTouchEnd = (e: React.TouchEvent) => {
+    if (mobileTouchStartX.current === null) return;
+    const diff = mobileTouchStartX.current - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 35) {
+      setMobileActiveIndex((prev) =>
+        diff > 0
+          ? (prev + 1) % SERVICES.length
+          : (prev - 1 + SERVICES.length) % SERVICES.length
+      );
+    }
+    mobileTouchStartX.current = null;
+  };
+
+  const mobileCardW = Math.min(268, Math.max(222, Math.round(windowWidth * 0.63)));
+  const mobileCardSpread = Math.round(mobileCardW * 0.84);
+
   return (
     <section
       id="services"
-      className="relative w-full bg-[#F5EEF8] text-[#141010] select-none z-20"
+      className="relative w-full bg-[#F5EEF8] text-[#141010] select-none z-20 overflow-x-clip"
       style={{ fontFamily: "'Onest', sans-serif" }}
     >
-      {/* =========================================================================
-          PART 1 & PART 2: Pinned scroll track
-          Phase 1: Cube descends down from top (below About) into middle of Services
-          Phase 2: In the middle, cube automatically blasts in 3D and services ring emerges
-          Phase 3: Scrolling down rotates through all 9 services in the Cover Ring
-      ========================================================================= */}
-      <div
-        ref={cardsTrackRef}
-        className="relative w-full"
-        style={{ height: "450vh" }}
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-      >
+      {isSmallScreen ? (
+        /* =====================================================================
+           MOBILE (<= 768px): Lightweight 3-Card 3D Cover-Ring Carousel
+           Matches reference layout without 340vh scroll-jacking or rAF loops
+           ===================================================================== */
+        <div className="relative w-full max-w-[2100px] mx-auto pt-12 pb-6 overflow-hidden">
+          {/* Header */}
+          <div className="px-4 sm:px-6 mb-4">
+            <div className="mb-2.5">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-[#693092]/20 text-[#693092] text-xs font-semibold tracking-wide shadow-xs select-none">
+                <span>Services</span>
+                <span className="w-3.5 h-3.5 rounded-full bg-[#693092] text-white inline-flex items-center justify-center">
+                  <ArrowRight className="w-2 h-2 stroke-[2.5]" />
+                </span>
+              </div>
+            </div>
+
+            <h2 className="services-title text-[32px] sm:text-4xl font-light tracking-[-0.035em] leading-[1.08] text-[#141010]">
+              <span className="block">Everything your business</span>
+              <span className="block text-[#693092]">needs to scale.</span>
+            </h2>
+
+            <p className="services-desc text-[#554E62] text-[13.5px] leading-relaxed font-normal mt-2">
+              From AI to infrastructure — we deliver end-to-end technology solutions that drive real results.
+            </p>
+          </div>
+
+          {/* 3-Card Cover-Ring Stage (swipe or tap peeking side cards) */}
+          <div
+            className="relative w-full h-[452px] sm:h-[472px] flex items-center justify-center overflow-visible"
+            style={{
+              perspective: "900px",
+              perspectiveOrigin: "50% 50%",
+              background:
+                "radial-gradient(ellipse 240px 220px at 50% 55%, rgba(190, 48, 147, 0.22) 0%, rgba(105, 48, 146, 0.10) 58%, transparent 80%)",
+            }}
+            onTouchStart={handleMobileTouchStart}
+            onTouchEnd={handleMobileTouchEnd}
+          >
+            {/* Subtle Floor Orbit Ellipse */}
+            <div
+              className="absolute pointer-events-none rounded-full"
+              style={{
+                width: `${Math.round(mobileCardW * 1.48)}px`,
+                height: "92px",
+                border: "1px dashed rgba(105, 48, 146, 0.20)",
+                transform: "translate3d(0, 145px, -80px) rotateX(72deg)",
+              }}
+            />
+
+            <div
+              className="relative w-0 h-0 flex items-center justify-center"
+              style={{ transformStyle: "preserve-3d" }}
+            >
+              {SERVICES.map((service, index) => {
+                const total = SERVICES.length;
+                const halfLen = Math.floor(total / 2);
+                const rel = ((index - mobileActiveIndex + total + halfLen) % total) - halfLen;
+                const absRel = Math.abs(rel);
+
+                if (absRel > 2) return null;
+
+                const isCenter = rel === 0;
+                const isSide = absRel === 1;
+                const translateX = rel * mobileCardSpread;
+                const translateZ = isCenter ? 0 : isSide ? -95 : -190;
+                const rotateY = -rel * 20;
+                const scale = isCenter ? 1 : isSide ? 0.84 : 0.7;
+                const opacity = isCenter ? 1 : isSide ? 0.88 : 0;
+                const zIndex = isCenter ? 30 : isSide ? 20 : 10;
+
+                return (
+                  <div
+                    key={service.id}
+                    className="absolute left-0 top-0 -translate-x-1/2 -translate-y-1/2 select-none cursor-pointer"
+                    style={{
+                      transform: `translate3d(${translateX}px, 0px, ${translateZ}px) rotateY(${rotateY}deg) scale(${scale})`,
+                      opacity,
+                      zIndex,
+                      pointerEvents: absRel <= 1 ? "auto" : "none",
+                      transition: "transform 0.36s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.32s ease",
+                      willChange: "transform, opacity",
+                    }}
+                    onClick={() => {
+                      if (!isCenter) {
+                        setMobileActiveIndex(index);
+                      } else {
+                        navigate(`/services/${service.slug}`);
+                      }
+                    }}
+                  >
+                    <div
+                      className="rounded-[22px] p-3.5 flex flex-col justify-between text-white relative overflow-hidden"
+                      style={{
+                        width: `${mobileCardW}px`,
+                        minHeight: "408px",
+                        background:
+                          "linear-gradient(180deg, #160A2E 0%, #0D051D 55%, #080312 100%)",
+                        border: isCenter
+                          ? "1.5px solid rgba(190, 48, 147, 0.72)"
+                          : "1px solid rgba(190, 48, 147, 0.28)",
+                        boxShadow: isCenter
+                          ? "0 18px 40px -12px rgba(105, 48, 146, 0.45), 0 0 24px rgba(190, 48, 147, 0.22)"
+                          : "0 10px 24px -10px rgba(0, 0, 0, 0.45)",
+                      }}
+                    >
+                      {/* Top Image */}
+                      <div className="relative w-full h-[108px] rounded-xl overflow-hidden bg-[#180A33] mb-3 border border-white/15 flex-shrink-0">
+                        <img
+                          src={service.image}
+                          srcSet={service.imageSrcSet}
+                          sizes="260px"
+                          alt={service.title}
+                          width={440}
+                          height={246}
+                          loading="lazy"
+                          decoding="async"
+                          className="w-full h-full object-cover object-center block"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#0D051D]/70 via-transparent to-transparent pointer-events-none" />
+                      </div>
+
+                      {/* Content */}
+                      <div className="flex-1 flex flex-col justify-between min-h-0">
+                        <div>
+                          <div className="flex items-center justify-between mb-1.5">
+                            <span className="font-mono font-semibold text-[11px] text-white/65 tracking-wider">
+                              {service.id} / 09
+                            </span>
+                            {isCenter && (
+                              <span className="uppercase font-mono font-bold tracking-wider text-[9.5px] text-[#FBAE42] bg-[#FBAE42]/15 px-2.5 py-0.5 rounded-full border border-[#FBAE42]/45">
+                                ACTIVE
+                              </span>
+                            )}
+                          </div>
+
+                          <h3 className="text-[17px] font-bold text-white tracking-tight leading-snug mb-1.5 line-clamp-2">
+                            {service.title}
+                          </h3>
+
+                          <p className="text-white/85 text-[11.5px] leading-relaxed font-normal line-clamp-2 mb-3">
+                            {service.description}
+                          </p>
+
+                          <div className="flex flex-col items-start gap-1.5 mb-3">
+                            {service.tags.slice(0, 3).map((tag) => (
+                              <span
+                                key={tag}
+                                className="rounded-full border border-white/25 bg-white/[0.07] text-white text-[10.5px] font-medium px-2.5 py-0.5 max-w-full truncate"
+                              >
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Bottom Explore + Swipe */}
+                        <div className="border-t border-white/15 pt-2.5 flex items-center justify-between">
+                          <Link
+                            to={`/services/${service.slug}`}
+                            onClick={(e) => e.stopPropagation()}
+                            className="inline-flex items-center gap-1 text-[12px] font-semibold text-white hover:text-[#FBAE42]"
+                          >
+                            <span className="underline underline-offset-4">Explore</span>
+                            <ArrowUpRight className="w-3 h-3" />
+                          </Link>
+                          <span className="text-[10.5px] text-white/55 font-medium">Swipe</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Indicator Dots & Caption */}
+          <div className="flex flex-col items-center justify-center mt-1 px-4">
+            <div className="flex items-center gap-1">
+              {SERVICES.map((s, idx) => {
+                const isActive = idx === mobileActiveIndex;
+                return (
+                  <button
+                    key={s.id}
+                    type="button"
+                    onClick={() => setMobileActiveIndex(idx)}
+                    aria-label={`Jump to ${s.title}`}
+                    className="min-w-[20px] min-h-[28px] px-0.5 py-2 inline-flex items-center justify-center cursor-pointer"
+                  >
+                    <span
+                      className={`block rounded-full transition-transform ${
+                        isActive
+                          ? "w-6 h-1.5 bg-[#693092]"
+                          : "w-1.5 h-1.5 bg-[#693092]/25"
+                      }`}
+                    />
+                  </button>
+                );
+              })}
+            </div>
+            <p className="text-[11.5px] text-[#554E62] mt-0.5">
+              Swipe or tap a side card
+            </p>
+          </div>
+        </div>
+      ) : (
+        /* =========================================================================
+           DESKTOP (> 768px): Pinned scroll track & 3D Cube Blast into Cover Ring
+           ========================================================================= */
+        <div
+          ref={cardsTrackRef}
+          className="relative w-full"
+          style={{ height: isMobile ? "340vh" : "450vh" }}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+        >
         {/* Sticky Fullscreen Stage */}
         <div
           className={`services-stage-wrap sticky top-0 h-screen h-[100dvh] w-full overflow-hidden flex flex-col justify-between select-none ${
@@ -851,7 +1081,7 @@ export default function Services() {
                           : is125Screen
                           ? "rounded-[24px] p-4"
                           : isMobile
-                          ? "rounded-[20px] p-3.5"
+                          ? "rounded-[20px] p-3"
                           : is150Screen
                           ? "rounded-[24px] p-3.5 sm:p-4 pb-3"
                           : "rounded-[24px] p-4 sm:p-4.5 pb-3.5"
@@ -890,7 +1120,9 @@ export default function Services() {
                             : isTablet
                             ? "120px"
                             : isMobile
-                            ? "100px"
+                            ? windowHeight < 640
+                              ? "76px"
+                              : "92px"
                             : windowHeight < 620
                             ? "95px"
                             : is150Screen
@@ -900,7 +1132,13 @@ export default function Services() {
                       >
                         <img
                           src={service.image}
+                          srcSet={service.imageSrcSet}
+                          sizes="440px"
                           alt={service.title}
+                          width={440}
+                          height={246}
+                          loading="lazy"
+                          decoding="async"
                           className="w-full h-full object-cover object-center group-hover:scale-108 transition-transform duration-700 ease-out"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-[#0D051D]/80 via-transparent to-transparent pointer-events-none" />
@@ -951,7 +1189,7 @@ export default function Services() {
 
                           {/* Description - High contrast white/95 with relaxed line-height */}
                           <p
-                            className={`text-white/95 leading-relaxed font-normal line-clamp-2 ${is100Screen ? "mb-3" : is150Screen ? "mb-1" : "mb-1.5"}`}
+                            className={`text-white/95 leading-relaxed font-normal line-clamp-2 ${is100Screen ? "mb-3" : is150Screen || isMobile ? "mb-1" : "mb-1.5"}`}
                             style={{
                               fontSize: is100Screen
                                 ? "14px"
@@ -1058,6 +1296,7 @@ export default function Services() {
           </div>
         </div>
       </div>
+      )}
 
       {/* =========================================================================
           PART 3: Bottom CTA Card (Untouched as requested)

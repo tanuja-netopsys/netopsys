@@ -152,7 +152,7 @@ function parseTimeToMinutes(timeStr: string): number {
 // Helper: minutes to formatted "09:00 AM"
 function minutesToFormattedTime(totalMinutes: number): string {
   const norm = ((totalMinutes % (24 * 60)) + 24 * 60) % (24 * 60);
-  let hours = Math.floor(norm / 60);
+  const hours = Math.floor(norm / 60);
   const minutes = norm % 60;
   const modifier = hours >= 12 ? "PM" : "AM";
 

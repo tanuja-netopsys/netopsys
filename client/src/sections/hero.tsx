@@ -10,6 +10,7 @@ import {
   VolumeX,
 } from "lucide-react";
 import posterImg from "../assets/hero-tech-poster.jpg";
+import { OptimizedPicture } from "../utils/optimized-image.tsx";
 
 const HERO_TITLES: [string, string][] = [
   ["Digital", "Transformation."],
@@ -375,6 +376,7 @@ export const Hero3DGlassCube = memo(function Hero3DGlassCube({
   const targetRotX = useRef(-26);
   const targetRotY = useRef(-45);
 
+  const cubeWrapRef = useRef<HTMLDivElement>(null);
   const cubeRigRef = useRef<HTMLDivElement>(null);
   const isDraggingRef = useRef(false);
   const lastPos = useRef({ x: 0, y: 0, time: 0 });
@@ -412,11 +414,22 @@ export const Hero3DGlassCube = memo(function Hero3DGlassCube({
     targetRotX.current -= dy * sens;
   };
 
-  // Smooth physics & ambient rotation loop (direct GPU transform without React re-render overhead)
+  // Smooth physics & ambient rotation loop (paused offscreen and when reduced motion is preferred)
   useEffect(() => {
+    const prefersReducedMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReducedMotion) return;
+
+    let isInView = true;
     let lastTime = performance.now();
 
     const updatePhysics = (now: number) => {
+      if (!isInView) {
+        animFrameRef.current = null;
+        return;
+      }
+
       const dt = Math.min((now - lastTime) / 1000, 0.05);
       lastTime = now;
 
@@ -440,9 +453,35 @@ export const Hero3DGlassCube = memo(function Hero3DGlassCube({
       animFrameRef.current = requestAnimationFrame(updatePhysics);
     };
 
-    animFrameRef.current = requestAnimationFrame(updatePhysics);
+    const startLoop = () => {
+      if (animFrameRef.current === null && isInView) {
+        lastTime = performance.now();
+        animFrameRef.current = requestAnimationFrame(updatePhysics);
+      }
+    };
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isInView = entry.isIntersecting;
+        if (isInView) {
+          startLoop();
+        } else if (animFrameRef.current !== null) {
+          cancelAnimationFrame(animFrameRef.current);
+          animFrameRef.current = null;
+        }
+      },
+      { threshold: 0.01 }
+    );
+
+    if (cubeWrapRef.current) {
+      observer.observe(cubeWrapRef.current);
+    }
+
+    startLoop();
     return () => {
+      observer.disconnect();
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+      animFrameRef.current = null;
     };
   }, []);
 
@@ -510,7 +549,8 @@ export const Hero3DGlassCube = memo(function Hero3DGlassCube({
 
   return (
     <div
-      className={`relative flex flex-col items-center justify-center min-h-[230px] xs:min-h-[260px] sm:min-h-[320px] md:min-h-[360px] lg:min-h-[310px] xl:min-h-[310px] 2xl:min-h-[310px] min-[1680px]:min-h-[310px] select-none ${isDragging ? "cursor-grabbing" : "cursor-grab"} touch-pan-y ${className}`}
+      ref={cubeWrapRef}
+      className={`relative flex flex-col items-center justify-center min-h-[210px] xs:min-h-[250px] sm:min-h-[300px] md:min-h-[340px] lg:min-h-[310px] xl:min-h-[310px] 2xl:min-h-[310px] min-[1680px]:min-h-[310px] select-none ${isDragging ? "cursor-grabbing" : "cursor-grab"} touch-pan-y ${className}`}
       style={{ perspective: "1200px" }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -524,7 +564,7 @@ export const Hero3DGlassCube = memo(function Hero3DGlassCube({
     >
       {/* Ground Ambient Drop Shadow */}
       <div
-        className="absolute -bottom-8 xs:-bottom-10 sm:-bottom-10 lg:-bottom-11 xl:-bottom-11 2xl:-bottom-11 min-[1680px]:-bottom-11 w-48 xs:w-60 sm:w-72 md:w-80 lg:w-72 xl:w-72 2xl:w-72 min-[1680px]:w-72 h-10 sm:h-12 min-[1680px]:h-12 rounded-full blur-xl pointer-events-none transition-transform duration-500"
+        className="absolute -bottom-6 xs:-bottom-8 sm:-bottom-10 lg:-bottom-11 xl:-bottom-11 2xl:-bottom-11 min-[1680px]:-bottom-11 w-44 xs:w-56 sm:w-72 md:w-80 lg:w-72 xl:w-72 2xl:w-72 min-[1680px]:w-72 h-10 sm:h-12 min-[1680px]:h-12 rounded-full blur-xl pointer-events-none transition-transform duration-500"
         style={{
           background:
             "radial-gradient(ellipse at center, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0.2) 40%, transparent 75%)",
@@ -535,7 +575,7 @@ export const Hero3DGlassCube = memo(function Hero3DGlassCube({
       {/* 3D Solid Image Cube Rig */}
       <div
         ref={cubeRigRef}
-        className="relative py-8 pointer-events-none"
+        className="relative py-0 lg:py-8 pointer-events-none"
         style={{
           width: `${cubeSize}px`,
           height: `${cubeSize}px`,
@@ -561,9 +601,12 @@ export const Hero3DGlassCube = memo(function Hero3DGlassCube({
             willChange: "transform",
           }}
         >
-          <img
+          <OptimizedPicture
             src="/cube/cube-robot-halo.jpg"
             alt="AI Cyborg with Blue Halo Ring - Netopsys"
+            width={300}
+            height={300}
+            sizes="(max-width: 768px) 240px, 300px"
             className="w-full h-full object-cover select-none pointer-events-none block"
             style={{
               transform: "translateZ(0)",
@@ -590,9 +633,12 @@ export const Hero3DGlassCube = memo(function Hero3DGlassCube({
             willChange: "transform",
           }}
         >
-          <img
+          <OptimizedPicture
             src="/cube/cube-brain-ai.jpg"
             alt="Holographic Neural Brain Platform - Netopsys AI"
+            width={300}
+            height={300}
+            sizes="(max-width: 768px) 240px, 300px"
             className="w-full h-full object-cover select-none pointer-events-none block"
             style={{
               transform: "translateZ(0)",
@@ -618,9 +664,12 @@ export const Hero3DGlassCube = memo(function Hero3DGlassCube({
             willChange: "transform",
           }}
         >
-          <img
+          <OptimizedPicture
             src="/cube/cube-server-datacenter.jpg"
             alt="High-Performance Cloud Data Center Corridors - Netopsys"
+            width={300}
+            height={300}
+            sizes="(max-width: 768px) 240px, 300px"
             className="w-full h-full object-cover select-none pointer-events-none block"
             style={{
               transform: "translateZ(0)",
@@ -647,9 +696,12 @@ export const Hero3DGlassCube = memo(function Hero3DGlassCube({
             willChange: "transform",
           }}
         >
-          <img
+          <OptimizedPicture
             src="/cube/cube-city-dome.jpg"
             alt="Smart Connected City Geodesic Dome - Netopsys AI"
+            width={300}
+            height={300}
+            sizes="(max-width: 768px) 240px, 300px"
             className="w-full h-full object-cover select-none pointer-events-none block"
             style={{
               transform: "translateZ(0)",
@@ -675,9 +727,12 @@ export const Hero3DGlassCube = memo(function Hero3DGlassCube({
             willChange: "transform",
           }}
         >
-          <img
+          <OptimizedPicture
             src="/cube/cube-chip-core.jpg"
             alt="Next-Gen AI Microprocessor Core - Netopsys"
+            width={300}
+            height={300}
+            sizes="(max-width: 768px) 240px, 300px"
             className="w-full h-full object-cover select-none pointer-events-none block"
             style={{
               transform: "translateZ(0)",
@@ -704,9 +759,12 @@ export const Hero3DGlassCube = memo(function Hero3DGlassCube({
             willChange: "transform",
           }}
         >
-          <img
+          <OptimizedPicture
             src="/cube/cube-touch.jpg"
             alt="Human & AI Digital Touch Connection - Netopsys"
+            width={300}
+            height={300}
+            sizes="(max-width: 768px) 240px, 300px"
             className="w-full h-full object-cover select-none pointer-events-none block"
             style={{
               transform: "translateZ(0)",
@@ -741,7 +799,10 @@ const CONFETTI_COLORS = [
 function HeroLaunchConfetti({ onComplete }: { onComplete: () => void }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const onCompleteRef = useRef(onComplete);
-  onCompleteRef.current = onComplete;
+
+  useEffect(() => {
+    onCompleteRef.current = onComplete;
+  }, [onComplete]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -888,6 +949,39 @@ function HeroLaunchConfetti({ onComplete }: { onComplete: () => void }) {
 // ============================================================================
 // 5. MAIN HERO SECTION COMPONENT (UI & UX 100% PRESERVED)
 // ============================================================================
+function DesktopHeroParallaxCube({
+  className,
+  children,
+}: {
+  className: string;
+  children: React.ReactNode;
+}) {
+  const { scrollY } = useScroll();
+  const smoothScrollY = useSpring(scrollY, {
+    stiffness: 150,
+    damping: 26,
+    mass: 0.35,
+  });
+  const parallaxCubeY = useTransform(smoothScrollY, [0, 750], [0, 480]);
+  const parallaxCubeX = useTransform(smoothScrollY, [0, 750], [0, -45]);
+  const parallaxCubeRotate = useTransform(smoothScrollY, [0, 750], [0, 30]);
+  const parallaxCubeScale = useTransform(smoothScrollY, [0, 750], [1, 0.9]);
+
+  return (
+    <motion.div
+      style={{
+        y: parallaxCubeY,
+        x: parallaxCubeX,
+        rotateZ: parallaxCubeRotate,
+        scale: parallaxCubeScale,
+      }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
 export default function Hero() {
   const heroRef = useRef<HTMLElement>(null);
   const location = useLocation();
@@ -907,20 +1001,27 @@ export default function Hero() {
     let fromStorage = false;
     try {
       fromStorage = sessionStorage.getItem("netopsys_launch_confetti") === "1";
-    } catch {}
+    } catch {
+      // ignore sessionStorage restrictions
+    }
 
     if (state?.celebrateLaunch || fromStorage) {
-      setShowLaunchConfetti(true);
+      const showRaf = requestAnimationFrame(() => setShowLaunchConfetti(true));
       // Clear after StrictMode initial double-mount completes so page refreshes stay clean
       const cleanupTimer = window.setTimeout(() => {
         try {
           sessionStorage.removeItem("netopsys_launch_confetti");
-        } catch {}
+        } catch {
+          // ignore sessionStorage restrictions
+        }
         if (state?.celebrateLaunch) {
           window.history.replaceState({}, document.title);
         }
       }, 600);
-      return () => window.clearTimeout(cleanupTimer);
+      return () => {
+        cancelAnimationFrame(showRaf);
+        window.clearTimeout(cleanupTimer);
+      };
     }
   }, [location.state]);
 
@@ -956,27 +1057,46 @@ export default function Hero() {
       : viewportHeight < 740
       ? "scale-[0.80] xl:scale-[0.85] 2xl:scale-[0.90]"
       : "scale-[0.88] xl:scale-[0.96] 2xl:scale-[1.02]"
-    : "scale-[0.68] xs:scale-[0.76] sm:scale-[0.85] md:scale-[0.90]";
+    : "scale-[0.54] xs:scale-[0.68] sm:scale-[0.80] md:scale-[0.88]";
 
-  // Rotating title cycle: smoothly transitions every 3.6s without layout shifts or height collapse
+  // Rotating title cycle: paused when offscreen or reduced-motion preferred
   useEffect(() => {
+    const prefersReducedMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReducedMotion) return;
+
+    let isVisible = true;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isVisible = entry.isIntersecting;
+      },
+      { threshold: 0.05 }
+    );
+    if (heroRef.current) {
+      observer.observe(heroRef.current);
+    }
+
     const timer = setInterval(() => {
-      setHeroTitleIndex((prev) => (prev + 1) % HERO_TITLES.length);
+      if (isVisible) {
+        setHeroTitleIndex((prev) => (prev + 1) % HERO_TITLES.length);
+      }
     }, 3600);
-    return () => clearInterval(timer);
+    return () => {
+      observer.disconnect();
+      clearInterval(timer);
+    };
   }, []);
 
-  // Scroll parallax: cube glides down side smoothly as user scrolls down on desktop
-  const { scrollY } = useScroll();
-  const smoothScrollY = useSpring(scrollY, {
-    stiffness: 150,
-    damping: 26,
-    mass: 0.35,
-  });
-  const parallaxCubeY = useTransform(smoothScrollY, [0, 750], [0, 480]);
-  const parallaxCubeX = useTransform(smoothScrollY, [0, 750], [0, -45]);
-  const parallaxCubeRotate = useTransform(smoothScrollY, [0, 750], [0, 30]);
-  const parallaxCubeScale = useTransform(smoothScrollY, [0, 750], [1, 0.90]);
+  const heroCubeClassName =
+    "hero-cube-wrap w-full max-w-[340px] xs:max-w-[380px] sm:max-w-[440px] md:max-w-[480px] lg:max-w-[440px] xl:max-w-[530px] 2xl:max-w-[660px] h-[220px] xs:h-[270px] sm:h-[315px] md:h-[355px] lg:h-auto lg:max-h-none flex flex-col items-center justify-center origin-center will-change-transform";
+  const heroCubeInner = (
+    <div
+      className={`hero-cube-scaler w-full flex flex-col items-center justify-center origin-center ${cubeScaleClass} transition-transform duration-200`}
+    >
+      <Hero3DGlassCube className="w-full" />
+    </div>
+  );
 
   return (
     <section
@@ -988,9 +1108,9 @@ export default function Hero() {
         <HeroLaunchConfetti onComplete={() => setShowLaunchConfetti(false)} />
       )}
       {/* 2-Column Responsive Layout - Fluid Scaling Across All Breakpoints */}
-      <div className="w-full max-w-[2100px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-6 xl:gap-8 2xl:gap-10 min-[1680px]:gap-16 items-center justify-between">
+      <div className="w-full max-w-[2100px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-7 sm:gap-8 lg:gap-6 xl:gap-8 2xl:gap-10 min-[1680px]:gap-16 items-center justify-between">
         {/* Left Column: Fluid Responsive Typography & Adaptive Spacing */}
-        <div className="lg:col-span-7 xl:col-span-7 2xl:col-span-7 flex flex-col items-start text-left z-10 animate-text-fade-in w-full">
+        <div className="min-w-0 lg:col-span-7 xl:col-span-7 2xl:col-span-7 flex flex-col items-start text-left z-10 animate-text-fade-in w-full">
           {/* Eyebrow Locations Pill Badge */}
           
 
@@ -1003,7 +1123,7 @@ export default function Hero() {
               Your Partner for
             </span>
             <span
-              className="hero-heading-title block relative h-[2.15em] min-h-[2.15em] max-h-[2.15em] overflow-hidden mt-1 sm:mt-1.5 text-[#141010] font-light text-[2rem] xs:text-[2.35rem] sm:text-4xl md:text-5xl lg:text-[2.85rem] xl:text-[3.15rem] 2xl:text-[4.15rem] leading-[1.05] sm:leading-[1.04] tracking-[-0.03em]"
+              className="hero-heading-title block relative min-h-[2.25em] sm:h-[2.15em] sm:min-h-[2.15em] sm:max-h-[2.15em] overflow-x-clip sm:overflow-hidden mt-1 sm:mt-1.5 text-[#141010] font-light text-[2rem] xs:text-[2.35rem] sm:text-4xl md:text-5xl lg:text-[2.85rem] xl:text-[3.15rem] 2xl:text-[4.15rem] leading-[1.05] sm:leading-[1.04] tracking-[-0.03em]"
               style={{ fontFamily: "'Onest', sans-serif" }}
             >
               <AnimatePresence mode="popLayout" initial={false}>
@@ -1054,27 +1174,14 @@ export default function Hero() {
         </div>
 
         {/* Right Column: 3D Cube with Proportional Breakpoint Scaling & Desktop-only Parallax */}
-        <div className="lg:col-span-5 xl:col-span-5 2xl:col-span-5 flex flex-col items-center justify-center z-10 py-2 sm:py-4 lg:py-0 animate-cube-slide-right w-full">
-          <motion.div
-            style={
-              isDesktop
-                ? {
-                    y: parallaxCubeY,
-                    x: parallaxCubeX,
-                    rotateZ: parallaxCubeRotate,
-                    scale: parallaxCubeScale,
-                  }
-                : undefined
-            }
-            className="hero-cube-wrap w-full max-w-[340px] xs:max-w-[380px] sm:max-w-[440px] md:max-w-[480px] lg:max-w-[440px] xl:max-w-[530px] 2xl:max-w-[660px] max-h-[245px] xs:max-h-[275px] sm:max-h-[325px] md:max-h-[365px] lg:max-h-none flex flex-col items-center justify-center origin-center will-change-transform"
-          >
-            {/* Inner Scale Wrapper that guarantees perfect vertical fit without conflicting with Framer Motion */}
-            <div
-              className={`hero-cube-scaler w-full flex flex-col items-center justify-center origin-center ${cubeScaleClass} transition-transform duration-200`}
-            >
-              <Hero3DGlassCube className="w-full" />
-            </div>
-          </motion.div>
+        <div className="min-w-0 lg:col-span-5 xl:col-span-5 2xl:col-span-5 flex flex-col items-center justify-center z-10 pt-2 pb-1 sm:py-4 lg:py-0 animate-cube-slide-right w-full">
+          {isDesktop ? (
+            <DesktopHeroParallaxCube className={heroCubeClassName}>
+              {heroCubeInner}
+            </DesktopHeroParallaxCube>
+          ) : (
+            <div className={heroCubeClassName}>{heroCubeInner}</div>
+          )}
         </div>
       </div>
     </section>

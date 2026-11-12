@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Link, useSearchParams, useParams } from "react-router-dom";
 import { motion, useScroll, useTransform, useSpring } from "framer-motion";
 import {
@@ -17,6 +17,7 @@ import {
 import Navbar from "../componenets/navbar.tsx";
 import Footer from "../componenets/footer.tsx";
 import BackToHeroButton from "../componenets/back-to-hero.tsx";
+import { OptimizedPicture } from "../utils/optimized-image.tsx";
 
 // Portfolio projects data with rich details
 const PORTFOLIO_PROJECTS = {
@@ -265,12 +266,132 @@ const PORTFOLIO_PROJECTS = {
   },
 };
 
+function DesktopPortfolioDetailHero({
+  project,
+}: {
+  project: {
+    name: string;
+    taglinePart1: string;
+    taglinePart2: string;
+    statusBadge: string;
+    description: string;
+    tags: string[];
+    image: string;
+  };
+}) {
+  const { scrollY } = useScroll();
+  const smoothScrollY = useSpring(scrollY, {
+    stiffness: 140,
+    damping: 26,
+    mass: 0.35,
+  });
+
+  const imageWidth = useTransform(smoothScrollY, [0, 280], ["100%", "54%"]);
+  const imageHeight = useTransform(smoothScrollY, [0, 280], ["660px", "480px"]);
+  const textOpacity = useTransform(smoothScrollY, [50, 250], [0, 1]);
+  const textX = useTransform(smoothScrollY, [50, 250], [-30, 0]);
+  const textPointerEvents = useTransform(smoothScrollY, (v) =>
+    v > 100 ? "auto" : "none"
+  );
+
+  return (
+    <div className="relative w-full h-[930px] pt-26 portfoliodetail-hero-wrap">
+      <div
+        className="sticky top-28 w-full flex flex-col justify-start overflow-visible pt-1 portfoliodetail-pinned-wrap"
+        style={{ top: "6rem" }}
+      >
+        <div className="relative w-full max-w-[2100px] mx-auto px-10 xl:px-14 2xl:px-18">
+          <div className="mb-5 portfoliodetail-back-wrap">
+            <Link
+              to="/portfolio"
+              className="inline-flex items-center gap-2 text-[13px] font-semibold text-[#6C6377] hover:text-[#693092] transition-colors cursor-pointer select-none w-fit"
+              aria-label="Back to Projects"
+            >
+              <ArrowLeft className="w-3.5 h-3.5 stroke-[2.2]" />
+              <span>Back to Portfolio</span>
+            </Link>
+          </div>
+
+          <div className="relative w-full flex flex-row items-start justify-between min-h-[480px] portfoliodetail-hero-row">
+            <motion.div
+              style={{
+                opacity: textOpacity,
+                x: textX,
+                pointerEvents: textPointerEvents,
+              }}
+              className="w-[42%] text-left z-10 pt-2 portfoliodetail-hero-text"
+            >
+              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white border border-[#10B981]/30 shadow-xs mb-4">
+                <span className="w-2 h-2 rounded-full bg-[#10B981]" />
+                <span className="text-[11px] font-bold tracking-wider text-[#059669] uppercase">
+                  {project.statusBadge}
+                </span>
+              </div>
+
+              <h1 className="text-[4.25rem] xl:text-[4.75rem] font-light tracking-[-0.035em] leading-[1.04] text-[#141010] portfoliodetail-hero-title">
+                <span className="block">{project.name}</span>
+                <span className="block text-[#693092] mt-0.5">{project.taglinePart1}</span>
+                <span className="block text-[#693092]">{project.taglinePart2}</span>
+              </h1>
+
+              <p className="text-[#554E62] text-[16px] font-normal leading-relaxed mt-5 mb-6 max-w-xl portfoliodetail-hero-desc">
+                {project.description}
+              </p>
+
+              <div className="flex items-center gap-3 flex-wrap portfoliodetail-tags">
+                {project.tags.map((tag: string) => (
+                  <span
+                    key={tag}
+                    className="inline-flex items-center px-5 py-2 rounded-full bg-[#EBDFF1] text-[#693092] text-[13px] font-semibold border border-[#BE3093]/10 shadow-xs"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </motion.div>
+
+            <div className="absolute right-0 top-0 w-full flex justify-end z-20 pointer-events-none">
+              <motion.div
+                style={{
+                  width: imageWidth,
+                  height: imageHeight,
+                  pointerEvents: "auto",
+                }}
+                className="rounded-3xl overflow-hidden border border-black/[0.08] shadow-2xl shadow-purple-950/15 bg-[#120727] origin-right portfoliodetail-hero-img"
+              >
+                <OptimizedPicture
+                  src={project.image}
+                  alt={`${project.name} preview`}
+                  width={1200}
+                  height={670}
+                  sizes="54vw"
+                  decoding="async"
+                  className="w-full h-full object-cover object-center"
+                />
+              </motion.div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+interface DbProjectData {
+  title: string;
+  status?: string;
+  description?: string;
+  technologies?: string[];
+  image?: string;
+  extendedDescription?: string;
+}
+
 export default function PortfolioDetailPage() {
   const { projectId: paramId } = useParams();
   const [searchParams] = useSearchParams();
 
   const rawId = (paramId || searchParams.get("id") || "01").toLowerCase();
-  const [dbProject, setDbProject] = useState<any>(null);
+  const [dbProject, setDbProject] = useState<DbProjectData | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -294,19 +415,26 @@ export default function PortfolioDetailPage() {
   else if (rawId === "03" || rawId === "3" || rawId.includes("assessment")) key = "03";
 
   const baseProject = PORTFOLIO_PROJECTS[key] || PORTFOLIO_PROJECTS["01"];
-  const project = dbProject
-    ? {
-        ...baseProject,
-        name: dbProject.title,
-        taglinePart1: "",
-        taglinePart2: "",
-        statusBadge: (dbProject.status || "DEPLOYED & ACTIVE").toUpperCase(),
-        description: dbProject.description || baseProject.description,
-        tags: Array.isArray(dbProject.technologies) && dbProject.technologies.length > 0 ? (dbProject.technologies as string[]) : baseProject.tags,
-        image: dbProject.image || baseProject.image,
-        overview: dbProject.extendedDescription || dbProject.description || baseProject.overview,
-      }
-    : baseProject;
+  const project = useMemo(
+    () =>
+      dbProject
+        ? {
+            ...baseProject,
+            name: dbProject.title,
+            taglinePart1: "",
+            taglinePart2: "",
+            statusBadge: (dbProject.status || "DEPLOYED & ACTIVE").toUpperCase(),
+            description: dbProject.description || baseProject.description,
+            tags:
+              Array.isArray(dbProject.technologies) && dbProject.technologies.length > 0
+                ? dbProject.technologies
+                : baseProject.tags,
+            image: dbProject.image || baseProject.image,
+            overview: dbProject.extendedDescription || dbProject.description || baseProject.overview,
+          }
+        : baseProject,
+    [baseProject, dbProject]
+  );
 
   // Track responsive screen size for horizontal calculation
   const [isDesktop, setIsDesktop] = useState(
@@ -325,46 +453,6 @@ export default function PortfolioDetailPage() {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
-
-  // Scroll animation driven smoothly by actual scroll distance
-  const heroRef = useRef<HTMLDivElement>(null);
-  const { scrollY } = useScroll();
-  const smoothScrollY = useSpring(scrollY, {
-    stiffness: 140,
-    damping: 26,
-    mass: 0.35,
-  });
-
-  const imageWidth = useTransform(
-    smoothScrollY,
-    [0, 280],
-    [isDesktop ? "100%" : "100%", isDesktop ? "54%" : "100%"]
-  );
-
-  const imageHeight = useTransform(
-    smoothScrollY,
-    [0, 280],
-    [
-      isDesktop ? "660px" : isSmallMobile ? "220px" : "320px",
-      isDesktop ? "480px" : isSmallMobile ? "220px" : "300px",
-    ]
-  );
-
-  const textOpacity = useTransform(
-    smoothScrollY,
-    [50, 250],
-    [isDesktop ? 0 : 1, 1]
-  );
-
-  const textX = useTransform(
-    smoothScrollY,
-    [50, 250],
-    [isDesktop ? -30 : 0, 0]
-  );
-
-  const textPointerEvents = useTransform(smoothScrollY, (v) =>
-    !isDesktop || v > 100 ? "auto" : "none"
-  );
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "instant" });
@@ -395,99 +483,76 @@ export default function PortfolioDetailPage() {
           <div className="absolute bottom-1/3 -left-48 w-96 h-96 rounded-full bg-[#693092]/10 blur-[140px]" />
         </div>
 
-        {/* =========================================================================
-            PINNED HERO ANIMATION SECTION
-            - On load: Full-width large hero image placed strictly below navbar without text.
-            - On scroll: Contracts ONLY horizontally to the side (54% width) & smoothly adjusts height to 480px.
-            - Stays pinned at top-28 until reveal is complete, then bottom content scrolls up directly.
-        ========================================================================= */}
-        <div ref={heroRef} className="relative w-full min-h-[360px] sm:min-h-[460px] h-auto lg:h-[930px] pt-20 sm:pt-24 lg:pt-26 portfoliodetail-hero-wrap">
-          <div
-            className="relative lg:sticky top-0 lg:top-24 xl:top-28 w-full flex flex-col justify-start overflow-visible pt-1 portfoliodetail-pinned-wrap"
-            style={{
-              top: isDesktop ? "6rem" : undefined,
-            }}
-          >
-            <div className="relative w-full max-w-[2100px] mx-auto px-4 sm:px-6 md:px-8 lg:px-10 xl:px-14 2xl:px-18">
-              {/* Back to Projects link */}
-              <div className="mb-3.5 sm:mb-4 lg:mb-5 portfoliodetail-back-wrap">
-                <Link
-                  to="/portfolio"
-                  className="inline-flex items-center gap-2 text-xs sm:text-[13px] font-semibold text-[#6C6377] hover:text-[#693092] transition-colors cursor-pointer select-none w-fit"
-                  aria-label="Back to Projects"
-                >
-                  <ArrowLeft className="w-3.5 h-3.5 stroke-[2.2]" />
-                  <span>Back to Portfolio</span>
-                </Link>
-              </div>
-
-              <div className="relative w-full flex flex-col lg:flex-row items-start justify-between min-h-[360px] lg:min-h-[480px] portfoliodetail-hero-row">
-                {/* Left Column: Badge, Titles, Description, Tags (Reveals on scroll) */}
-                <motion.div
-                  style={{
-                    opacity: textOpacity,
-                    x: textX,
-                    pointerEvents: textPointerEvents,
-                  }}
-                  className="order-2 lg:order-1 w-full lg:w-[42%] text-left z-10 pt-1 lg:pt-2 portfoliodetail-hero-text"
-                >
-                  {/* Status Badge */}
-                  <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white border border-[#10B981]/30 shadow-xs mb-3.5 sm:mb-4">
-                    <span className="w-2 h-2 rounded-full bg-[#10B981]" />
-                    <span className="text-[11px] font-bold tracking-wider text-[#059669] uppercase">
-                      {project.statusBadge}
-                    </span>
-                  </div>
-
-                  {/* Main Heading matching services detail page heading style */}
-                  <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[4.25rem] xl:text-[4.75rem] font-light tracking-[-0.035em] leading-[1.04] text-[#141010] portfoliodetail-hero-title">
-                    <span className="block">{project.name}</span>
-                    <span className="block text-[#693092] mt-0.5">{project.taglinePart1}</span>
-                    <span className="block text-[#693092]">{project.taglinePart2}</span>
-                  </h1>
-
-                  {/* Description matching services detail page subtitle */}
-                  <p className="text-[#554E62] text-sm sm:text-base md:text-[16px] font-normal leading-relaxed mt-4 sm:mt-5 mb-5 sm:mb-6 max-w-xl portfoliodetail-hero-desc">
-                    {project.description}
-                  </p>
-
-                  {/* Tags / Pills */}
-                  <div className="flex items-center gap-2.5 sm:gap-3 flex-wrap portfoliodetail-tags">
-                    {project.tags.map((tag: string) => (
-                      <span
-                        key={tag}
-                        className="inline-flex items-center px-4 sm:px-5 py-1.5 sm:py-2 rounded-full bg-[#EBDFF1] text-[#693092] text-xs sm:text-[13px] font-semibold border border-[#BE3093]/10 shadow-xs"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                </motion.div>
-
-                {/* Right-anchored Featured Image:
-                    Starts 100% full width of the container & 660px tall.
-                    On scroll, contracts ONLY horizontally into the right column (54% width, 480px height).
-                    Does NOT move up vertically. */}
-                <div className="order-1 lg:order-2 lg:absolute lg:right-0 lg:top-0 w-full flex justify-end z-20 pointer-events-none mb-6 lg:mb-0">
-                  <motion.div
-                    style={{
-                      width: imageWidth,
-                      height: imageHeight,
-                      pointerEvents: "auto",
-                    }}
-                    className="rounded-2xl sm:rounded-3xl overflow-hidden border border-black/[0.08] shadow-2xl shadow-purple-950/15 bg-[#120727] origin-right portfoliodetail-hero-img"
+        {/* Hero Section: Desktop scroll parallax vs static lightweight mobile hero */}
+        {isDesktop ? (
+          <DesktopPortfolioDetailHero project={project} />
+        ) : (
+          <div className="relative w-full min-h-[360px] sm:min-h-[460px] h-auto pt-20 sm:pt-24 portfoliodetail-hero-wrap">
+            <div className="relative w-full flex flex-col justify-start pt-1 portfoliodetail-pinned-wrap">
+              <div className="relative w-full max-w-[2100px] mx-auto px-4 sm:px-6 md:px-8">
+                <div className="mb-3.5 sm:mb-4 portfoliodetail-back-wrap">
+                  <Link
+                    to="/portfolio"
+                    className="inline-flex items-center gap-2 text-xs sm:text-[13px] font-semibold text-[#6C6377] hover:text-[#693092] transition-colors cursor-pointer select-none w-fit"
+                    aria-label="Back to Projects"
                   >
-                    <img
-                      src={project.image}
-                      alt={`${project.name} preview`}
-                      className="w-full h-full object-cover object-center"
-                    />
-                  </motion.div>
+                    <ArrowLeft className="w-3.5 h-3.5 stroke-[2.2]" />
+                    <span>Back to Portfolio</span>
+                  </Link>
+                </div>
+
+                <div className="relative w-full flex flex-col items-start justify-between portfoliodetail-hero-row">
+                  <div className="order-2 w-full text-left z-10 pt-1 portfoliodetail-hero-text">
+                    <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white border border-[#10B981]/30 shadow-xs mb-3.5 sm:mb-4">
+                      <span className="w-2 h-2 rounded-full bg-[#10B981]" />
+                      <span className="text-[11px] font-bold tracking-wider text-[#059669] uppercase">
+                        {project.statusBadge}
+                      </span>
+                    </div>
+
+                    <h1 className="text-4xl sm:text-5xl md:text-6xl font-light tracking-[-0.035em] leading-[1.04] text-[#141010] portfoliodetail-hero-title">
+                      <span className="block">{project.name}</span>
+                      <span className="block text-[#693092] mt-0.5">{project.taglinePart1}</span>
+                      <span className="block text-[#693092]">{project.taglinePart2}</span>
+                    </h1>
+
+                    <p className="text-[#554E62] text-sm sm:text-base md:text-[16px] font-normal leading-relaxed mt-4 sm:mt-5 mb-5 sm:mb-6 max-w-xl portfoliodetail-hero-desc">
+                      {project.description}
+                    </p>
+
+                    <div className="flex items-center gap-2.5 sm:gap-3 flex-wrap portfoliodetail-tags">
+                      {project.tags.map((tag: string) => (
+                        <span
+                          key={tag}
+                          className="inline-flex items-center px-4 sm:px-5 py-1.5 sm:py-2 rounded-full bg-[#EBDFF1] text-[#693092] text-xs sm:text-[13px] font-semibold border border-[#BE3093]/10 shadow-xs"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="order-1 w-full mb-6">
+                    <div
+                      style={{ height: isSmallMobile ? "220px" : "300px" }}
+                      className="w-full rounded-2xl sm:rounded-3xl overflow-hidden border border-black/[0.08] shadow-md bg-[#120727] portfoliodetail-hero-img"
+                    >
+                      <OptimizedPicture
+                        src={project.image}
+                        alt={`${project.name} preview`}
+                        width={600}
+                        height={335}
+                        sizes="100vw"
+                        decoding="async"
+                        className="w-full h-full object-cover object-center"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Content Container for Following Sections */}
         <div className="relative w-full max-w-[2100px] mx-auto px-4 sm:px-6 md:px-8 lg:px-10 xl:px-14 2xl:px-18">
