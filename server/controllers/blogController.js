@@ -210,7 +210,7 @@ function extractMetadataAndCleanContent(rawContent, body = {}) {
 
   return {
     cleanContent: cleanContent || content,
-    authorName: extractedAuthor || "Netopsys Team",
+    authorName: extractedAuthor || "",
     date: extractedDate,
     excerpt: extractedExcerpt,
     isFeatured: extractedFeatured,
@@ -273,7 +273,7 @@ exports.createBlog = async (req, res) => {
       uniqueSlug = `${baseSlug}-${counter++}`;
     }
 
-    const cleanTag = (tag && tag.trim()) || "AI Automation";
+    const cleanTag = (tag && tag.trim()) || "";
     const colors = getCategoryColor(cleanTag);
     const plainExcerpt =
       parsed.excerpt ||
@@ -281,7 +281,7 @@ exports.createBlog = async (req, res) => {
       stripHtml(bodyContent).slice(0, 160) + "...";
 
     const cleanAuthorName = parsed.authorName || (authorName && authorName.trim()) || "Netopsys Team";
-    const cleanRole = (authorRole && authorRole.trim()) || "Enterprise Systems Architecture";
+    const cleanRole = (authorRole && authorRole.trim()) || "";
     const cleanInitials =
       (authorInitials && authorInitials.trim()) ||
       cleanAuthorName
@@ -341,11 +341,7 @@ exports.createBlog = async (req, res) => {
       if (sentences.length >= 3) {
         takeawaysArray = [sentences[0], sentences[1], sentences[2]];
       } else {
-        takeawaysArray = [
-          "Conversational interfaces unlock faster adoption of complex enterprise software suites.",
-          "Natural language queries eliminate navigation friction across deep nested ERP modules.",
-          "Smart action recommendations guide operators through high-stakes compliance steps.",
-        ];
+        takeawaysArray = [];
       }
     }
 

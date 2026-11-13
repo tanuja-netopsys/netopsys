@@ -20,6 +20,7 @@ import Footer from "../componenets/footer.tsx";
 import { toast } from "../componenets/toast.tsx";
 import BackToHeroButton from "../componenets/back-to-hero.tsx";
 import LoginModal from "./login.tsx";
+import { preloadRecaptcha, executeRecaptcha } from "../utils/recaptcha.ts";
 
 interface JobRole {
   id: string;
@@ -61,10 +62,16 @@ export default function CareersPage() {
       setIsPaperRocketFlying(true);
       setIsSubmittingNotify(true);
 
+      // Generate invisible reCAPTCHA v3 token for job alert notification
+      const captchaToken = await executeRecaptcha("job_alert_subscribe").catch((err) => {
+        console.warn("reCAPTCHA execution note:", err);
+        return "";
+      });
+
       const res = await fetch("/api/subscribers/job", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, captchaToken }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -357,6 +364,7 @@ export default function CareersPage() {
                         <input
                           type="email"
                           value={notifyEmail}
+                          onFocus={() => preloadRecaptcha()}
                           onChange={(e) => setNotifyEmail(e.target.value)}
                           placeholder="Enter your email"
                           required
@@ -457,6 +465,7 @@ export default function CareersPage() {
                         <input
                           type="email"
                           value={notifyEmail}
+                          onFocus={() => preloadRecaptcha()}
                           onChange={(e) => setNotifyEmail(e.target.value)}
                           placeholder="Enter your email"
                           required

@@ -931,7 +931,7 @@ export default function AdminDashboard() {
                   <div className="flex items-center justify-between p-3.5 rounded-xl border border-gray-100 bg-[#FAF8FC]">
                     <div>
                       <div className="font-bold text-sm text-[#141010]">{adminDisplayName}</div>
-                      <div className="text-xs text-gray-500">{adminUser?.email || "superadmin@netopsys.in"} • Super Admin</div>
+                      <div className="text-xs text-gray-500">{adminUser?.email || "Admin"} • Super Admin</div>
                     </div>
                     <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full">
                       Active

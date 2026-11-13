@@ -1,5 +1,6 @@
 const subscriberService = require("../services/subscriberService");
 const emailService = require("../services/emailService");
+const { verifyRecaptchaV3Token } = require("../utils/recaptchaVerifier");
 
 /**
  * Public: Subscribe to Blog Updates
@@ -7,11 +8,32 @@ const emailService = require("../services/emailService");
  */
 exports.subscribeBlog = async (req, res) => {
   try {
-    const { email } = req.body;
+    const { email, captchaToken } = req.body;
     if (!email) {
       return res.status(400).json({
         success: false,
         message: "Email address is required.",
+      });
+    }
+
+    // Google reCAPTCHA v3 verification
+    const forwardedIp = req.headers["x-forwarded-for"];
+    const clientIp =
+      (typeof forwardedIp === "string" && forwardedIp.split(",")[0].trim()) ||
+      req.ip ||
+      req.socket?.remoteAddress;
+
+    const verification = await verifyRecaptchaV3Token({
+      token: captchaToken,
+      remoteIp: clientIp,
+      expectedAction: "newsletter_subscribe",
+    });
+
+    if (!verification.ok) {
+      return res.status(verification.status).json({
+        success: false,
+        message: verification.message,
+        errorCodes: verification.errorCodes,
       });
     }
 
@@ -37,11 +59,32 @@ exports.subscribeBlog = async (req, res) => {
  */
 exports.subscribeJob = async (req, res) => {
   try {
-    const { email } = req.body;
+    const { email, captchaToken } = req.body;
     if (!email) {
       return res.status(400).json({
         success: false,
         message: "Email address is required.",
+      });
+    }
+
+    // Google reCAPTCHA v3 verification
+    const forwardedIp = req.headers["x-forwarded-for"];
+    const clientIp =
+      (typeof forwardedIp === "string" && forwardedIp.split(",")[0].trim()) ||
+      req.ip ||
+      req.socket?.remoteAddress;
+
+    const verification = await verifyRecaptchaV3Token({
+      token: captchaToken,
+      remoteIp: clientIp,
+      expectedAction: "job_alert_subscribe",
+    });
+
+    if (!verification.ok) {
+      return res.status(verification.status).json({
+        success: false,
+        message: verification.message,
+        errorCodes: verification.errorCodes,
       });
     }
 

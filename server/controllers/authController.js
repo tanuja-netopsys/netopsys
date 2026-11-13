@@ -2,6 +2,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const prisma = require("../config/prisma");
 const emailService = require("../services/emailService");
+const { verifyRecaptchaV3Token } = require("../utils/recaptchaVerifier");
 
 /**
  * SuperAdmin & Admin Login Handler
@@ -11,7 +12,30 @@ const emailService = require("../services/emailService");
  */
 exports.superAdminLogin = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, captchaToken } = req.body;
+
+    // 0. Optional reCAPTCHA v3 verification for superadmin login
+    if (captchaToken) {
+      const forwardedIp = req.headers["x-forwarded-for"];
+      const clientIp =
+        (typeof forwardedIp === "string" && forwardedIp.split(",")[0].trim()) ||
+        req.ip ||
+        req.socket?.remoteAddress;
+
+      const verification = await verifyRecaptchaV3Token({
+        token: captchaToken,
+        remoteIp: clientIp,
+        expectedAction: "superadmin_login_submit",
+      });
+
+      if (!verification.ok) {
+        return res.status(verification.status).json({
+          success: false,
+          message: verification.message,
+          errorCodes: verification.errorCodes,
+        });
+      }
+    }
 
     // 1. Validate Input Fields
     if (!email || !password) {
@@ -236,13 +260,36 @@ exports.getSuperAdminProfile = async (req, res) => {
  */
 exports.candidateRegister = async (req, res) => {
   try {
-    const { firstName, lastName, email, mobileNumber, password } = req.body;
+    const { firstName, lastName, email, mobileNumber, password, captchaToken } = req.body;
 
     if (!firstName || !lastName || !email || !password) {
       return res.status(400).json({
         success: false,
         message: "First name, last name, email, and password are required.",
       });
+    }
+
+    // Google reCAPTCHA v3 verification
+    if (captchaToken || process.env.NODE_ENV === "production") {
+      const forwardedIp = req.headers["x-forwarded-for"];
+      const clientIp =
+        (typeof forwardedIp === "string" && forwardedIp.split(",")[0].trim()) ||
+        req.ip ||
+        req.socket?.remoteAddress;
+
+      const verification = await verifyRecaptchaV3Token({
+        token: captchaToken,
+        remoteIp: clientIp,
+        expectedAction: "register_submit",
+      });
+
+      if (!verification.ok) {
+        return res.status(verification.status).json({
+          success: false,
+          message: verification.message,
+          errorCodes: verification.errorCodes,
+        });
+      }
     }
 
     const normalizedEmail = String(email).trim().toLowerCase();
@@ -323,13 +370,36 @@ exports.candidateRegister = async (req, res) => {
  */
 exports.candidateLogin = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, captchaToken } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({
         success: false,
         message: "Email and password are required.",
       });
+    }
+
+    // Google reCAPTCHA v3 verification
+    if (captchaToken || process.env.NODE_ENV === "production") {
+      const forwardedIp = req.headers["x-forwarded-for"];
+      const clientIp =
+        (typeof forwardedIp === "string" && forwardedIp.split(",")[0].trim()) ||
+        req.ip ||
+        req.socket?.remoteAddress;
+
+      const verification = await verifyRecaptchaV3Token({
+        token: captchaToken,
+        remoteIp: clientIp,
+        expectedAction: "login_submit",
+      });
+
+      if (!verification.ok) {
+        return res.status(verification.status).json({
+          success: false,
+          message: verification.message,
+          errorCodes: verification.errorCodes,
+        });
+      }
     }
 
     const normalizedEmail = String(email).trim().toLowerCase();
@@ -413,7 +483,7 @@ exports.logout = (req, res) => {
  */
 exports.forgotPassword = async (req, res) => {
   try {
-    const { email } = req.body;
+    const { email, captchaToken } = req.body;
 
     if (!email || !String(email).trim()) {
       return res.status(400).json({
@@ -421,6 +491,29 @@ exports.forgotPassword = async (req, res) => {
         isRegistered: false,
         message: "Please enter your email address.",
       });
+    }
+
+    // Google reCAPTCHA v3 verification
+    if (captchaToken || process.env.NODE_ENV === "production") {
+      const forwardedIp = req.headers["x-forwarded-for"];
+      const clientIp =
+        (typeof forwardedIp === "string" && forwardedIp.split(",")[0].trim()) ||
+        req.ip ||
+        req.socket?.remoteAddress;
+
+      const verification = await verifyRecaptchaV3Token({
+        token: captchaToken,
+        remoteIp: clientIp,
+        expectedAction: "forgot_password_submit",
+      });
+
+      if (!verification.ok) {
+        return res.status(verification.status).json({
+          success: false,
+          message: verification.message,
+          errorCodes: verification.errorCodes,
+        });
+      }
     }
 
     const normalizedEmail = String(email).trim().toLowerCase();
@@ -705,6 +798,29 @@ exports.resetPassword = async (req, res) => {
 exports.sendVerificationOtp = async (req, res) => {
   try {
     const email = req.body?.email || req.user?.email;
+    const captchaToken = req.body?.captchaToken;
+
+    if (captchaToken) {
+      const forwardedIp = req.headers["x-forwarded-for"];
+      const clientIp =
+        (typeof forwardedIp === "string" && forwardedIp.split(",")[0].trim()) ||
+        req.ip ||
+        req.socket?.remoteAddress;
+
+      const verification = await verifyRecaptchaV3Token({
+        token: captchaToken,
+        remoteIp: clientIp,
+        expectedAction: "verify_email_otp_submit",
+      });
+
+      if (!verification.ok) {
+        return res.status(verification.status).json({
+          success: false,
+          message: verification.message,
+          errorCodes: verification.errorCodes,
+        });
+      }
+    }
 
     if (!email || !String(email).trim()) {
       return res.status(400).json({

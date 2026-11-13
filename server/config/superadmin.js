@@ -1,24 +1,16 @@
 const bcrypt = require("bcryptjs");
 const prisma = require("../config/prisma");
 
-const DEFAULT_SUPERADMIN_EMAIL = "superadmin@netopsys.in";
-const DEFAULT_SUPERADMIN_PASSWORD = "SuperAdmin@2026";
-const DEFAULT_SUPERADMIN_NAME = "Netopsys Super Admin";
-
 /**
- * Returns the configured SuperAdmin credentials from environment variables
- * with fallback defaults.
+ * Returns the configured SuperAdmin credentials from environment variables.
+ * Values must be configured in server/.env (SUPERADMIN_EMAIL, SUPERADMIN_PASSWORD, SUPERADMIN_NAME).
  */
 function getSuperAdminConfig() {
-  const email = String(process.env.SUPERADMIN_EMAIL || DEFAULT_SUPERADMIN_EMAIL)
+  const email = String(process.env.SUPERADMIN_EMAIL || "")
     .trim()
     .toLowerCase();
-  const password = String(
-    process.env.SUPERADMIN_PASSWORD || DEFAULT_SUPERADMIN_PASSWORD
-  );
-  const name = String(
-    process.env.SUPERADMIN_NAME || DEFAULT_SUPERADMIN_NAME
-  ).trim();
+  const password = String(process.env.SUPERADMIN_PASSWORD || "");
+  const name = String(process.env.SUPERADMIN_NAME || "Netopsys Super Admin").trim();
 
   return { email, password, name };
 }

@@ -30,7 +30,6 @@ export default function ProtectedRoute({
       const role = String(user.role || "").toUpperCase();
       const email = String(user.email || "").toLowerCase();
       const isSuper =
-        email === "superadmin@netopsys.in" ||
         role === "SUPERADMIN" ||
         role === "SUPER_ADMIN";
 
@@ -59,7 +58,6 @@ export default function ProtectedRoute({
         const role = String(user.role || "").toUpperCase();
         const email = String(user.email || "").toLowerCase();
         const isSuper =
-          email === "superadmin@netopsys.in" ||
           role === "SUPERADMIN" ||
           role === "SUPER_ADMIN";
 

@@ -4,6 +4,7 @@ import { Send, Mail, Loader2, Check } from "lucide-react";
 import netopsysLogo from "../assets/netopsys-logo.webp";
 import { toast } from "./toast.tsx";
 import { openCookiePreferences } from "../utils/cookie-consent.ts";
+import { preloadRecaptcha, executeRecaptcha } from "../utils/recaptcha.ts";
 
 export default function Footer() {
   const navigate = useNavigate();
@@ -27,10 +28,16 @@ export default function Footer() {
       setIsRocketLaunching(true);
       setIsSubmittingNewsletter(true);
 
+      // Generate invisible reCAPTCHA v3 token for newsletter subscription
+      const captchaToken = await executeRecaptcha("newsletter_subscribe").catch((err) => {
+        console.warn("reCAPTCHA execution note:", err);
+        return "";
+      });
+
       const res = await fetch("/api/subscribers/blog", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, captchaToken }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -357,6 +364,7 @@ export default function Footer() {
                 <input
                   type="email"
                   value={newsletterEmail}
+                  onFocus={() => preloadRecaptcha()}
                   onChange={(e) => setNewsletterEmail(e.target.value)}
                   placeholder="Your email address"
                   className="w-full min-w-0 bg-[#100D16] border border-white/15 focus:border-[#BE3093] rounded-xl px-3.5 py-2.5 text-xs text-white placeholder:text-[#6C667A] outline-none transition-colors select-text cursor-text pointer-events-auto relative z-30 focus:ring-1 focus:ring-[#BE3093]"

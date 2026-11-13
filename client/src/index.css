@@ -1100,15 +1100,27 @@ img, svg, video, canvas {
 
   .teams-gallery {
     gap: 0.875rem !important;
+    align-items: flex-start !important;
   }
 
   .teams-card {
     width: clamp(160px, 44vw, 200px) !important;
+    justify-content: flex-start !important;
   }
 
   .teams-card-img-wrap {
     height: clamp(168px, 46vw, 210px) !important;
     border-radius: 16px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .teams-card-name {
+    min-height: auto !important;
+    line-height: 1.25 !important;
+  }
+
+  .teams-card-role {
+    margin-top: 0.15rem !important;
   }
 
   .contact-card {
@@ -3252,20 +3264,38 @@ img, svg, video, canvas {
   }
 }
 
-/* Keep the official floating reCAPTCHA v3 badge visible and hover-stable above BackToHeroButton */
+/* Keep the official floating reCAPTCHA v3 badge visible and responsive across all devices */
 .grecaptcha-badge {
   visibility: visible !important;
-  bottom: 72px !important;
+  bottom: 84px !important;
   right: 0px !important;
   z-index: 40 !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.16) !important;
+  border-radius: 4px 0 0 4px !important;
   transform: translateX(186px) !important;
-  transition: transform 0.25s ease !important;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
   will-change: transform;
 }
 
 .grecaptcha-badge:hover,
-.grecaptcha-badge:focus-within {
+.grecaptcha-badge:focus-within,
+.grecaptcha-badge:active {
   transform: translateX(0px) !important;
+}
+
+@media (max-width: 639px) {
+  .grecaptcha-badge {
+    bottom: 74px !important;
+    right: 0px !important;
+    transform: scale(0.88) translateX(186px) !important;
+    transform-origin: bottom right !important;
+  }
+
+  .grecaptcha-badge:hover,
+  .grecaptcha-badge:focus-within,
+  .grecaptcha-badge:active {
+    transform: scale(0.88) translateX(0px) !important;
+  }
 }
 
 @media (min-width: 640px) {
@@ -3274,9 +3304,19 @@ img, svg, video, canvas {
   }
 }
 
+/* Display scaling calibrations for 125% and 150% scales */
+@media screen and (min-resolution: 115dpi) and (max-resolution: 150dpi) {
+  .grecaptcha-badge {
+    bottom: 86px !important;
+  }
+}
+
 /* Hide badge inside admin portals */
-body.hide-recaptcha-badge .grecaptcha-badge {
+body.hide-recaptcha-badge .grecaptcha-badge,
+.admin-layout ~ div .grecaptcha-badge {
   visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
 
 /* ==========================================================================

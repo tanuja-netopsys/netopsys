@@ -12,6 +12,7 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { toast } from "../componenets/toast.tsx";
+import { preloadRecaptcha, executeRecaptcha } from "../utils/recaptcha.ts";
 
 export interface CareerUser {
   name: string;
@@ -582,6 +583,9 @@ export default function LoginPage({
 
   useEffect(() => {
     resetForm();
+    if (isOpen) {
+      preloadRecaptcha();
+    }
   }, [isOpen]);
 
   useEffect(() => {
@@ -682,12 +686,18 @@ export default function LoginPage({
     setIsLoading(true);
 
     try {
+      const captchaToken = await executeRecaptcha("login_submit").catch((err) => {
+        console.warn("reCAPTCHA execution note:", err);
+        return "";
+      });
+
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: signInEmail.trim(),
           password: signInPassword,
+          captchaToken,
         }),
       });
 
@@ -761,10 +771,15 @@ export default function LoginPage({
 
     setIsLoading(true);
     try {
+      const captchaToken = await executeRecaptcha("forgot_password_submit").catch((err) => {
+        console.warn("reCAPTCHA execution note:", err);
+        return "";
+      });
+
       const res = await fetch("/api/auth/forgot-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: forgotEmail.trim() }),
+        body: JSON.stringify({ email: forgotEmail.trim(), captchaToken }),
       });
 
       const data = await res.json();
@@ -801,10 +816,15 @@ export default function LoginPage({
     setIsLoading(true);
 
     try {
+      const captchaToken = await executeRecaptcha("forgot_password_submit").catch((err) => {
+        console.warn("reCAPTCHA execution note:", err);
+        return "";
+      });
+
       const res = await fetch("/api/auth/forgot-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: forgotEmail.trim() }),
+        body: JSON.stringify({ email: forgotEmail.trim(), captchaToken }),
       });
 
       const data = await res.json();
@@ -958,6 +978,11 @@ export default function LoginPage({
     setIsLoading(true);
 
     try {
+      const captchaToken = await executeRecaptcha("register_submit").catch((err) => {
+        console.warn("reCAPTCHA execution note:", err);
+        return "";
+      });
+
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -967,6 +992,7 @@ export default function LoginPage({
           email: createEmail.trim(),
           mobileNumber: mobileNumber.trim(),
           password: createPassword,
+          captchaToken,
         }),
       });
 

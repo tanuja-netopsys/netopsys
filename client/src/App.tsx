@@ -15,6 +15,7 @@ import { ToastContainer } from "./componenets/toast.tsx";
 import ProtectedRoute from "./componenets/ProtectedRoute.tsx";
 import SmoothScrollController from "./componenets/SmoothScrollController.tsx";
 import CookieConsent from "./componenets/cookie-consent.tsx";
+import { preloadRecaptcha } from "./utils/recaptcha.ts";
 
 const ServicesPage = lazy(() => import("./pages/services.tsx"));
 const ServiceDetailPage = lazy(() => import("./pages/service-detail.tsx"));
@@ -62,6 +63,9 @@ function RouteThemeSync() {
       const isAdminRoute = p.startsWith("/admin") || p.startsWith("/superadmin");
       const isLaunchingRoute = p.startsWith("/launching");
       document.body.classList.toggle("hide-recaptcha-badge", isAdminRoute || isLaunchingRoute);
+      if (!isAdminRoute && !isLaunchingRoute) {
+        preloadRecaptcha();
+      }
     } catch {
       // ignore DOM style/classList access restrictions
     }

@@ -152,27 +152,22 @@ export default function AdminSidebar({
       const stored = localStorage.getItem("netopsys_admin_user");
       if (stored) {
         const parsed = JSON.parse(stored);
-        const email = String(parsed.email || "").toLowerCase();
-        let role = parsed.role;
+        const role = parsed.role;
         const isSuper =
-          email === "superadmin@netopsys.in" ||
           role === "SUPERADMIN" ||
           role === "SUPER_ADMIN";
 
         if (isSuper) {
           return {
-            name: parsed.name || "Netopsys Super Admin",
-            email: parsed.email || "superadmin@netopsys.in",
+            name: parsed.name || "Super Admin",
+            email: parsed.email || "",
             role: "SUPERADMIN",
           };
         }
 
-        if (email === "admin@netopsys.in" || (email.startsWith("admin@") && !email.includes("superadmin"))) {
-          role = "ADMIN";
-        }
         return {
           name: parsed.name || "Admin User",
-          email: parsed.email || "admin@netopsys.in",
+          email: parsed.email || "",
           role: role || "ADMIN",
         };
       }
@@ -182,15 +177,15 @@ export default function AdminSidebar({
 
     if (typeof window !== "undefined" && window.location.pathname.startsWith("/superadmin")) {
       return {
-        name: "Netopsys Super Admin",
-        email: "superadmin@netopsys.in",
+        name: "Super Admin",
+        email: "",
         role: "SUPERADMIN",
       };
     }
 
     return {
       name: "Admin User",
-      email: "admin@netopsys.in",
+      email: "",
       role: "ADMIN",
     };
   });
@@ -201,28 +196,23 @@ export default function AdminSidebar({
         const stored = localStorage.getItem("netopsys_admin_user");
         if (stored) {
           const parsed = JSON.parse(stored);
-          const email = String(parsed.email || "").toLowerCase();
-          let role = parsed.role;
+          const role = parsed.role;
           const isSuper =
-            email === "superadmin@netopsys.in" ||
             role === "SUPERADMIN" ||
             role === "SUPER_ADMIN";
 
           if (isSuper) {
             setAdminUser({
-              name: parsed.name || "Netopsys Super Admin",
-              email: parsed.email || "superadmin@netopsys.in",
+              name: parsed.name || "Super Admin",
+              email: parsed.email || "",
               role: "SUPERADMIN",
             });
             return;
           }
 
-          if (email === "admin@netopsys.in" || (email.startsWith("admin@") && !email.includes("superadmin"))) {
-            role = "ADMIN";
-          }
           setAdminUser({
             name: parsed.name || "Admin User",
-            email: parsed.email || "admin@netopsys.in",
+            email: parsed.email || "",
             role: role || "ADMIN",
           });
           return;
@@ -233,8 +223,8 @@ export default function AdminSidebar({
 
       if (window.location.pathname.startsWith("/superadmin")) {
         setAdminUser({
-          name: "Netopsys Super Admin",
-          email: "superadmin@netopsys.in",
+          name: "Super Admin",
+          email: "",
           role: "SUPERADMIN",
         });
       }
@@ -302,7 +292,7 @@ export default function AdminSidebar({
     }
 
     // Only genuine superadmin credentials
-    return role === "SUPERADMIN" || role === "SUPER_ADMIN" || email === "superadmin@netopsys.in";
+    return role === "SUPERADMIN" || role === "SUPER_ADMIN";
   }, [adminUser.role, adminUser.email]);
 
   // Which Job Management items should be visible in the sidebar:

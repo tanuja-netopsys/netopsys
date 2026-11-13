@@ -51,6 +51,7 @@ export interface ParsedBlogData {
   image?: string | null;
   leadParagraph: string;
   sections: BlogSection[];
+  cleanHtml: string;
   quoteText: string;
   quoteAuthor: string;
   keyTakeaways: string[];
@@ -167,57 +168,9 @@ function HeroGraphicCard({
  * 4. 4 key takeaway bullets
  * 5. Relevant explore topics
  */
-function parseUniversalBlogData(blog: BlogPostDetail | null): ParsedBlogData {
+function parseUniversalBlogData(blog: BlogPostDetail | null): ParsedBlogData | null {
   if (!blog) {
-    return {
-      category: "AI Automation",
-      tagBg: "bg-[#F6EEFA]",
-      tagColor: "text-[#693092]",
-      variant: "featured",
-      titleMain: "How AI Automation Is Reshaping Enterprise",
-      titleHighlight: "Workflows",
-      fullTitle: "How AI Automation Is Reshaping Enterprise Workflows",
-      excerpt:
-        "From intelligent document processing to self-healing pipelines, here's how organisations are cutting manual effort and moving faster with practical AI automation.",
-      authorName: "Netopsys Team",
-      authorRole: "Enterprise Systems Architecture",
-      authorInitials: "NT",
-      date: "Oct 20, 2026",
-      readTime: "8 min read",
-      image: null,
-      leadParagraph:
-        "Automation is no longer limited to rigid, rule-based scripts. With modern AI, systems can read documents, understand context and recover from failures, which makes it practical to automate work that used to need a person at every step.",
-      sections: [
-        {
-          id: "section-0",
-          title: "Why manual workflows hold teams back",
-          content:
-            "Most enterprises still run on a patchwork of inboxes, spreadsheets and manual hand-offs. Each one is small, but together they slow every team down: invoices wait for data entry, approvals sit in queues, and skilled people spend their days copying information between systems instead of solving problems.",
-        },
-        {
-          id: "section-1",
-          title: "Intelligent document processing",
-          content:
-            "Modern AI models can read invoices, contracts, forms and emails the way a person would, then extract the fields that matter and route them to the right system. Instead of templates that break whenever a layout changes, the model adapts and sends only the uncertain cases to a person for review.",
-        },
-        {
-          id: "section-2",
-          title: "Self-healing pipelines",
-          content:
-            "Pipelines fail for ordinary reasons: a schema changes, an API times out, a file arrives late. Self-healing pipelines watch for these failures, retry intelligently, repair known issues on their own and alert an engineer only when something genuinely needs attention.",
-        },
-      ],
-      quoteText:
-        "Automation works best when it removes the busywork and gives people more time for judgement.",
-      quoteAuthor: "Netopsys Team",
-      keyTakeaways: [
-        "Start with one repetitive, high-volume process",
-        "Keep a person in the loop for low-confidence cases",
-        "Measure time saved and error rates from day one",
-        "Expand step by step once the first workflow is stable",
-      ],
-      topics: ["Machine Learning", "NLP Solutions", "ERP Solutions", "AI Automation"],
-    };
+    return null;
   }
 
   // 1. Raw text extraction
@@ -228,14 +181,13 @@ function parseUniversalBlogData(blog: BlogPostDetail | null): ParsedBlogData {
     : "";
 
   // 2. Metadata extraction
-  let category = blog.category?.trim() || "";
+  let category = blog.category?.trim() || blog.tag?.trim() || "";
   const catMatch = raw.match(
     /(?:<strong>|<b>)?\s*Category\s*:\s*(?:<\/strong>|<\/b>)?\s*([^<\n\r]+)/i
   );
   if (catMatch && catMatch[1]?.trim()) {
     category = catMatch[1].trim();
   }
-  if (!category) category = "AI Automation";
 
   let author = blog.author?.name?.trim() || "";
   const authorMatch = raw.match(
@@ -244,7 +196,6 @@ function parseUniversalBlogData(blog: BlogPostDetail | null): ParsedBlogData {
   if (authorMatch && authorMatch[1]?.trim()) {
     author = authorMatch[1].trim();
   }
-  if (!author) author = "Netopsys Team";
 
   let date = blog.date?.trim() || "";
   const dateMatch = raw.match(
@@ -253,7 +204,6 @@ function parseUniversalBlogData(blog: BlogPostDetail | null): ParsedBlogData {
   if (dateMatch && dateMatch[1]?.trim()) {
     date = dateMatch[1].trim();
   }
-  if (!date) date = "Oct 20, 2026";
 
   let excerpt = blog.excerpt?.trim() || "";
   const descMatch = raw.match(
@@ -263,16 +213,17 @@ function parseUniversalBlogData(blog: BlogPostDetail | null): ParsedBlogData {
     excerpt = descMatch[1].trim();
   }
 
-  const authorRole = blog.author?.role?.trim() || "Enterprise Systems Architecture";
+  const authorRole = blog.author?.role?.trim() || "";
   const authorInitials =
     blog.author?.initials?.trim() ||
-    author
-      .split(/\s+/)
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2) ||
-    "NT";
+    (author
+      ? author
+          .split(/\s+/)
+          .map((n) => n[0])
+          .join("")
+          .toUpperCase()
+          .slice(0, 2)
+      : "");
 
   // Clean out metadata from body content
   let cleanHtml = raw
@@ -328,7 +279,7 @@ function parseUniversalBlogData(blog: BlogPostDetail | null): ParsedBlogData {
     while (i < headingTokens.length) {
       const hTitle = (headingTokens[i] || headingTokens[i + 1] || "").replace(/<[^>]+>/g, "").trim();
       const hContent = (headingTokens[i + 2] || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
-      if (hTitle && hContent && hContent.length > 15) {
+      if (hTitle && hContent && hContent.length > 5) {
         sections.push({
           id: `section-${sIdx++}`,
           title: hTitle,
@@ -339,113 +290,43 @@ function parseUniversalBlogData(blog: BlogPostDetail | null): ParsedBlogData {
     }
   }
 
-  // If no explicit headings, parse paragraphs into lead + sections
-  if (sections.length < 3) {
+  // If no explicit headings, parse paragraphs into lead + sections if there are multiple paragraphs
+  if (sections.length === 0) {
     const pMatches = cleanHtml
       .split(/(?:<\/p>|\n\n+)/i)
       .map((p) => p.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim())
       .filter((p) => p.length > 20);
 
-    if (pMatches.length > 0) {
-      if (!leadParagraph) {
-        leadParagraph = pMatches[0];
-      }
-      const rest = leadParagraph === pMatches[0] ? pMatches.slice(1) : pMatches;
-
-      if (rest.length >= 3) {
-        const fallbackTitles = [
-          "Why manual workflows hold teams back",
-          "Intelligent document processing",
-          "Self-healing pipelines",
-        ];
-        rest.slice(0, 3).forEach((p, idx) => {
-          if (sections.length <= idx) {
-            sections.push({
-              id: `section-${sections.length}`,
-              title: fallbackTitles[idx] || `Core Architecture Phase ${idx + 1}`,
-              content: p,
-            });
-          }
+    if (pMatches.length > 1) {
+      leadParagraph = pMatches[0];
+      pMatches.slice(1).forEach((p, idx) => {
+        sections.push({
+          id: `section-${idx}`,
+          title: `Section ${idx + 1}`,
+          content: p,
         });
-      } else {
-        // Synthesize full 3 sections matching the exact high-standard content
-        const defaultTemplates = [
-          {
-            title: "Why manual workflows hold teams back",
-            content:
-              rest[0] ||
-              "Most enterprises still run on a patchwork of inboxes, spreadsheets and manual hand-offs. Each one is small, but together they slow every team down: invoices wait for data entry, approvals sit in queues, and skilled people spend their days copying information between systems instead of solving problems.",
-          },
-          {
-            title: "Intelligent document processing",
-            content:
-              rest[1] ||
-              "Modern AI models can read invoices, contracts, forms and emails the way a person would, then extract the fields that matter and route them to the right system. Instead of templates that break whenever a layout changes, the model adapts and sends only the uncertain cases to a person for review.",
-          },
-          {
-            title: "Self-healing pipelines",
-            content:
-              rest[2] ||
-              "Pipelines fail for ordinary reasons: a schema changes, an API times out, a file arrives late. Self-healing pipelines watch for these failures, retry intelligently, repair known issues on their own and alert an engineer only when something genuinely needs attention.",
-          },
-        ];
-
-        defaultTemplates.forEach((t) => {
-          if (sections.length < 3) {
-            sections.push({
-              id: `section-${sections.length}`,
-              title: t.title,
-              content: t.content,
-            });
-          }
-        });
-      }
+      });
+    } else if (pMatches.length === 1) {
+      leadParagraph = pMatches[0];
     }
   }
 
-  // Ensure lead paragraph is set
-  if (!leadParagraph) {
-    leadParagraph =
-      excerpt ||
-      "Automation is no longer limited to rigid, rule-based scripts. With modern AI, systems can read documents, understand context and recover from failures, which makes it practical to automate work that used to need a person at every step.";
+  // Ensure lead paragraph is set from excerpt if empty
+  if (!leadParagraph && excerpt) {
+    leadParagraph = excerpt;
   }
 
-  // Ensure excerpt is set
-  if (!excerpt) {
-    excerpt =
-      "From intelligent document processing to self-healing pipelines, here's how organisations are cutting manual effort and moving faster with practical AI automation.";
-  }
-
-  // Ensure quote is set
-  if (!quoteText) {
-    quoteText =
-      "Automation works best when it removes the busywork and gives people more time for judgement.";
-  }
-
-  // Ensure 4 key takeaways
+  // Key takeaways
   let keyTakeaways = Array.isArray(blog.keyTakeaways)
     ? blog.keyTakeaways.map((t) => String(t).trim()).filter(Boolean)
     : [];
 
-  if (keyTakeaways.length < 4) {
-    if (extractedBullets.length >= 4) {
-      keyTakeaways = extractedBullets.slice(0, 4);
-    } else {
-      const defaultTakeaways = [
-        "Start with one repetitive, high-volume process",
-        "Keep a person in the loop for low-confidence cases",
-        "Measure time saved and error rates from day one",
-        "Expand step by step once the first workflow is stable",
-      ];
-      keyTakeaways = [
-        ...keyTakeaways,
-        ...defaultTakeaways.slice(keyTakeaways.length),
-      ].slice(0, 4);
-    }
+  if (keyTakeaways.length === 0 && extractedBullets.length > 0) {
+    keyTakeaways = extractedBullets.slice(0, 4);
   }
 
-  // Title split into main and highlight (last word in purple #693092 matching screenshot)
-  const fullTitle = blog.title?.trim() || "How AI Automation Is Reshaping Enterprise Workflows";
+  // Title split into main and highlight (last word in purple #693092)
+  const fullTitle = blog.title?.trim() || "";
   const words = fullTitle.split(/\s+/);
   let titleMain = fullTitle;
   let titleHighlight = "";
@@ -454,27 +335,26 @@ function parseUniversalBlogData(blog: BlogPostDetail | null): ParsedBlogData {
     titleMain = words.slice(0, -1).join(" ");
   }
 
-  // Topic tags
-  const baseTopics = ["Machine Learning", "NLP Solutions", "ERP Solutions", "AI Automation"];
-  const topics = Array.from(new Set([category, ...baseTopics])).slice(0, 4);
+  const topics = category ? [category] : [];
 
   return {
     category,
-    tagBg: "bg-[#F6EEFA]",
-    tagColor: "text-[#693092]",
+    tagBg: blog.tagBg || "bg-[#F6EEFA]",
+    tagColor: blog.tagColor || "text-[#693092]",
     variant: blog.graphicVariant || "featured",
     titleMain,
     titleHighlight,
     fullTitle,
-    excerpt,
+    excerpt: excerpt || leadParagraph,
     authorName: author,
     authorRole,
     authorInitials,
     date,
-    readTime: blog.readTime || "8 min read",
+    readTime: blog.readTime || "",
     image: blog.image || null,
     leadParagraph,
     sections,
+    cleanHtml,
     quoteText,
     quoteAuthor: author,
     keyTakeaways,
@@ -489,7 +369,7 @@ export default function BlogsDetailPage() {
 
   const queryId = searchParams.get("id");
   const querySlug = searchParams.get("slug");
-  const targetIdentifier = idOrSlug || queryId || querySlug || "1";
+  const targetIdentifier = idOrSlug || queryId || querySlug || "";
 
   const [blog, setBlog] = useState<BlogPostDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -539,12 +419,14 @@ export default function BlogsDetailPage() {
     };
   }, [targetIdentifier]);
 
-  const parsed = parseUniversalBlogData(blog);
+  const parsed = blog ? parseUniversalBlogData(blog) : null;
 
   // Set document title
   useEffect(() => {
-    document.title = `${parsed.fullTitle} | Netopsys Blog`;
-  }, [parsed.fullTitle]);
+    if (parsed?.fullTitle) {
+      document.title = `${parsed.fullTitle} | Netopsys Blog`;
+    }
+  }, [parsed?.fullTitle]);
 
   const handleShare = () => {
     navigator.clipboard?.writeText?.(window.location.href);
@@ -603,14 +485,14 @@ export default function BlogsDetailPage() {
           {isLoading && (
             <div className="py-28 flex flex-col items-center justify-center gap-4 bg-white/70 backdrop-blur-xs rounded-[28px] border border-[#ECE4F2]">
               <Loader2 className="w-9 h-9 text-[#693092] animate-spin" />
-              <p className="text-sm font-medium text-[#716A7E]">Loading article in standard format...</p>
+              <p className="text-sm font-medium text-[#716A7E]">Loading article...</p>
             </div>
           )}
 
           {/* Error State */}
-          {!isLoading && error && (
+          {!isLoading && (error || !blog) && (
             <div className="py-20 text-center bg-white rounded-[28px] border border-[#ECE4F2] px-6">
-              <p className="text-lg font-bold text-[#141010] mb-2">{error}</p>
+              <p className="text-lg font-bold text-[#141010] mb-2">{error || "Article not found"}</p>
               <p className="text-xs sm:text-sm text-[#716A7E] mb-6">
                 The article you are looking for might have been moved or unpublished.
               </p>
@@ -625,7 +507,7 @@ export default function BlogsDetailPage() {
           )}
 
           {/* Full Article Content View */}
-          {!isLoading && (
+          {!isLoading && !error && blog && parsed && (
             <article className="space-y-6 sm:space-y-7">
               {/* ===================================================================
                   CARD 1: TOP HERO CARD (Single white card with title + graphic)
@@ -715,107 +597,124 @@ export default function BlogsDetailPage() {
                   {/* Card A: Numbered Article Content Canvas */}
                   <div className="bg-white rounded-[24px] sm:rounded-[28px] p-6 sm:p-8 md:p-10 border border-[#ECE4F2] shadow-[0_4px_24px_rgba(0,0,0,0.03)] blogdetail-content-card">
                     {/* Lead Paragraph with Amber/Gold Left Accent Border - Standard description size */}
-                    <div className="border-l-2 border-[#FBAE42] pl-4 sm:pl-5 py-1 mb-8 sm:mb-9 blogdetail-lead">
-                      <p className="text-[#554E62] text-sm sm:text-base md:text-[16.5px] leading-relaxed font-normal">
-                        {parsed.leadParagraph}
-                      </p>
-                    </div>
+                    {parsed.leadParagraph && (
+                      <div className="border-l-2 border-[#FBAE42] pl-4 sm:pl-5 py-1 mb-8 sm:mb-9 blogdetail-lead">
+                        <p className="text-[#554E62] text-sm sm:text-base md:text-[16.5px] leading-relaxed font-normal">
+                          {parsed.leadParagraph}
+                        </p>
+                      </div>
+                    )}
 
-                    {/* Numbered Sections (01, 02, 03, ...) */}
-                    <div className="space-y-8 sm:space-y-9 blogdetail-sections-wrap">
-                      {parsed.sections.map((section, idx) => (
-                        <section
-                          key={section.id || idx}
-                          id={`section-${idx}`}
-                          className="scroll-mt-32"
-                        >
-                          {/* Heading with 01/02/03 Badge: Unified section heading size & style */}
-                          <div className="flex items-center gap-3 mb-3">
-                            <span className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs sm:text-[13px] font-bold bg-[#F6EEFA] text-[#693092] select-none shrink-0">
-                              {String(idx + 1).padStart(2, "0")}
-                            </span>
-                            <h2 className="text-xl sm:text-2xl lg:text-[1.65rem] font-bold tracking-tight leading-snug text-[#141010] blogdetail-section-title">
-                              {section.title}
-                            </h2>
-                          </div>
+                    {/* Numbered Sections or Full Content */}
+                    {parsed.sections.length > 0 ? (
+                      <div className="space-y-8 sm:space-y-9 blogdetail-sections-wrap">
+                        {parsed.sections.map((section, idx) => (
+                          <section
+                            key={section.id || idx}
+                            id={`section-${idx}`}
+                            className="scroll-mt-32"
+                          >
+                            {/* Heading with 01/02/03 Badge: Unified section heading size & style */}
+                            <div className="flex items-center gap-3 mb-3">
+                              <span className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs sm:text-[13px] font-bold bg-[#F6EEFA] text-[#693092] select-none shrink-0">
+                                {String(idx + 1).padStart(2, "0")}
+                              </span>
+                              <h2 className="text-xl sm:text-2xl lg:text-[1.65rem] font-bold tracking-tight leading-snug text-[#141010] blogdetail-section-title">
+                                {section.title}
+                              </h2>
+                            </div>
 
-                          {/* Body text: Unified description size matching remaining pages */}
-                          <p className="text-[#554E62] text-sm sm:text-base md:text-[16.5px] leading-relaxed font-normal pl-0 sm:pl-0.5 blogdetail-section-body">
-                            {section.content}
+                            {/* Body text: Unified description size matching remaining pages */}
+                            <p className="text-[#554E62] text-sm sm:text-base md:text-[16.5px] leading-relaxed font-normal pl-0 sm:pl-0.5 blogdetail-section-body">
+                              {section.content}
+                            </p>
+                          </section>
+                        ))}
+                      </div>
+                    ) : parsed.cleanHtml ? (
+                      <div
+                        className="text-[#554E62] text-sm sm:text-base md:text-[16.5px] leading-relaxed font-normal space-y-4"
+                        dangerouslySetInnerHTML={{ __html: parsed.cleanHtml }}
+                      />
+                    ) : null}
+                  </div>
+
+                  {/* Card B: Quote Callout Card (Only shown if quote exists) */}
+                  {parsed.quoteText && (
+                    <div className="bg-[#A12F91] text-white rounded-[24px] sm:rounded-[28px] p-7 sm:p-9 relative overflow-hidden shadow-sm blogdetail-quote-card">
+                      {/* Ambient subtle circles in bottom right */}
+                      <div className="absolute -right-8 -bottom-8 w-36 h-36 rounded-full bg-white/10 pointer-events-none" />
+                      <div className="absolute right-12 bottom-3 w-14 h-14 rounded-full bg-[#FBAE42]/40 pointer-events-none" />
+
+                      <div className="relative z-10 max-w-xl">
+                        <p className="text-lg sm:text-xl md:text-[22px] font-bold leading-snug tracking-[-0.02em] mb-4">
+                          &ldquo;{parsed.quoteText}&rdquo;
+                        </p>
+                        {parsed.quoteAuthor && (
+                          <p className="text-xs sm:text-sm font-medium text-white/90">
+                            — {parsed.quoteAuthor}
                           </p>
-                        </section>
-                      ))}
+                        )}
+                      </div>
                     </div>
-                  </div>
-
-                  {/* Card B: Quote Callout Card (Vibrant Magenta #A12F91 matching screenshot) */}
-                  <div className="bg-[#A12F91] text-white rounded-[24px] sm:rounded-[28px] p-7 sm:p-9 relative overflow-hidden shadow-sm blogdetail-quote-card">
-                    {/* Ambient subtle circles in bottom right */}
-                    <div className="absolute -right-8 -bottom-8 w-36 h-36 rounded-full bg-white/10 pointer-events-none" />
-                    <div className="absolute right-12 bottom-3 w-14 h-14 rounded-full bg-[#FBAE42]/40 pointer-events-none" />
-
-                    <div className="relative z-10 max-w-xl">
-                      <p className="text-lg sm:text-xl md:text-[22px] font-bold leading-snug tracking-[-0.02em] mb-4">
-                        &ldquo;{parsed.quoteText}&rdquo;
-                      </p>
-                      <p className="text-xs sm:text-sm font-medium text-white/90">
-                        — {parsed.quoteAuthor}
-                      </p>
-                    </div>
-                  </div>
+                  )}
                 </div>
 
                 {/* ---------------------------------------------------------------
                     RIGHT COLUMN: 4 Sidebar Cards
                 ---------------------------------------------------------------- */}
                 <div className="lg:col-span-4 space-y-6 blogdetail-sidebar">
-                  {/* Widget 1: On this page (TOC with active indicator) */}
-                  <div className="bg-white rounded-[20px] p-6 sm:p-7 border border-[#ECE4F2] shadow-sm blogdetail-sidebar-card">
-                    <h3 className="text-sm sm:text-[15px] font-bold tracking-wider uppercase text-[#141010] mb-4 select-none">
-                      On this page
-                    </h3>
-                    <nav className="space-y-3.5">
-                      {parsed.sections.map((section, idx) => {
-                        const isActive = activeSection === idx;
-                        return (
-                          <button
-                            key={section.id || idx}
-                            type="button"
-                            onClick={() => scrollToSection(idx)}
-                            className={`w-full text-left text-sm sm:text-base md:text-[16px] leading-snug transition-colors flex items-start gap-3 cursor-pointer ${
-                              isActive
-                                ? "text-[#693092] font-semibold"
-                                : "text-[#716A7E] hover:text-[#141010]"
-                            }`}
-                          >
-                            <span
-                              className={`w-1 h-5 rounded-full shrink-0 mt-0.5 transition-colors ${
-                                isActive ? "bg-[#FBAE42]" : "bg-transparent"
+                  {/* Widget 1: On this page (Only shown if sections exist) */}
+                  {parsed.sections.length > 0 && (
+                    <div className="bg-white rounded-[20px] p-6 sm:p-7 border border-[#ECE4F2] shadow-sm blogdetail-sidebar-card">
+                      <h3 className="text-sm sm:text-[15px] font-bold tracking-wider uppercase text-[#141010] mb-4 select-none">
+                        On this page
+                      </h3>
+                      <nav className="space-y-3.5">
+                        {parsed.sections.map((section, idx) => {
+                          const isActive = activeSection === idx;
+                          return (
+                            <button
+                              key={section.id || idx}
+                              type="button"
+                              onClick={() => scrollToSection(idx)}
+                              className={`w-full text-left text-sm sm:text-base md:text-[16px] leading-snug transition-colors flex items-start gap-3 cursor-pointer ${
+                                isActive
+                                  ? "text-[#693092] font-semibold"
+                                  : "text-[#716A7E] hover:text-[#141010]"
                               }`}
-                            />
-                            <span className="truncate">{section.title}</span>
-                          </button>
-                        );
-                      })}
-                    </nav>
-                  </div>
+                            >
+                              <span
+                                className={`w-1 h-5 rounded-full shrink-0 mt-0.5 transition-colors ${
+                                  isActive ? "bg-[#FBAE42]" : "bg-transparent"
+                                }`}
+                              />
+                              <span className="truncate">{section.title}</span>
+                            </button>
+                          );
+                        })}
+                      </nav>
+                    </div>
+                  )}
 
-                  {/* Widget 2: Key takeaways (Dark Navy #2A124E matching screenshot) */}
-                  <div className="bg-[#2A124E] text-white rounded-[22px] p-6 sm:p-7 relative overflow-hidden shadow-md blogdetail-sidebar-card">
-                    {/* Decorative corner aura */}
-                    <div className="absolute top-2 right-2 w-16 h-16 rounded-full bg-white/5 pointer-events-none" />
-                    <h3 className="text-lg sm:text-xl font-bold text-white mb-4 select-none">
-                      Key takeaways
-                    </h3>
-                    <ul className="space-y-4 text-sm sm:text-base md:text-[16px] text-white/90 leading-relaxed font-normal">
-                      {parsed.keyTakeaways.map((item, idx) => (
-                        <li key={idx} className="flex items-start gap-3">
-                          <span className="w-2 h-2 rounded-full bg-[#FBAE42] mt-2 shrink-0" />
-                          <span>{item}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+                  {/* Widget 2: Key takeaways (Only shown if key takeaways exist) */}
+                  {parsed.keyTakeaways && parsed.keyTakeaways.length > 0 && (
+                    <div className="bg-[#2A124E] text-white rounded-[22px] p-6 sm:p-7 relative overflow-hidden shadow-md blogdetail-sidebar-card">
+                      {/* Decorative corner aura */}
+                      <div className="absolute top-2 right-2 w-16 h-16 rounded-full bg-white/5 pointer-events-none" />
+                      <h3 className="text-lg sm:text-xl font-bold text-white mb-4 select-none">
+                        Key takeaways
+                      </h3>
+                      <ul className="space-y-4 text-sm sm:text-base md:text-[16px] text-white/90 leading-relaxed font-normal">
+                        {parsed.keyTakeaways.map((item, idx) => (
+                          <li key={idx} className="flex items-start gap-3">
+                            <span className="w-2 h-2 rounded-full bg-[#FBAE42] mt-2 shrink-0" />
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
 
                   {/* Widget 3: Share this article */}
                   <div className="bg-white rounded-[20px] p-6 sm:p-7 border border-[#ECE4F2] shadow-sm blogdetail-sidebar-card">

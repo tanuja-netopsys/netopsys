@@ -34,7 +34,7 @@ const VISAKHAPATNAM_OFFICE = {
   ],
   landmark: "Opposite road to SBI ATM",
   email: "noreply@netopsys.in",
-  phone: "+91 40 4000 0000",
+  phone: "+91 xxxxx xxxxx",
 };
 
 // ============================================================================

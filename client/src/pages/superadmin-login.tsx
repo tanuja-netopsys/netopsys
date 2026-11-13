@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useState, useEffect, type FormEvent } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import {
   Mail,
@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import netopsysLogo from "../assets/netopsys-ai-logo.png";
 import { toast } from "../componenets/toast.tsx";
+import { preloadRecaptcha, executeRecaptcha } from "../utils/recaptcha.ts";
 
 export default function SuperAdminLoginPage() {
   const navigate = useNavigate();
@@ -26,6 +27,10 @@ export default function SuperAdminLoginPage() {
 
   // Determine if URL is specifically /superadmin or /admin
   const isSuperRoute = location.pathname.includes("superadmin");
+
+  useEffect(() => {
+    preloadRecaptcha();
+  }, []);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -45,6 +50,11 @@ export default function SuperAdminLoginPage() {
     setIsLoading(true);
 
     try {
+      const captchaToken = await executeRecaptcha("superadmin_login_submit").catch((err) => {
+        console.warn("reCAPTCHA execution note:", err);
+        return "";
+      });
+
       const response = await fetch("/api/auth/superadmin/login", {
         method: "POST",
         headers: {
@@ -53,6 +63,7 @@ export default function SuperAdminLoginPage() {
         body: JSON.stringify({
           email: email.trim(),
           password,
+          captchaToken,
         }),
       });
 
@@ -83,12 +94,10 @@ export default function SuperAdminLoginPage() {
 
       // Smooth redirect based on role or route
       const userRole = String(data.user?.role || "").toUpperCase();
-      const userEmail = String(data.user?.email || "").toLowerCase();
       const isSuper =
         isSuperRoute ||
         userRole === "SUPERADMIN" ||
-        userRole === "SUPER_ADMIN" ||
-        userEmail === "superadmin@netopsys.in";
+        userRole === "SUPER_ADMIN";
 
       const redirectPath = sessionStorage.getItem("netopsys_redirect_after_login");
       sessionStorage.removeItem("netopsys_redirect_after_login");

@@ -364,7 +364,7 @@ export default function PermissionsPage() {
         const role = String(u.role || "").toUpperCase();
         const email = String(u.email || "").toLowerCase();
         if (email === "admin@netopsys.in" || role === "ADMIN") return false;
-        return role === "SUPERADMIN" || role === "SUPER_ADMIN" || email === "superadmin@netopsys.in";
+        return role === "SUPERADMIN" || role === "SUPER_ADMIN";
       }
     } catch {}
     return false;
@@ -451,8 +451,7 @@ export default function PermissionsPage() {
   const filteredUsers = useMemo(() => {
     const nonSuperUsers = adminUsers.filter((u) => {
       const r = String(u.role || "").toUpperCase();
-      const em = String(u.email || "").toLowerCase();
-      return r !== "SUPERADMIN" && r !== "SUPER_ADMIN" && em !== "superadmin@netopsys.in";
+      return r !== "SUPERADMIN" && r !== "SUPER_ADMIN";
     });
     if (!searchQuery.trim()) return nonSuperUsers;
     const q = searchQuery.toLowerCase();
@@ -902,7 +901,7 @@ export default function PermissionsPage() {
                     filteredUsers.map((user) => {
                       const isSuper =
                         String(user.role).toUpperCase() === "SUPERADMIN" ||
-                        user.email.toLowerCase() === "superadmin@netopsys.in";
+                        String(user.role).toUpperCase() === "SUPER_ADMIN";
                       const initials = (user.name?.[0] || user.email?.[0] || "A").toUpperCase();
 
                       return (

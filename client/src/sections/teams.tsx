@@ -179,13 +179,13 @@ export default function Teams() {
             onMouseLeave={() => setIsHovered(false)}
             onTouchStart={() => setIsHovered(true)}
             onTouchEnd={() => setIsHovered(false)}
-            className="teams-gallery flex items-end gap-5 sm:gap-6 lg:gap-6 xl:gap-7 overflow-x-auto pb-4 pt-2 no-scrollbar select-none cursor-grab active:cursor-grabbing"
+            className="teams-gallery flex items-start sm:items-end gap-5 sm:gap-6 lg:gap-6 xl:gap-7 overflow-x-auto pb-4 pt-2 no-scrollbar select-none cursor-grab active:cursor-grabbing"
             style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
             {displayMembers.map((member) => (
               <div
                 key={member.uniqueKey}
-                className="teams-card group flex-shrink-0 w-[220px] sm:w-[250px] lg:w-[260px] xl:w-[280px] 2xl:w-[290px] flex flex-col justify-between h-auto min-w-0 break-words transition-transform duration-300"
+                className="teams-card group flex-shrink-0 w-[220px] sm:w-[250px] lg:w-[260px] xl:w-[280px] 2xl:w-[290px] flex flex-col justify-start sm:justify-between h-auto min-w-0 break-words transition-transform duration-300"
               >
                 {/* Uniform Portrait Photo Container */}
                 <div className="teams-card-img-wrap relative w-full h-[310px] sm:h-[360px] rounded-2xl sm:rounded-[22px] overflow-hidden bg-[#161224] border border-white/[0.08] shadow-xl group-hover:border-white/25 group-hover:shadow-2xl group-hover:shadow-purple-950/30 transition-all duration-500">

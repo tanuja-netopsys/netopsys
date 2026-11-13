@@ -22,7 +22,7 @@ const SCRIPT_ID = "google-recaptcha-v3-script";
 let scriptLoadPromise: Promise<void> | null = null;
 
 function getSiteKey(): string {
-  const key = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
+  const key = import.meta.env.VITE_RECAPTCHA_SITE_KEY || "6Lc2OxkuAAAAAAU094CHA78sVHx1UmTeN942OJ_E";
   if (!key || typeof key !== "string" || !key.trim()) {
     throw new Error("reCAPTCHA site key is missing. Please configure VITE_RECAPTCHA_SITE_KEY.");
   }
@@ -122,9 +122,9 @@ export function loadRecaptchaScript(): Promise<void> {
  */
 export function preloadRecaptcha(): void {
   if (typeof window === "undefined") return;
-  if (!import.meta.env.VITE_RECAPTCHA_SITE_KEY) return;
-  loadRecaptchaScript().catch(() => {
+  loadRecaptchaScript().catch((err) => {
     // Silent preload failure; executeRecaptcha will handle and report on submit if still blocked
+    console.debug("[reCAPTCHA] Preload note:", err?.message);
   });
 }
 
@@ -133,32 +133,40 @@ export function preloadRecaptcha(): void {
  */
 export async function executeRecaptcha(action = "contact_form_submit"): Promise<string> {
   const siteKey = getSiteKey();
-  await loadRecaptchaScript();
+  try {
+    await loadRecaptchaScript();
 
-  const client = getGrecaptchaClient();
-  if (!client || typeof client.execute !== "function") {
-    throw new Error("reCAPTCHA client is unavailable. Please refresh the page and try again.");
-  }
+    const client = getGrecaptchaClient();
+    if (!client || typeof client.execute !== "function") {
+      throw new Error("reCAPTCHA client is unavailable. Please refresh the page and try again.");
+    }
 
-  return new Promise<string>((resolve, reject) => {
-    client.ready(() => {
-      client
-        .execute(siteKey, { action })
-        .then((token) => {
-          if (!token || typeof token !== "string") {
-            reject(new Error("Failed to obtain reCAPTCHA verification token."));
-          } else {
-            resolve(token);
-          }
-        })
-        .catch((err) => {
-          reject(
-            err instanceof Error
-              ? err
-              : new Error("reCAPTCHA execution failed. Please try again.")
-          );
-        });
+    return await new Promise<string>((resolve, reject) => {
+      client.ready(() => {
+        client
+          .execute(siteKey, { action })
+          .then((token) => {
+            if (!token || typeof token !== "string") {
+              reject(new Error("Failed to obtain reCAPTCHA verification token."));
+            } else {
+              resolve(token);
+            }
+          })
+          .catch((err) => {
+            reject(
+              err instanceof Error
+                ? err
+                : new Error("reCAPTCHA execution failed. Please try again.")
+            );
+          });
+      });
     });
-  });
+  } catch (err) {
+    if (import.meta.env.DEV) {
+      console.warn("[reCAPTCHA] Dev fallback activated in local development:", err);
+      return "dev-token";
+    }
+    throw err;
+  }
 }
 

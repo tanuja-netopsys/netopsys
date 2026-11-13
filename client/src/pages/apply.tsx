@@ -20,6 +20,7 @@ import Footer from "../componenets/footer.tsx";
 import BackToHeroButton from "../componenets/back-to-hero.tsx";
 import { toast } from "../componenets/toast.tsx";
 import LoginModal, { type CareerUser } from "./login.tsx";
+import { preloadRecaptcha, executeRecaptcha } from "../utils/recaptcha.ts";
 
 export interface ApplyJobData {
   id: string | number;
@@ -69,10 +70,11 @@ export default function ApplyPage() {
     setIsSendingOtp(true);
     setOtpError("");
     try {
+      const captchaToken = await executeRecaptcha("verify_email_otp_submit").catch(() => "");
       const res = await fetch("/api/auth/send-verification-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: currentUser.email }),
+        body: JSON.stringify({ email: currentUser.email, captchaToken }),
       });
       const data = await res.json();
       if (res.ok && data.success) {
@@ -166,6 +168,7 @@ export default function ApplyPage() {
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "instant" });
     loadUser();
+    preloadRecaptcha();
 
     // Listen to user auth events
     window.addEventListener("career_user_change", loadUser);
